@@ -4,6 +4,6 @@ compatibility_date = "2022-09-26"
 account_id = "c229cc48718600b3bd546f03383082e9"
 
 [[kv_namespaces]]
-binding = "TESTING"
-id = "1443d2cc0bde4766873d47a94794a886"
-preview_id = "49d2fe85f4154d46805fb20c9a3def7d"
+binding = "WORDS"
+id = "9e629eee35a74db189a3f2b5b6e7d22e"
+preview_id = "a145bd25755d40a4a7254baf916f4122"

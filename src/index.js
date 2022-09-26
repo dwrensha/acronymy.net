@@ -8,11 +8,10 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
-//console.log(TESTING);
-
 async function handleRequest(req) {
-  let value = await TESTING.get("key1");
-  return (new Response("Hello World, " + value));
+  console.log(req.url);
+  let value = await WORDS.get("posit");
+  return (new Response("Hello World. definition of 'posit': " + value));
 }
 
 addEventListener('fetch', event => {
