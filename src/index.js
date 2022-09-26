@@ -21,6 +21,8 @@ div {
   font-size:500%;
 }`;
 
+const WORD_OF_THE_DAY_KEY = "word-of-the-day";
+
 async function handle_get(req, env) {
     let url = new URL(req.url);
     console.log("path = ", url.pathname);
@@ -28,8 +30,8 @@ async function handle_get(req, env) {
       return new Response(MAIN_CSS);
     }
 
-    let value = await env.WORDS.get("posit");
-  return (new Response("Hello World. definition of 'posit': " + value));
+    let value = await env.META.get(WORD_OF_THE_DAY_KEY);
+    return (new Response("Hello World. word of the day: " + value));
 }
 
 export default {

@@ -7,3 +7,9 @@ account_id = "c229cc48718600b3bd546f03383082e9"
 binding = "WORDS"
 id = "9e629eee35a74db189a3f2b5b6e7d22e"
 preview_id = "a145bd25755d40a4a7254baf916f4122"
+
+
+[[kv_namespaces]]
+binding = "META"
+id = "8c703fb07e54401084e6e7ce5dc7da2e"
+preview_id = "75d13e911a294abcb3f71ac23a908acc"
