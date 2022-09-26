@@ -9,11 +9,14 @@
  */
 
 async function handleRequest(req) {
-  console.log(req.url);
-  let value = await WORDS.get("posit");
-  return (new Response("Hello World. definition of 'posit': " + value));
 }
 
-addEventListener('fetch', event => {
-  return event.respondWith(handleRequest(event.request));
-});
+export default {
+  async fetch(req, env) {
+    let url = new URL(req.url);
+    console.log("path = ", url.pathname);
+
+    let value = await env.WORDS.get("posit");
+    return (new Response("Hello World. definition of 'posit': " + value));
+  }
+}
