@@ -1,0 +1,3 @@
+name = "acronymy"
+main = "src/index.js"
+compatibility_date = "2022-09-26"
