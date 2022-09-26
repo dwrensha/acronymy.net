@@ -1,22 +1,41 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npx wrangler dev src/index.js` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npx wrangler publish src/index.js --name my-worker` to publish your worker
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
+const MAIN_CSS =
+    `body { font-family: Helvetica, Sans, Arial;
+            font-size: medium;
+             margin-left: auto;
+             margin-right: auto;
+             text-align: center;
+     }
+     div {
+          padding-bottom: 10pt;
+     }
+    .word {
+        text-align: center;
+        font-size: 500%;
+     }
+     .err {
+       font-size: 90%;
+       color: #AA0000;
+     }
+     .title {
+       text-align: center;
+       font-size:500%;
+     }`;
 
-async function handleRequest(req) {
-}
+
 
 export default {
   async fetch(req, env) {
     let url = new URL(req.url);
     console.log("path = ", url.pathname);
+    if (url.pathname == "/main.css") {
+      return new Response(MAIN_CSS);
+    }
 
     let value = await env.WORDS.get("posit");
     return (new Response("Hello World. definition of 'posit': " + value));
+  },
+
+  async scheduled(event, env, ctx) {
+    // event.cron is a string, the name of the cron trigger.
   }
 }
