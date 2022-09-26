@@ -8,8 +8,13 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
-export default {
-	async fetch(request) {
-		return new Response("Hello World!!");
-	},
-};
+//console.log(TESTING);
+
+async function handleRequest(req) {
+  let value = await TESTING.get("key1");
+  return (new Response("Hello World, " + value));
+}
+
+addEventListener('fetch', event => {
+  return event.respondWith(handleRequest(event.request));
+});
