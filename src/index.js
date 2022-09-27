@@ -69,7 +69,7 @@ function validate_definition(def, word, word_list) {
     if (!word_list.has(def_word)) {
       return {
         invalid: true,
-        reason: `${def.length} is not in the word list`
+        reason: `${def_word} is not in the word list`
       };
     }
     if (def_word[0] != word[idx]) {
