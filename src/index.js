@@ -126,7 +126,7 @@ async function handle_get(req, env) {
       let definition = null;
       let proposed_definition = url.searchParams.get('definition');
       if (proposed_definition) {
-        let def_words = proposed_definition.split(/[\s+]/);
+        let def_words = proposed_definition.trim().split(/[\s+]/);
         let validation_result = validate_definition(def_words, word, word_list);
         if (validation_result.valid) {
           let new_def = def_words.join(" ");
