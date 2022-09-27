@@ -119,6 +119,7 @@ async function handle_get(req, env) {
     if (!word_list.has(word)) {
       response_string += `<div class="err">${word} is not in the word list</div>`;
       response_string += LOOKUP_FORM;
+      response_string += HOME_LINK;
     } else {
       response_string += `<div class=\"word\">${word}</div>`;
       let error_message = null;
