@@ -180,7 +180,8 @@ export default {
     if (req.method == "GET") {
       return await handle_get(req, env);
     } else {
-      return new Response(400);
+      return new Response("bad request",
+                          { status: 400 });
     }
   },
 
