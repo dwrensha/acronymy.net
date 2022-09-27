@@ -112,8 +112,8 @@ async function handle_get(req, env) {
     if (!word) {
       return new Response("need to specify word", { status: 400 })
     }
-    let word_list = await get_word_list(env);
-    if (!word_list.has(word)) {
+    let definition = await env.WORDS.get(word);
+    if (!definition && !(await get_word_list(env)).has(word)) {
       response_string += `<div class="err">${word} is not in the word list</div>`;
       response_string += LOOKUP_FORM;
       response_string += HOME_LINK;
@@ -124,6 +124,7 @@ async function handle_get(req, env) {
       let proposed_definition = url.searchParams.get('definition');
       if (proposed_definition) {
         let def_words = proposed_definition.trim().split(/[\s+]/);
+        let word_list = await get_word_list(env);
         let validation_result = validate_definition(def_words, word, word_list);
         if (validation_result.valid) {
           let new_def = def_words.join(" ");
