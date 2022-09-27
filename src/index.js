@@ -46,7 +46,7 @@ const WORD_LIST = new Set();
 async function get_word_list(env) {
   if (WORD_LIST.size == 0) {
     let raw_word_list = await env.META.get(WORD_LIST_KEY);
-    let words = raw_word_list.split(/(\s+)/);
+    let words = raw_word_list.split(/[\s+]/);
     for (let word of words) {
       WORD_LIST.add(word);
     }
@@ -54,7 +54,51 @@ async function get_word_list(env) {
   return WORD_LIST;
 }
 
+// returns either `{valid: true}` or
+// {invalid: true, reason: <string> }.
+function validate_definition(def, word, word_list) {
+  console.log("def = ", def);
+  if (def.length != word.length) {
+    return {
+      invalid: true,
+      reason: `definition has length ${def.length}, but word has length ${word.length}`
+    };
+  }
+  let idx = 0;
+  for (let def_word of def) {
+    if (!word_list.has(def_word)) {
+      return {
+        invalid: true,
+        reason: `${def.length} is not in the word list`
+      };
+    }
+    if (!def_word[0] == word[idx]) {
+      return {
+        invalid: true,
+        reason: `${def_word} does not start with ${word[idx]}`
+      };
+    }
+    idx += 1;
+  }
 
+  return {valid: true};
+}
+
+
+function render_definition(definition) {
+  let response_string = "";
+  if (definition) {
+    let def_words = definition.split(" ");
+    response_string += "<div>"
+    for (let def_word of def_words) {
+      response_string += ` <a href="/define?word=${def_word}">${def_word}</a> `;
+    }
+    response_string += "</div>";
+  } else {
+    response_string += "<div>this word has no definition yet</div>";
+  }
+  return response_string;
+}
 
 async function handle_get(req, env) {
   let url = new URL(req.url);
@@ -71,27 +115,29 @@ async function handle_get(req, env) {
     if (!word) {
       return new Response("need to specify word", { status: 400 })
     }
+    response_string += `<div class=\"word\">${word}</div>`;
+
     let word_list = await get_word_list(env);
     if (!word_list.has(word)) {
       return new Response(word + " is not in the word list", { status: 400 })
     }
 
-    if (url.searchParams.get('definition')) {
-
-    } else {
-      response_string += `<div class=\"word\">${word}</div>`;
-      console.log(`looking up |${word}|`);
-      let definition = await env.WORDS.get(word);
-      if (definition) {
-        let def_words = definition.split(" ");
-        response_string += "<div>"
-        for (let def_word of def_words) {
-          response_string += ` <a href="/define?word=${def_word}">${def_word}</a> `;
-        }
-        response_string += "</div>";
+    let definition = url.searchParams.get('definition');
+    if (definition) {
+      let def_words = definition.split(/[\s+]/);
+      let validation_result = validate_definition(def_words, word, word_list);
+      if (validation_result.valid) {
+        let new_def = def_words.join(" ");
+        await env.WORDS.put(word, new_def);
+        response_string += render_definition(definition);
+        response_string += define_form(word);
+        response_string += HOME_LINK;
       } else {
-        response_string += "<div>this word has no definition yet</div>";
+        console.log(validation_result);
       }
+    } else {
+      definition = await env.WORDS.get(word);
+      response_string += render_definition(definition);
       response_string += define_form(word);
       response_string += HOME_LINK;
     }
