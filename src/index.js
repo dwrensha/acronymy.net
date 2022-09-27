@@ -19,7 +19,11 @@ div {
 .title {
   text-align: center;
   font-size:500%;
-}`;
+}
+.link-to-source {
+   font-size: 11px;
+}
+`;
 
 const HEADER =
 `<head><title> acronymy </title><link rel="stylesheet" type="text/css" href="main.css" >
@@ -160,6 +164,10 @@ async function handle_get(req, env) {
     response_string += `<a href="/define?word=${word_of_the_day}">${word_of_the_day}</a>`;
     response_string += "</div>"
     response_string += LOOKUP_FORM;
+    response_string +=
+      `<div class="link-to-source">
+        <a href="https://github.com/dwrensha/acronymy-workers">source code</a>
+       </div>`;
   }
 
   response_string += "</body></html>";
