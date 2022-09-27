@@ -1,6 +1,6 @@
 const MAIN_CSS =
 `body { font-family: Helvetica, Sans, Arial;
-        font-size: medium;
+        font-size: 24px;
         margin-left: auto;
         margin-right: auto;
         text-align: center;
