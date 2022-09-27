@@ -116,37 +116,36 @@ async function handle_get(req, env) {
     if (!word) {
       return new Response("need to specify word", { status: 400 })
     }
-    response_string += `<div class=\"word\">${word}</div>`;
-
     let word_list = await get_word_list(env);
     if (!word_list.has(word)) {
-      return new Response(word + " is not in the word list", { status: 400 })
-    }
-
-    let error_message = null;
-    let definition = null;
-    let proposed_definition = url.searchParams.get('definition');
-    if (proposed_definition) {
-      let def_words = proposed_definition.split(/[\s+]/);
-      let validation_result = validate_definition(def_words, word, word_list);
-      if (validation_result.valid) {
-        let new_def = def_words.join(" ");
-        await env.WORDS.put(word, new_def);
-        definition = new_def;
+      response_string += `<div class="err">${word} is not in the word list</div>`;
+      response_string += LOOKUP_FORM;
+    } else {
+      response_string += `<div class=\"word\">${word}</div>`;
+      let error_message = null;
+      let definition = null;
+      let proposed_definition = url.searchParams.get('definition');
+      if (proposed_definition) {
+        let def_words = proposed_definition.split(/[\s+]/);
+        let validation_result = validate_definition(def_words, word, word_list);
+        if (validation_result.valid) {
+          let new_def = def_words.join(" ");
+          await env.WORDS.put(word, new_def);
+          definition = new_def;
+        } else {
+          definition = await env.WORDS.get(word);
+          error_message = validation_result.reason;
+        }
       } else {
         definition = await env.WORDS.get(word);
-        error_message = validation_result.reason;
       }
-    } else {
-      definition = await env.WORDS.get(word);
+      response_string += render_definition(definition);
+      response_string += define_form(word);
+      if (error_message) {
+        response_string += `<div class="err"> ${error_message} </div>`;
+      }
+      response_string += HOME_LINK;
     }
-    response_string += render_definition(definition);
-    response_string += define_form(word);
-    if (error_message) {
-      response_string += `<div class="err"> ${error_message} </div>`;
-    }
-
-    response_string += HOME_LINK;
   } else {
     response_string += "<div class=\"title\">Acronymy</div>";
     response_string += "<div>A user-editable, acronym-only dictionary.</div>";
