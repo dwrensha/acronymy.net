@@ -72,7 +72,8 @@ function validate_definition(def, word, word_list) {
         reason: `${def.length} is not in the word list`
       };
     }
-    if (!def_word[0] == word[idx]) {
+    console.log("checking ", def_word[0], word[idx]);
+    if (def_word[0] != word[idx]) {
       return {
         invalid: true,
         reason: `${def_word} does not start with ${word[idx]}`
@@ -122,25 +123,30 @@ async function handle_get(req, env) {
       return new Response(word + " is not in the word list", { status: 400 })
     }
 
-    let definition = url.searchParams.get('definition');
-    if (definition) {
-      let def_words = definition.split(/[\s+]/);
+    let error_message = null;
+    let definition = null;
+    let proposed_definition = url.searchParams.get('definition');
+    if (proposed_definition) {
+      let def_words = proposed_definition.split(/[\s+]/);
       let validation_result = validate_definition(def_words, word, word_list);
       if (validation_result.valid) {
         let new_def = def_words.join(" ");
         await env.WORDS.put(word, new_def);
-        response_string += render_definition(definition);
-        response_string += define_form(word);
-        response_string += HOME_LINK;
+        definition = new_def;
       } else {
-        console.log(validation_result);
+        definition = await env.WORDS.get(word);
+        error_message = validation_result.reason;
       }
     } else {
       definition = await env.WORDS.get(word);
-      response_string += render_definition(definition);
-      response_string += define_form(word);
-      response_string += HOME_LINK;
     }
+    response_string += render_definition(definition);
+    response_string += define_form(word);
+    if (error_message) {
+      response_string += `<div class="err"> ${error_message} </div>`;
+    }
+
+    response_string += HOME_LINK;
   } else {
     response_string += "<div class=\"title\">Acronymy</div>";
     response_string += "<div>A user-editable, acronym-only dictionary.</div>";
