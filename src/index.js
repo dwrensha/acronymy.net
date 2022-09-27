@@ -112,6 +112,7 @@ async function handle_get(req, env) {
     if (!word) {
       return new Response("need to specify word", { status: 400 })
     }
+    word = word.toLowerCase();
     let definition = await env.WORDS.get(word);
     if (!definition && !(await get_word_list(env)).has(word)) {
       response_string += `<div class="err">${word} is not in the word list</div>`;
