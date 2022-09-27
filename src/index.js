@@ -72,7 +72,6 @@ function validate_definition(def, word, word_list) {
         reason: `${def.length} is not in the word list`
       };
     }
-    console.log("checking ", def_word[0], word[idx]);
     if (def_word[0] != word[idx]) {
       return {
         invalid: true,
@@ -163,6 +162,7 @@ async function handle_get(req, env) {
 
 export default {
   async fetch(req, env) {
+    console.log(Math.random());
     if (req.method == "GET") {
       return await handle_get(req, env);
     } else {
@@ -172,5 +172,23 @@ export default {
 
   async scheduled(event, env, ctx) {
     // event.cron is a string, the name of the cron trigger.
+
+    let words = [];
+    while (true) {
+      let chunk = await env.WORDS.list();
+      console.log('keys length: ' + chunk['keys'].length);
+      for (let key of chunk['keys']) {
+        words.push(key['name']);
+      }
+      if (chunk['list_complete']) {
+        break;
+      }
+    }
+
+    let idx = Math.floor(Math.random() * words.length);
+    console.log("idx = ", idx);
+    console.log("setting the word of the day to", words[idx]);
+    words[idx];
+    await env.META.put(WORD_OF_THE_DAY_KEY, words[idx]);
   }
 }
