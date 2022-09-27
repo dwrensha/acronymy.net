@@ -156,7 +156,7 @@ async function handle_get(req, env) {
     let word_of_the_day = await env.META.get(WORD_OF_THE_DAY_KEY);
     response_string += "<div>Today's featured word: ";
     response_string += `<a href="/define?word=${word_of_the_day}">${word_of_the_day}</a>`;
-    response_string += ".</div>"
+    response_string += "</div>"
     response_string += LOOKUP_FORM;
   }
 
