@@ -123,7 +123,7 @@ async function handle_get(req, env) {
       let definition = null;
       let proposed_definition = url.searchParams.get('definition');
       if (proposed_definition) {
-        let def_words = proposed_definition.trim().split(/[\s+]/);
+        let def_words = proposed_definition.trim().toLowerCase().split(/[\s+]/);
         let word_list = await get_word_list(env);
         let validation_result = validate_definition(def_words, word, word_list);
         if (validation_result.valid) {
