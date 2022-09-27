@@ -57,7 +57,6 @@ async function get_word_list(env) {
 // returns either `{valid: true}` or
 // {invalid: true, reason: <string> }.
 function validate_definition(def, word, word_list) {
-  console.log("def = ", def);
   if (def.length != word.length) {
     return {
       invalid: true,
@@ -102,7 +101,6 @@ function render_definition(definition) {
 
 async function handle_get(req, env) {
   let url = new URL(req.url);
-  console.log("path = ", url.pathname);
   if (url.pathname == "/main.css") {
     return new Response(MAIN_CSS);
   }
@@ -110,7 +108,6 @@ async function handle_get(req, env) {
   let response_string = "<html>" + HEADER + "<body>";
 
   if (url.pathname == "/define") {
-    console.log("query = ", url.searchParams);
     let word = url.searchParams.get('word');
     if (!word) {
       return new Response("need to specify word", { status: 400 })
@@ -130,8 +127,15 @@ async function handle_get(req, env) {
         let validation_result = validate_definition(def_words, word, word_list);
         if (validation_result.valid) {
           let new_def = def_words.join(" ");
-          await env.WORDS.put(word, new_def);
-          definition = new_def;
+          try {
+            await env.WORDS.put(word, new_def);
+            definition = new_def;
+          } catch (e) {
+            error_message =
+              "<p>error (daily quota?) while attempting to write definition</p>"
+            error_message +=
+              `<p>(you should maybe try asking <a href="https://twitter.com/dwrensha">@dwrensha</a> to upgrade to a paid Cloudflare plan)<p>`;
+          }
         } else {
           definition = await env.WORDS.get(word);
           error_message = validation_result.reason;
@@ -163,7 +167,6 @@ async function handle_get(req, env) {
 
 export default {
   async fetch(req, env) {
-    console.log(Math.random());
     if (req.method == "GET") {
       return await handle_get(req, env);
     } else {
