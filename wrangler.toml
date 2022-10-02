@@ -18,7 +18,7 @@ id = "4cce34eaa52c40ef86a9f8371ebde3e7"
 preview_id = "de8dc6d270b24862a150320f0f8fe573"
 
 [[kv_namespaces]]
-# META stores miscellanous information
+# META stores miscellaneous information, such as the word of the day
 binding = "META"
 id = "8c703fb07e54401084e6e7ce5dc7da2e"
 preview_id = "75d13e911a294abcb3f71ac23a908acc"
