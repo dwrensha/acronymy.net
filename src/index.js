@@ -45,22 +45,31 @@ const HOME_LINK = "<a href=\"/\">home</a>";
 const WORD_OF_THE_DAY_KEY = "word-of-the-day";
 const WORD_LIST_KEY = "word-list";
 
-const WORD_LIST = new Set();
-
-async function get_word_list(env) {
-  if (WORD_LIST.size == 0) {
-    let raw_word_list = await env.META.get(WORD_LIST_KEY);
-    let words = raw_word_list.split(/[\s+]/);
-    for (let word of words) {
-      WORD_LIST.add(word);
-    }
+class WordList {
+  constructor() {
+    this.subsets = new Map();
   }
-  return WORD_LIST;
+
+  async is_word(query, env) {
+    if (query.length == 0) return false;
+    let first_letter = query[0];
+    if (!this.subsets.has(first_letter)) {
+      let subset = new Set();
+      this.subsets.set(first_letter, subset);
+      let raw_word_list = await env.META.get(WORD_LIST_KEY + "-" + first_letter);
+      let words = raw_word_list.split(/[\s+]/);
+      for (let word of words) {
+        subset.add(word);
+      }
+    }
+    return this.subsets.get(first_letter).has(query);
+  }
 }
+const WORD_LIST = new WordList();
 
 // returns either `{valid: true}` or
 // {invalid: true, reason: <string> }.
-function validate_definition(def, word, word_list) {
+async function validate_definition(def, word, env) {
   if (def.length != word.length) {
     return {
       invalid: true,
@@ -69,7 +78,7 @@ function validate_definition(def, word, word_list) {
   }
   let idx = 0;
   for (let def_word of def) {
-    if (!word_list.has(def_word)) {
+    if (!(await WORD_LIST.is_word(def_word, env))) {
       return {
         invalid: true,
         reason: `${def_word} is not in the word list`
@@ -118,7 +127,7 @@ async function handle_get(req, env) {
     }
     word = word.toLowerCase();
     let definition = await env.WORDS.get(word);
-    if (!definition && !(await get_word_list(env)).has(word)) {
+    if (!definition && !(await WORD_LIST.is_word(word, env))) {
       response_string += `<div class="err">${word} is not in the word list</div>`;
       response_string += LOOKUP_FORM;
       response_string += HOME_LINK;
@@ -129,8 +138,7 @@ async function handle_get(req, env) {
       let proposed_definition = url.searchParams.get('definition');
       if (proposed_definition) {
         let def_words = proposed_definition.trim().toLowerCase().split(/[\s+]/);
-        let word_list = await get_word_list(env);
-        let validation_result = validate_definition(def_words, word, word_list);
+        let validation_result = await validate_definition(def_words, word, env);
         if (validation_result.valid) {
           let new_def = def_words.join(" ");
           try {
