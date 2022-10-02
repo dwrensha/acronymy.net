@@ -142,7 +142,9 @@ async function handle_get(req, env) {
         if (validation_result.valid) {
           let new_def = def_words.join(" ");
           try {
-            await env.WORDS.put(word, new_def);
+            let p1 = env.WORDS.put(word, new_def);
+            let p2 = env.WORDS_LOG.put(word + ":" + Date.now(), new_def);
+            await Promise.all([p1, p2]);
             definition = new_def;
           } catch (e) {
             error_message =

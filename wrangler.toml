@@ -4,12 +4,21 @@ compatibility_date = "2022-09-26"
 account_id = "c229cc48718600b3bd546f03383082e9"
 
 [[kv_namespaces]]
+# WORDS stores definitions, keyed by word
+# These get overwritten when new definitions are submitted.
 binding = "WORDS"
 id = "9e629eee35a74db189a3f2b5b6e7d22e"
 preview_id = "a145bd25755d40a4a7254baf916f4122"
 
+[[kv_namespaces]]
+# WORDS_LOG stores definitions, keyed by word:timestamp
+# These never get overwritten.
+binding = "WORDS_LOG"
+id = "4cce34eaa52c40ef86a9f8371ebde3e7"
+preview_id = "de8dc6d270b24862a150320f0f8fe573"
 
 [[kv_namespaces]]
+# META stores miscellanous information
 binding = "META"
 id = "8c703fb07e54401084e6e7ce5dc7da2e"
 preview_id = "75d13e911a294abcb3f71ac23a908acc"
