@@ -137,7 +137,7 @@ async function handle_get(req, env) {
       return new Response("need to specify word", { status: 400 })
     }
     word = word.toLowerCase();
-    const { value, metadata } = await env.WORDS.getWithMetadata(word);
+    let { value, metadata } = await env.WORDS.getWithMetadata(word);
     let definition = value;
     if (!definition && !(await WORD_LIST.is_word(word, env))) {
       response_string += `<div class="err">${word} is not in the word list</div>`;
@@ -155,15 +155,13 @@ async function handle_get(req, env) {
           let new_def = def_words.join(" ");
           try {
             let now = Date.now();
-            let metadata = {
-              metadata: {
+            metadata= {
                 time: now
-              }
             };
             if (req.headers.has('cf-connecting-ip')) {
-              metadata.metadata['ip'] = req.headers.get('cf-connecting-ip');
+              metadata['ip'] = req.headers.get('cf-connecting-ip');
             }
-            let p1 = env.WORDS.put(word, new_def, metadata);
+            let p1 = env.WORDS.put(word, new_def, {metadata});
             let p2 = env.WORDS_LOG.put(word + ":" + now, new_def, metadata);
             await Promise.all([p1, p2]);
             definition = new_def;
