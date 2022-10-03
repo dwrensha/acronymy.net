@@ -48,7 +48,7 @@ const HEADER =
 
 const LOOKUP_FORM =
 `<form action="define" method="get">
- <input name="word" maxlength="100" size="20"/><button>look up</button></form>`;
+ <input name="word" maxlength="100" size="15" placeholder="enter word"/><button>look up</button></form>`;
 
 function define_form(word) {
   return `<div class="definition-form" >
