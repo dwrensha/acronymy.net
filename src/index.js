@@ -23,6 +23,11 @@ div {
 .link-to-source {
    font-size: 11px;
 }
+.attribution {
+   font-size: 11px;
+   font-style: italic;
+}
+
 `;
 
 const HEADER =
@@ -97,7 +102,7 @@ async function validate_definition(def, word, env) {
 }
 
 
-function render_definition(definition) {
+function render_definition(definition, metadata) {
   let response_string = "";
   if (definition) {
     let def_words = definition.split(" ");
@@ -106,6 +111,12 @@ function render_definition(definition) {
       response_string += ` <a href="/define?word=${def_word}">${def_word}</a> `;
     }
     response_string += "</div>";
+    if (metadata && metadata.time) {
+      let time = new Date(metadata.time);
+      response_string += `<div class="attribution">`;
+      response_string += `—defined ${time.toUTCString()}`;
+      response_string += `</div>`;
+    }
   } else {
     response_string += "<div>this word has no definition yet</div>";
   }
@@ -126,7 +137,8 @@ async function handle_get(req, env) {
       return new Response("need to specify word", { status: 400 })
     }
     word = word.toLowerCase();
-    let definition = await env.WORDS.get(word);
+    const { value, metadata } = await env.WORDS.getWithMetadata(word);
+    let definition = value;
     if (!definition && !(await WORD_LIST.is_word(word, env))) {
       response_string += `<div class="err">${word} is not in the word list</div>`;
       response_string += LOOKUP_FORM;
@@ -168,7 +180,7 @@ async function handle_get(req, env) {
       } else {
         definition = await env.WORDS.get(word);
       }
-      response_string += render_definition(definition);
+      response_string += render_definition(definition, metadata);
       response_string += define_form(word);
       if (error_message) {
         response_string += `<div class="err"> ${error_message} </div>`;
