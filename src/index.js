@@ -146,7 +146,6 @@ async function handle_get(req, env) {
     } else {
       response_string += `<div class=\"word\">${word}</div>`;
       let error_message = null;
-      let definition = null;
       let proposed_definition = url.searchParams.get('definition');
       if (proposed_definition) {
         let def_words = proposed_definition.trim().toLowerCase().split(/[\s+]/);
