@@ -23,9 +23,6 @@ div {
   text-align: center;
   font-size:500%;
 }
-.link-to-source {
-   font-size: 11px;
-}
 .attribution {
    font-size: 11px;
    font-style: italic;
@@ -75,6 +72,21 @@ function define_form(word) {
 }
 
 const HOME_LINK = "<a href=\"/\">home</a>";
+
+function render_home_footer(maybe_username) {
+  let result = `<div class="footer">
+                    <hr>
+                <a href="https://github.com/dwrensha/acronymy-workers">source code</a>`
+  if (maybe_username) {
+    result += `<form action="logout">logged in as ${maybe_username}
+               <button>logout</button></form>`
+  } else {
+      result += `<form action="login"><input name="username" placeholder="username" size="10"/>
+                 <button>log in</button>`;
+  }
+  result += `</form></div>`;
+  return result;
+}
 
 function render_def_footer(word, maybe_username) {
   let result = `<div class="footer">
@@ -309,10 +321,7 @@ async function handle_get(req, env) {
     response_string += `<a href="/define?word=${word_of_the_day}">${word_of_the_day}</a>`;
     response_string += "</div>"
     response_string += LOOKUP_FORM;
-    response_string +=
-      `<div class="link-to-source">
-        <a href="https://github.com/dwrensha/acronymy-workers">source code</a>
-       </div>`;
+    response_string += render_home_footer(username);
   }
 
   response_string += "</body></html>";
