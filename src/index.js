@@ -27,7 +27,15 @@ div {
    font-size: 11px;
    font-style: italic;
 }
-
+.definition-form {
+   text-align: left;
+   margin: auto;
+   width: 500px;
+}
+.definition-input-text {
+   width: 100%;
+   font-size: 20px;
+}
 `;
 
 const HEADER =
@@ -39,10 +47,13 @@ const LOOKUP_FORM =
  <input name="word" maxlength="100"/><button>find word</button></form>`;
 
 function define_form(word) {
-  return `<form action=\"define\" method=\"get\">
+  return `<div class="definition-form" >
+          <form action=\"define\" method=\"get\">
           <input name=\"word\" value=\"${word}\" type=\"hidden\"/>
-          <input name=\"definition\" maxlength=\"2000\"/>
-          <button>submit definition</button></form>`;
+          <input name=\"definition\" maxlength=\"2000\" placeholder="enter new definition" class="definition-input-text"/>
+          <br>
+          <button>submit</button></form>
+          </div>`;
 }
 
 const HOME_LINK = "<a href=\"/\">home</a>";
