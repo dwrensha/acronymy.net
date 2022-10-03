@@ -270,6 +270,12 @@ async function handle_get(req, env) {
       response_string += render_def_footer(word, username);
     }
   } else if (url.pathname == "/login") {
+    let word = url.searchParams.get('word');
+    let location = "/";
+    if (word) {
+      location = `/define?word=${word}`;
+    }
+
     let username = url.searchParams.get('username');
     if (!username) {
       return new Response("need to specify username", { status: 400 })
@@ -277,13 +283,8 @@ async function handle_get(req, env) {
     let username_validation = validate_username(username);
     if (!username_validation.valid) {
       response_string += `<div class="err"> ${username_validation.reason} </div>`;
-      response_string += HOME_LINK;
+      response_string += `<a href="${location}">back</a>`;
     } else {
-      let word = url.searchParams.get('word');
-      let location = "/";
-      if (word) {
-        location = `/define?word=${word}`;
-      }
       return new Response("",
                           {status: 302,
                            headers: {'Location': location,
