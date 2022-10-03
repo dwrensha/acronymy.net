@@ -51,6 +51,13 @@ input[name="word"] {
   float: right;
   font-style: italic;
 }
+.history {
+   width: 500px;
+   text-align: left;
+   margin: auto;
+   font-size: 14px;
+   font-style: italic;
+}
 `;
 
 const HEADER =
@@ -167,7 +174,7 @@ async function validate_definition(def, word, env) {
 }
 
 
-function render_definition(definition, metadata) {
+function render_definition(word, definition, metadata) {
   let response_string = "";
   if (definition) {
     let def_words = definition.split(" ");
@@ -183,6 +190,7 @@ function render_definition(definition, metadata) {
       if (metadata.user) {
         response_string += ` by ${metadata.user}`;
       }
+      response_string += ` <a href="/history?word=${word}">[history]</a>`
       response_string += `</div>`;
     }
   } else {
@@ -274,7 +282,7 @@ async function handle_get(req, env) {
       } else {
         definition = await env.WORDS.get(word);
       }
-      response_string += render_definition(definition, metadata);
+      response_string += render_definition(word, definition, metadata);
       response_string += define_form(word);
       if (error_message) {
         response_string += `<div class="err"> ${error_message} </div>`;
@@ -313,6 +321,43 @@ async function handle_get(req, env) {
                          headers: {'Location': location,
                                    'Set-Cookie':
                                       `username=X; expires=Thu, 01 Jan 1970 00:00:00 GMT`}});
+  } else if (url.pathname == "/history") {
+    let word = url.searchParams.get('word');
+    if (!word) {
+      return new Response("need to specify word", { status: 400 })
+    }
+
+    let entries = [];
+    while (true) {
+      let chunk = await env.WORDS_LOG.list({prefix: word + ":"});
+      console.log('keys length: ' + chunk['keys'].length);
+      for (let key of chunk['keys']) {
+        entries.push(key);
+      }
+      if (chunk['list_complete']) {
+        break;
+      }
+    }
+    entries.reverse();
+
+    response_string += `<div>history of definitions for
+                        <a href="/define?word=${word}">${word}</a>:</div>`;
+    response_string += `<ul class="history">`
+    for (let entry of entries) {
+      let def = await env.WORDS_LOG.get(entry.name);
+      response_string += `<li>${def}`
+      let metadata = entry.metadata;
+      if (metadata && metadata.time) {
+        let time = new Date(metadata.time);
+        response_string += ` — defined ${time.toUTCString()}`;
+        if (metadata.user) {
+          response_string += ` by ${metadata.user}`;
+        }
+      }
+      response_string += `</li>`
+    }
+    response_string += `</ul>`
+    response_string += render_def_footer(word, username);
   } else {
     response_string += "<div class=\"title\">Acronymy</div>";
     response_string += "<div>A user-editable, acronym-only dictionary.</div>";
