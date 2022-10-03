@@ -28,14 +28,18 @@ div {
    font-style: italic;
 }
 .definition-form {
-   text-align: left;
+   text-align: right;
    margin: auto;
    width: 500px;
 }
-.definition-input-text {
+input[name="definition"] {
    width: 100%;
    font-size: 20px;
 }
+input[name="word"] {
+   font-size: 16px;
+}
+
 `;
 
 const HEADER =
@@ -44,7 +48,7 @@ const HEADER =
 
 const LOOKUP_FORM =
 `<form action="define" method="get">
- <input name="word" maxlength="100"/><button>find word</button></form>`;
+ <input name="word" maxlength="100" size="20"/><button>look up</button></form>`;
 
 function define_form(word) {
   return `<div class="definition-form" >
