@@ -67,6 +67,9 @@ const WORD_LIST_KEY = "word-list";
 
 class WordList {
   constructor() {
+    // One Set for each possible initial letter of a word.
+    // The wordlist is sharded like this to decrease the cold-start
+    // cost of looking up a single word.
     this.subsets = new Map();
   }
 
