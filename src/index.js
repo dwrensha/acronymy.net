@@ -74,9 +74,12 @@ class WordList {
     if (query.length == 0) return false;
     let first_letter = query[0];
     if (!this.subsets.has(first_letter)) {
+      let raw_word_list = await env.META.get(WORD_LIST_KEY + "-" + first_letter);
+      if (!raw_word_list) {
+        return false;
+      }
       let subset = new Set();
       this.subsets.set(first_letter, subset);
-      let raw_word_list = await env.META.get(WORD_LIST_KEY + "-" + first_letter);
       let words = raw_word_list.split(/[\s+]/);
       for (let word of words) {
         subset.add(word);
