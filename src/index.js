@@ -142,8 +142,17 @@ async function handle_get(req, env) {
         if (validation_result.valid) {
           let new_def = def_words.join(" ");
           try {
-            let p1 = env.WORDS.put(word, new_def);
-            let p2 = env.WORDS_LOG.put(word + ":" + Date.now(), new_def);
+            let now = Date.now();
+            let metadata = {
+              metadata: {
+                time: now
+              }
+            };
+            if (req.headers.has('cf-connecting-ip')) {
+              metadata.metadata['ip'] = req.headers.get('cf-connecting-ip');
+            }
+            let p1 = env.WORDS.put(word, new_def, metadata);
+            let p2 = env.WORDS_LOG.put(word + ":" + now, new_def, metadata);
             await Promise.all([p1, p2]);
             definition = new_def;
           } catch (e) {
