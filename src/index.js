@@ -152,23 +152,25 @@ async function handle_get(req, env) {
         let validation_result = await validate_definition(def_words, word, env);
         if (validation_result.valid) {
           let new_def = def_words.join(" ");
-          try {
-            let now = Date.now();
-            metadata= {
+          if (new_def != definition) {
+            try {
+              let now = Date.now();
+              metadata= {
                 time: now
-            };
-            if (req.headers.has('cf-connecting-ip')) {
-              metadata['ip'] = req.headers.get('cf-connecting-ip');
+              };
+              if (req.headers.has('cf-connecting-ip')) {
+                metadata['ip'] = req.headers.get('cf-connecting-ip');
+              }
+              let p1 = env.WORDS.put(word, new_def, {metadata});
+              let p2 = env.WORDS_LOG.put(word + ":" + now, new_def, metadata);
+              await Promise.all([p1, p2]);
+              definition = new_def;
+            } catch (e) {
+              error_message =
+                "<p>error (daily quota?) while attempting to write definition</p>"
+              error_message +=
+                `<p>(you should maybe try asking <a href="https://twitter.com/dwrensha">@dwrensha</a> to upgrade to a paid Cloudflare plan)<p>`;
             }
-            let p1 = env.WORDS.put(word, new_def, {metadata});
-            let p2 = env.WORDS_LOG.put(word + ":" + now, new_def, metadata);
-            await Promise.all([p1, p2]);
-            definition = new_def;
-          } catch (e) {
-            error_message =
-              "<p>error (daily quota?) while attempting to write definition</p>"
-            error_message +=
-              `<p>(you should maybe try asking <a href="https://twitter.com/dwrensha">@dwrensha</a> to upgrade to a paid Cloudflare plan)<p>`;
           }
         } else {
           definition = await env.WORDS.get(word);
