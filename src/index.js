@@ -328,15 +328,20 @@ async function handle_get(req, env) {
     }
 
     let entries = [];
-    while (true) {
-      let chunk = await env.WORDS_LOG.list({prefix: word + ":"});
-      console.log('keys length: ' + chunk['keys'].length);
-      for (let key of chunk['keys']) {
-        entries.push(key);
+    try {
+      while (true) {
+        let chunk = await env.WORDS_LOG.list({prefix: word + ":"});
+        for (let key of chunk['keys']) {
+          entries.push(key);
+        }
+        if (chunk['list_complete']) {
+          break;
+        }
       }
-      if (chunk['list_complete']) {
-        break;
-      }
+    } catch (e) {
+      console.log(e);
+      return new Response("Error while listing history. Maybe we've hit daily quota?",
+                          { status: 500 })
     }
     entries.reverse();
 
