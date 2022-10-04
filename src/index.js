@@ -154,8 +154,15 @@ async function validate_definition(def, word, env) {
     };
   }
   let idx = 0;
+  let def_promises = [];
   for (let def_word of def) {
-    if (!(await WORD_LIST.is_word(def_word, env))) {
+    def_promises.push(WORD_LIST.is_word(def_word, env));
+  }
+  let defs = await Promise.all(def_promises);
+  for (let ii = 0; ii < def.length; ++ii) {
+    let def_word = def[ii];
+    let def_word_def = defs[ii];
+    if (!def_word_def) {
       return {
         invalid: true,
         reason: `${def_word} is not in the word list`
