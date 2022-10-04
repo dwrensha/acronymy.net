@@ -86,7 +86,7 @@ function render_home_footer(maybe_username) {
                 <a href="https://github.com/dwrensha/acronymy-workers">source code</a>`
   if (maybe_username) {
     result += `<form action="logout">logged in as ${maybe_username}
-               <button>logout</button></form>`
+               <button>log out</button></form>`
   } else {
       result += `<form action="login"><input name="username" placeholder="username" size="10"/>
                  <button>log in</button>`;
@@ -102,7 +102,7 @@ function render_def_footer(word, maybe_username) {
   if (maybe_username) {
     result += `<form action="logout">logged in as ${maybe_username}
                <input name=\"word\" value=\"${word}\" type=\"hidden\"/>
-               <button>logout</button></form>`
+               <button>log out</button></form>`
   } else {
       result += `<form action="login"><input name="username" placeholder="username" size="10"/>
                   <input name=\"word\" value=\"${word}\" type=\"hidden\"/>
