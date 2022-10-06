@@ -355,8 +355,14 @@ async function handle_get(req, env) {
     response_string += `<div>history of definitions for
                         <a href="/define?word=${word}">${word}</a>:</div>`;
     response_string += `<ul class="history">`
+    let promises = [];
     for (let entry of entries) {
-      let def = await env.WORDS_LOG.get(entry.name);
+      promises.push(await env.WORDS_LOG.get(entry.name));
+    }
+    let defs = await Promise.all(promises);
+    for (let ii = 0; ii < defs.length; ++ii) {
+      let def = defs[ii];
+      let entry = entries[ii];
       response_string += `<li>${def}`
       let metadata = entry.metadata;
       if (metadata && metadata.time) {
