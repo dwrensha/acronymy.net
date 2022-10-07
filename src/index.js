@@ -242,7 +242,7 @@ async function handle_get(req, env) {
     if (!word) {
       return new Response("need to specify word", { status: 400 })
     }
-    word = word.toLowerCase();
+    word = word.toLowerCase().trim();
     let { value, metadata } = await env.WORDS.getWithMetadata(word);
     let definition = value;
     if (!definition && !(await WORD_LIST.is_word(word, env))) {
