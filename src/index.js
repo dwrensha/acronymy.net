@@ -72,7 +72,7 @@ function define_form(word) {
   return `<div class="definition-form" >
           <form action=\"define\" method=\"get\">
           <input name=\"word\" value=\"${word}\" type=\"hidden\"/>
-          <input name=\"definition\" maxlength=\"2000\" placeholder="enter new definition" class="definition-input-text"/>
+          <input name=\"definition\" maxlength=\"2000\" placeholder="enter new definition" class="definition-input-text" autofocus/>
           <br>
           <button>submit</button></form>
           </div>`;
