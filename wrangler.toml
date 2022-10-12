@@ -3,6 +3,10 @@ main = "src/index.js"
 compatibility_date = "2022-09-26"
 account_id = "c229cc48718600b3bd546f03383082e9"
 
+# make sure acronymy.word.workers.dev stays enabled,
+# so that it redirect to acronymy.net
+workers_dev = true
+
 [[kv_namespaces]]
 # WORDS stores definitions, keyed by word
 # These get overwritten when new definitions are submitted.
@@ -22,6 +26,12 @@ preview_id = "de8dc6d270b24862a150320f0f8fe573"
 binding = "META"
 id = "8c703fb07e54401084e6e7ce5dc7da2e"
 preview_id = "75d13e911a294abcb3f71ac23a908acc"
+
+
+[[routes]]
+pattern = "acronymy.net"
+custom_domain = true
+zone_name = "acronymy.net"
 
 
 [triggers]
