@@ -66,13 +66,13 @@ const HEADER =
 
 const LOOKUP_FORM =
 `<form action="define" method="get">
- <input name="word" maxlength="100" size="15" placeholder="enter word" autofocus/><button>look up</button></form>`;
+ <input name="word" maxlength="100" size="15" placeholder="enter word" autofocus required/><button>look up</button></form>`;
 
 function define_form(word) {
   return `<div class="definition-form" >
           <form action=\"define\" method=\"get\">
           <input name=\"word\" value=\"${word}\" type=\"hidden\"/>
-          <input name=\"definition\" maxlength=\"2000\" placeholder="enter new definition" class="definition-input-text" autofocus/>
+          <input name=\"definition\" maxlength=\"2000\" placeholder="enter new definition" class="definition-input-text" autofocus required/>
           <br>
           <button>submit</button></form>
           </div>`;
@@ -88,8 +88,9 @@ function render_home_footer(maybe_username) {
     result += `<form action="logout">logged in as ${maybe_username}
                <button>log out</button></form>`
   } else {
-      result += `<form action="login"><input name="username" placeholder="username" size="10"/>
-                 <button>log in</button>`;
+    result +=
+      `<form action="login"><input name="username" placeholder="username" size="10" required/>
+       <button>log in</button>`;
   }
   result += `</form></div>`;
   return result;
@@ -104,9 +105,10 @@ function render_def_footer(word, maybe_username) {
                <input name=\"word\" value=\"${word}\" type=\"hidden\"/>
                <button>log out</button></form>`
   } else {
-      result += `<form action="login"><input name="username" placeholder="username" size="10"/>
-                  <input name=\"word\" value=\"${word}\" type=\"hidden\"/>
-                    <button>log in</button>`;
+    result +=
+      `<form action="login"><input name="username" placeholder="username" size="10" required/>
+       <input name=\"word\" value=\"${word}\" type=\"hidden\"/>
+       <button>log in</button>`;
   }
   result += `</form></div>`;
   return result;
