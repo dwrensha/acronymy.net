@@ -209,6 +209,9 @@ function render_definition(word, definition, metadata) {
 // returns either `{valid: true}` or
 // {invalid: true, reason: <string> }.
 function validate_username(username) {
+  if (!username) {
+    return {invalid: true, reason: "username must be nonempty"};
+  }
   if (!username.match(/^[0-9a-zA-Z]+$/)) {
     return {invalid: true, reason: "username must be alphanumeric"};
   }
@@ -309,10 +312,7 @@ async function handle_get(req, env) {
       location = `/define?word=${word}`;
     }
 
-    let username = url.searchParams.get('username');
-    if (!username) {
-      return new Response("need to specify username", { status: 400 })
-    }
+    let username = url.searchParams.get('username') || "";
     let username_validation = validate_username(username);
     if (!username_validation.valid) {
       response_string += `<div class="err"> ${username_validation.reason} </div>`;
