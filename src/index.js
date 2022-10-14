@@ -131,7 +131,7 @@ function render_def_footer(word, maybe_username) {
 
   result += `<form action="define" method="get">
              <input name="word" maxlength="100" size="15"
-                    placeholder="enter word" autofocus required/>
+                    placeholder="enter word" required/>
              <button>look up</button></form>`;
 
   result += `<a class="home-link" href=\"/\">Acronymy</a>`
