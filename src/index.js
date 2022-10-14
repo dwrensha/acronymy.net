@@ -39,13 +39,17 @@ input[name="definition"] {
 .footer {
   width: 500px;
   margin: auto;
-  font-size: 14px;
+  font-size: 13px;
 }
 a[class="home-link"] {
-  font-size: 16px;
+  font-size: 15px;
 }
 .source-link {
   font-size: 12px;
+}
+.logged-in {
+  font-style: italic;
+  font-size: 11px;
 }
 
 .footer-row {
@@ -53,6 +57,10 @@ a[class="home-link"] {
  justify-content: space-between;
 }
 .footer form input[name="word"] {
+  width: 110px;
+}
+
+.footer form input[name="username"] {
   width: 110px;
 }
 
@@ -91,7 +99,7 @@ function render_home_footer(maybe_username) {
                 href="https://github.com/dwrensha/acronymy-workers">source code</a>`
 
   if (maybe_username) {
-    result += `<form action="logout">logged in as ${maybe_username}
+    result += `<form class="logged-in" action="logout">logged in as ${maybe_username}
                <button>log out</button></form>`
   } else {
     result +=
