@@ -36,21 +36,26 @@ input[name="definition"] {
    width: 100%;
    font-size: 22px;
 }
-input[name="word"] {
-   font-size: 16px;
-}
 .footer {
   width: 500px;
   margin: auto;
   font-size: 14px;
 }
-.footer a {
-  float: left;
+a[class="home-link"] {
+  font-size: 16px;
 }
-.footer form {
-  float: right;
-  font-style: italic;
+.source-link {
+  font-size: 12px;
 }
+
+.footer-row {
+ display:flex;
+ justify-content: space-between;
+}
+.footer form input[name="word"] {
+  width: 110px;
+}
+
 .history {
    width: 500px;
    text-align: left;
@@ -64,10 +69,6 @@ const HEADER =
 `<head><title> acronymy </title><link rel="stylesheet" type="text/css" href="main.css" >
  </head>`;
 
-const LOOKUP_FORM =
-`<form action="define" method="get">
- <input name="word" maxlength="100" size="15" placeholder="enter word" autofocus required/><button>look up</button></form>`;
-
 function define_form(word) {
   return `<div class="definition-form" >
           <form action=\"define\" method=\"get\">
@@ -78,12 +79,17 @@ function define_form(word) {
           </div>`;
 }
 
-const HOME_LINK = "<a href=\"/\">home</a>";
-
 function render_home_footer(maybe_username) {
   let result = `<div class="footer">
                     <hr>
-                <a href="https://github.com/dwrensha/acronymy-workers">source code</a>`
+                <div class="footer-row">`;
+  result += `<form action="define" method="get">
+             <input name="word" maxlength="100" size="15"
+                    placeholder="enter word" autofocus required/>
+             <button>look up</button></form>`;
+  result += `<a class="source-link"
+                href="https://github.com/dwrensha/acronymy-workers">source code</a>`
+
   if (maybe_username) {
     result += `<form action="logout">logged in as ${maybe_username}
                <button>log out</button></form>`
@@ -92,14 +98,22 @@ function render_home_footer(maybe_username) {
       `<form action="login"><input name="username" placeholder="username" size="10" required/>
        <button>log in</button>`;
   }
-  result += `</form></div>`;
+  result += `</form></div></div>`;
   return result;
 }
 
 function render_def_footer(word, maybe_username) {
   let result = `<div class="footer">
-                    <hr>
-                    <a href=\"/\">Acronymy</a>`
+                <hr>
+                <div class="footer-row">`;
+
+  result += `<form action="define" method="get">
+             <input name="word" maxlength="100" size="15"
+                    placeholder="enter word" autofocus required/>
+             <button>look up</button></form>`;
+
+  result += `<a class="home-link" href=\"/\">Acronymy</a>`
+
   if (maybe_username) {
     result += `<form action="logout">logged in as ${maybe_username}
                <input name=\"word\" value=\"${word}\" type=\"hidden\"/>
@@ -110,7 +124,7 @@ function render_def_footer(word, maybe_username) {
        <input name=\"word\" value=\"${word}\" type=\"hidden\"/>
        <button>log in</button>`;
   }
-  result += `</form></div>`;
+  result += `</form></div></div>`;
   return result;
 }
 
@@ -258,8 +272,7 @@ async function handle_get(req, env) {
     let definition = value;
     if (!definition && !(await WORD_LIST.is_word(word, env))) {
       response_string += `<div class="err">${word} is not in the word list</div>`;
-      response_string += LOOKUP_FORM;
-      response_string += HOME_LINK;
+      response_string += render_def_footer(word, username);
     } else {
       response_string += `<div class=\"word\">${word}</div>`;
       let error_message = null;
@@ -391,7 +404,6 @@ async function handle_get(req, env) {
     response_string += "<div>Today's featured word: ";
     response_string += `<a href="/define?word=${word_of_the_day}">${word_of_the_day}</a>`;
     response_string += "</div>"
-    response_string += LOOKUP_FORM;
     response_string += render_home_footer(username);
   }
 
