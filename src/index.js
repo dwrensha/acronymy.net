@@ -71,6 +71,20 @@ a[class="home-link"] {
    font-size: 14px;
    font-style: italic;
 }
+
+.status {
+  border-style: dotted;
+  width: 500px;
+  text-align: left;
+  margin: auto;
+  font-size: 17px;
+}
+
+.status-title {
+  margin-left: 20px;
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
 `;
 
 const HEADER =
@@ -407,11 +421,27 @@ async function handle_get(req, env) {
   } else {
     response_string += "<div class=\"title\">Acronymy</div>";
     response_string += "<div>A user-editable, acronym-only dictionary.</div>";
+    response_string += `<div class="status">`
     let status = JSON.parse(await env.META.get(STATUS_KEY));
     let word_of_the_day = status.word_of_the_day;
-    response_string += "<div>Today's featured word: ";
-    response_string += `<a href="/define?word=${word_of_the_day}">${word_of_the_day}</a>`;
-    response_string += "</div>"
+    let timestamp = new Date(status.timestamp);
+    response_string += `<h5 class="status-title">status as of ${timestamp.toUTCString()}:</h5>`
+    response_string += `<ul>`;
+    response_string +=
+      `<li>${status.num_defined} out of ${status.total_num_words} words have been defined.</li>`;
+    response_string += "<li>Recently defined words include: ";
+    for (let ii = 0; ii < status.recently_defined.length; ++ii) {
+      let w = status.recently_defined[ii];
+      response_string += `<a href="/define?word=${w}">${w}</a>`;
+      if (ii+1 < status.recently_defined.length) {
+        response_string += ", ";
+      }
+    }
+    response_string += ".</li>";
+    response_string += "<li>Today's featured word is ";
+    response_string += `<b><a href="/define?word=${word_of_the_day}">${word_of_the_day}</a></b>.`;
+    response_string += "</li>";
+    response_string += `</div>`;
     response_string += render_home_footer(username);
   }
 
@@ -455,7 +485,7 @@ export default {
     });
 
     let recently_defined = [];
-    for (let idx = 0; idx < keys.length && idx < 5; ++idx) {
+    for (let idx = 0; idx < keys.length && idx < 10; ++idx) {
       recently_defined.push(keys[idx].name);
     }
 
