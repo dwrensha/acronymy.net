@@ -128,9 +128,8 @@ function render_def_footer(word, maybe_username) {
   return result;
 }
 
-
-const WORD_OF_THE_DAY_KEY = "word-of-the-day";
 const WORD_LIST_KEY = "word-list";
+const STATUS_KEY = "status";
 
 class WordList {
   constructor() {
@@ -400,7 +399,8 @@ async function handle_get(req, env) {
   } else {
     response_string += "<div class=\"title\">Acronymy</div>";
     response_string += "<div>A user-editable, acronym-only dictionary.</div>";
-    let word_of_the_day = await env.META.get(WORD_OF_THE_DAY_KEY);
+    let status = JSON.parse(await env.META.get(STATUS_KEY));
+    let word_of_the_day = status.word_of_the_day;
     response_string += "<div>Today's featured word: ";
     response_string += `<a href="/define?word=${word_of_the_day}">${word_of_the_day}</a>`;
     response_string += "</div>"
@@ -426,10 +426,12 @@ export default {
     // event.cron is a string, the name of the cron trigger.
 
     let words = [];
+    let keys = [];
     while (true) {
       let chunk = await env.WORDS.list();
       console.log('keys length: ' + chunk['keys'].length);
       for (let key of chunk['keys']) {
+        keys.push(key);
         words.push(key['name']);
       }
       if (chunk['list_complete']) {
@@ -437,10 +439,32 @@ export default {
       }
     }
 
+    keys.sort((k1,k2) => {
+      let t1 = (k1.metadata || {}).time || 0;
+      let t2 = (k2.metadata || {}).time || 0;
+      console.log(t1, t2);
+      return t2 - t1;
+    });
+
+    let recently_defined = [];
+    for (let idx = 0; idx < keys.length && idx < 5; ++idx) {
+      recently_defined.push(keys[idx].name);
+    }
+
+    let word_list_raw = await env.META.get(WORD_LIST_KEY);
+    let word_list = word_list_raw.split(/[\s+]/);
+
     let idx = Math.floor(Math.random() * words.length);
-    console.log("idx = ", idx);
-    console.log("setting the word of the day to", words[idx]);
-    words[idx];
-    await env.META.put(WORD_OF_THE_DAY_KEY, words[idx]);
+    let word_of_the_day = words[idx];
+
+    let status = {
+      timestamp: Date.now(),
+      word_of_the_day: word_of_the_day,
+      num_defined: words.length,
+      total_num_words: word_list.length,
+      recently_defined: recently_defined
+    };
+
+    await env.META.put(STATUS_KEY, JSON.stringify(status));
   }
 }
