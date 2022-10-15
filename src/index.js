@@ -427,8 +427,10 @@ async function handle_get(req, env) {
     let timestamp = new Date(status.timestamp);
     response_string += `<h5 class="status-title">status as of ${timestamp.toUTCString()}:</h5>`
     response_string += `<ul>`;
+    let percent = (100 * status.num_defined/status.total_num_words).toFixed(3);
     response_string +=
-      `<li>${status.num_defined} out of ${status.total_num_words} words have been defined.</li>`;
+      `<li>${status.num_defined} out of ${status.total_num_words}
+           words have been defined (${percent}%).</li>`;
     response_string += "<li>Recently defined words include: ";
     for (let ii = 0; ii < status.recently_defined.length; ++ii) {
       let w = status.recently_defined[ii];
