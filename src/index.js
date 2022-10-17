@@ -4,9 +4,13 @@ const MAIN_CSS =
         margin-left: auto;
         margin-right: auto;
         text-align: center;
+        box-sizing: border-box;
 }
 .definition {
    font-size: 28px;
+}
+@media (max-width: 530px) {
+  .definition { font-size: 8vw; }
 }
 div {
   padding-bottom: 10pt;
@@ -15,13 +19,16 @@ div {
   text-align: center;
   font-size: 500%;
 }
+@media (max-width: 530px) {
+  .word { font-size: 11vw; }
+}
 .err {
   font-size: 90%;
   color: #AA0000;
 }
 .title {
   text-align: center;
-  font-size:500%;
+  font-size: 500%;
 }
 .attribution {
    font-size: 11px;
@@ -30,14 +37,23 @@ div {
 .definition-form {
    text-align: right;
    margin: auto;
+}
+.full-width {
    width: 500px;
+}
+@media (max-width: 530px) {
+  .title { font-size: 16vw; }
+}
+@media (max-width: 500px) {
+  .full-width {
+     width: 97vw;
+  }
 }
 input[name="definition"] {
    width: 100%;
    font-size: 22px;
 }
 .footer {
-  width: 500px;
   margin: auto;
   font-size: 13px;
 }
@@ -56,6 +72,13 @@ a[class="home-link"] {
  display:flex;
  justify-content: space-between;
 }
+@media (max-width: 475px) {
+   .footer-row {
+     flex-direction: column;
+   }
+}
+
+
 .footer form input[name="word"] {
   width: 110px;
 }
@@ -65,7 +88,6 @@ a[class="home-link"] {
 }
 
 .history {
-   width: 500px;
    text-align: left;
    margin: auto;
    font-size: 14px;
@@ -74,7 +96,6 @@ a[class="home-link"] {
 
 .status {
   border-style: dotted;
-  width: 500px;
   text-align: left;
   margin: auto;
   font-size: 17px;
@@ -88,11 +109,13 @@ a[class="home-link"] {
 `;
 
 const HEADER =
-`<head><title> acronymy </title><link rel="stylesheet" type="text/css" href="main.css" >
+`<head>
+ <meta name="viewport" content="width=device-width">
+<title> acronymy </title><link rel="stylesheet" type="text/css" href="main.css" >
  </head>`;
 
 function define_form(word) {
-  return `<div class="definition-form" >
+  return `<div class="definition-form full-width" >
           <form action=\"define\" method=\"get\">
           <input name=\"word\" value=\"${word}\" type=\"hidden\"/>
           <input name=\"definition\" maxlength=\"2000\" placeholder="enter new definition" class="definition-input-text" autofocus required/>
@@ -102,7 +125,7 @@ function define_form(word) {
 }
 
 function render_home_footer(maybe_username) {
-  let result = `<div class="footer">
+  let result = `<div class="footer full-width">
                     <hr>
                 <div class="footer-row">`;
   result += `<form action="define" method="get">
@@ -125,7 +148,7 @@ function render_home_footer(maybe_username) {
 }
 
 function render_def_footer(word, maybe_username) {
-  let result = `<div class="footer">
+  let result = `<div class="footer full-width">
                 <hr>
                 <div class="footer-row">`;
 
@@ -238,7 +261,7 @@ function render_definition(word, definition, metadata) {
       response_string += `</div>`;
     }
   } else {
-    response_string += "<div>this word has no definition yet</div>";
+    response_string += "<div><i>this word has no definition yet</i></div>";
   }
   return response_string;
 }
@@ -295,7 +318,7 @@ async function handle_get(req, env) {
       response_string += `<div class="err">${word} is not in the word list</div>`;
       response_string += render_def_footer(word, username);
     } else {
-      response_string += `<div class=\"word\">${word}</div>`;
+      response_string += `<div class=\"word\"><b>${word}</b></div>`;
       let error_message = null;
       let proposed_definition = url.searchParams.get('definition');
       if (proposed_definition) {
@@ -396,7 +419,7 @@ async function handle_get(req, env) {
 
     response_string += `<div>history of definitions for
                         <a href="/define?word=${word}">${word}</a>:</div>`;
-    response_string += `<ul class="history">`
+    response_string += `<ul class="history full-width">`
     let promises = [];
     for (let entry of entries) {
       promises.push(await env.WORDS_LOG.get(entry.name));
@@ -421,7 +444,7 @@ async function handle_get(req, env) {
   } else {
     response_string += "<div class=\"title\">Acronymy</div>";
     response_string += "<div>A user-editable, acronym-only dictionary.</div>";
-    response_string += `<div class="status">`
+    response_string += `<div class="status full-width">`
     let status = JSON.parse(await env.META.get(STATUS_KEY));
     let word_of_the_day = status.word_of_the_day;
     let timestamp = new Date(status.timestamp);
