@@ -73,23 +73,25 @@ a[class="home-link"] {
  display:flex;
  justify-content: space-between;
 }
+
+
+.footer form input {
+  width: 110px;
+}
+
 @media (max-width: 475px) {
-   .footer-row {
-     flex-direction: column;
+  a[class="home-link"] {
+    font-size: 3vw;
    }
+ .footer form {
+  text-align: right;
+  width: 30vw;
+ }
+ .footer form input {
+   width: 100%;
+ }
 }
 
-.home-link {
-  margin-bottom: 13px;
-}
-
-.footer form input[name="word"] {
-  width: 110px;
-}
-
-.footer form input[name="username"] {
-  width: 110px;
-}
 
 .history {
    text-align: left;
