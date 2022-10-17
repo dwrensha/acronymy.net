@@ -62,6 +62,7 @@ a[class="home-link"] {
 }
 .source-link {
   font-size: 12px;
+  margin-bottom: 13px;
 }
 .logged-in {
   font-style: italic;
@@ -78,6 +79,9 @@ a[class="home-link"] {
    }
 }
 
+.home-link {
+  margin-bottom: 13px;
+}
 
 .footer form input[name="word"] {
   width: 110px;
