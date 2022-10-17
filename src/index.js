@@ -10,7 +10,7 @@ const MAIN_CSS =
    font-size: 28px;
 }
 @media (max-width: 530px) {
-  .definition { font-size: 8vw; }
+  .definition { font-size: 7vw; }
 }
 div {
   padding-bottom: 10pt;
