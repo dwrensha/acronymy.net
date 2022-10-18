@@ -92,7 +92,6 @@ a[class="home-link"] {
  }
 }
 
-
 .history {
    text-align: left;
    margin: auto;
@@ -441,7 +440,7 @@ async function handle_get(req, env) {
 
     response_string += `<div>history of definitions for
                         <a href="/define/${word}">${word}</a>:</div>`;
-    response_string += `<ul class="history full-width">`
+    response_string += `<div class="history full-width"><ul>`
     let promises = [];
     for (let entry of entries) {
       promises.push(await env.WORDS_LOG.get(entry.name));
@@ -461,7 +460,7 @@ async function handle_get(req, env) {
       }
       response_string += `</li>`
     }
-    response_string += `</ul>`
+    response_string += `</ul></div>`
     response_string += render_def_footer(word, username);
   } else {
     response_string += "<div class=\"title\">Acronymy</div>";
