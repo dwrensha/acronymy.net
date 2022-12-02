@@ -115,14 +115,18 @@ a[class="home-link"] {
 
 const HEADER =
 `<head>
- <meta name="viewport" content="width=device-width">
+<meta name="viewport" content="width=device-width">
 <title> acronymy </title><link rel="stylesheet" type="text/css" href="/main.css" >
- </head>`;
+</head>`;
 
-function define_form(word) {
+function define_form(word, initial_value) {
+  let maybe_value = "";
+  if (initial_value) {
+    maybe_value = `value="${initial_value}"`;
+  }
   return `<div class="definition-form full-width">
           <form action="/define/${word}" method="post">
-          <input name=\"definition\" maxlength=\"2000\" placeholder="enter new definition" class="definition-input-text" autofocus required/>
+          <input name=\"definition\" maxlength=\"2000\" placeholder="enter new definition" class="definition-input-text" ${maybe_value} autofocus required/>
           <br>
           <button>submit</button></form>
           </div>`;
@@ -294,7 +298,7 @@ async function handle_get(req, env) {
   }
 
   if (url.pathname == "/main.css") {
-    return new Response(MAIN_CSS);
+    return new Response(MAIN_CSS, {headers: {"Content-type": "text/css"}});
   }
 
   let username = null;
@@ -308,7 +312,7 @@ async function handle_get(req, env) {
     }
   }
 
-  let response_string = "<html>" + HEADER + "<body>";
+  let response_string = "<!DOCTYPE html><html>" + HEADER + "<body>";
 
   if (url.pathname == "/define") {
     // Result of submitting the "look up" form.
@@ -325,6 +329,7 @@ async function handle_get(req, env) {
     let word = url.pathname.slice("/define/".length);
     let { value, metadata } = await env.WORDS.getWithMetadata(word);
     let definition = value;
+    let input_starting_value = null;
     if (!definition && !(await WORD_LIST.is_word(word, env))) {
       response_string += `<div class="err">${word} is not in the word list</div>`;
       response_string += render_def_footer(word, username);
@@ -374,12 +379,13 @@ async function handle_get(req, env) {
         } else {
           definition = await env.WORDS.get(word);
           error_message = validation_result.reason;
+          input_starting_value = def_words.join(" ");
         }
       } else {
         definition = await env.WORDS.get(word);
       }
       response_string += render_definition(word, definition, metadata);
-      response_string += define_form(word);
+      response_string += define_form(word, input_starting_value);
       if (error_message) {
         response_string += `<div class="err"> ${error_message} </div>`;
       }
