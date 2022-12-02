@@ -511,8 +511,9 @@ export default {
 
     let words = [];
     let keys = [];
+    let options = {};
     while (true) {
-      let chunk = await env.WORDS.list();
+      let chunk = await env.WORDS.list(options);
       console.log('keys length: ' + chunk['keys'].length);
       for (let key of chunk['keys']) {
         keys.push(key);
@@ -520,13 +521,14 @@ export default {
       }
       if (chunk['list_complete']) {
         break;
+      } else {
+        options.cursor = chunk['cursor'];
       }
     }
 
     keys.sort((k1,k2) => {
       let t1 = (k1.metadata || {}).time || 0;
       let t2 = (k2.metadata || {}).time || 0;
-      console.log(t1, t2);
       return t2 - t1;
     });
 
