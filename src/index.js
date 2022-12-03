@@ -377,12 +377,9 @@ async function handle_get(req, env) {
             }
           }
         } else {
-          definition = await env.WORDS.get(word);
           error_message = validation_result.reason;
           input_starting_value = def_words.join(" ");
         }
-      } else {
-        definition = await env.WORDS.get(word);
       }
       response_string += render_definition(word, definition, metadata);
       response_string += define_form(word, input_starting_value);
