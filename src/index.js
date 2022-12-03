@@ -99,6 +99,11 @@ a[class="home-link"] {
    font-style: italic;
 }
 
+.not-defined {
+  border-style: dotted;
+  border-width: 1px;
+}
+
 .status {
   border-style: dotted;
   text-align: left;
@@ -249,13 +254,25 @@ async function validate_definition(def, word, env) {
 }
 
 
-function render_definition(word, definition, metadata) {
+async function render_definition(env, word, definition, metadata) {
   let response_string = "";
   if (definition) {
     let def_words = definition.split(" ");
-    response_string += `<div class="definition">`
+    let def_promises = [];
     for (let def_word of def_words) {
-      response_string += ` <a href="/define/${def_word}">${def_word}</a> `;
+      def_promises.push(env.WORDS.get(def_word));
+    }
+    let defs = await Promise.all(def_promises);
+
+    response_string += `<div class="definition">`
+    for (let ii = 0; ii < def_words.length; ++ii){
+      let def_word = def_words[ii];
+      let def_word_def = defs[ii];
+      let not_defined_class="";
+      if (!def_word_def) {
+        not_defined_class = `class="not-defined"`;
+      }
+      response_string += ` <a href="/define/${def_word}" ${not_defined_class}>${def_word}</a> `;
     }
     response_string += "</div>";
     if (metadata && metadata.time) {
@@ -381,7 +398,7 @@ async function handle_get(req, env) {
           input_starting_value = def_words.join(" ");
         }
       }
-      response_string += render_definition(word, definition, metadata);
+      response_string += await render_definition(env, word, definition, metadata);
       response_string += define_form(word, input_starting_value);
       if (error_message) {
         response_string += `<div class="err"> ${error_message} </div>`;
