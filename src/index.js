@@ -544,7 +544,7 @@ export default {
     }
 
     let word_list_raw = await env.META.get(WORD_LIST_KEY);
-    let word_list = word_list_raw.split(/[\s+]/);
+    let word_list_length = word_list_raw.match(/\n/g).length;
 
     let idx = Math.floor(Math.random() * words.length);
     let word_of_the_day = words[idx];
@@ -553,7 +553,7 @@ export default {
       timestamp: Date.now(),
       word_of_the_day: word_of_the_day,
       num_defined: words.length,
-      total_num_words: word_list.length,
+      total_num_words: word_list_length,
       recently_defined: recently_defined
     };
 
