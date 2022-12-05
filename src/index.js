@@ -207,7 +207,7 @@ class WordList {
       }
       let subset = new Set();
       this.subsets.set(first_letter, subset);
-      let words = raw_word_list.split(/[\s+]/);
+      let words = raw_word_list.split(/\s+/);
       for (let word of words) {
         subset.add(word);
       }
@@ -363,7 +363,7 @@ async function handle_get(req, env) {
         }
       }
       if (proposed_definition) {
-        let def_words = proposed_definition.trim().toLowerCase().split(/[\s+]/);
+        let def_words = proposed_definition.trim().toLowerCase().split(/\s+/);
         let validation_result = await validate_definition(def_words, word, env);
         if (validation_result.valid) {
           let new_def = def_words.join(" ");
