@@ -229,6 +229,13 @@ async function validate_definition(def, word, env) {
   let idx = 0;
   let def_promises = [];
   for (let def_word of def) {
+    let match = def_word.match(/[^a-zA-Z\s]/);
+    if (match) {
+      return {
+        invalid: true,
+        reason: `invalid character: '${match}'`
+      };
+    }
     def_promises.push(WORD_LIST.is_word(def_word, env));
   }
   let defs = await Promise.all(def_promises);
