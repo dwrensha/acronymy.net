@@ -282,16 +282,18 @@ async function render_definition(env, word, definition, metadata) {
       response_string += ` <a href="/define/${def_word}" ${not_defined_class}>${def_word}</a> `;
     }
     response_string += "</div>";
+    response_string += `<div class="attribution">`;
     if (metadata && metadata.time) {
       let time = new Date(metadata.time);
-      response_string += `<div class="attribution">`;
       response_string += `—defined ${time.toUTCString()}`;
       if (metadata.user) {
         response_string += ` by ${metadata.user}`;
       }
       response_string += ` <a href="/history?word=${word}">[history]</a>`
-      response_string += `</div>`;
+    } else {
+      response_string += `—defined before the beginning of history (October 2022)`;
     }
+    response_string += `</div>`;
   } else {
     response_string += "<div><i>this word has no definition yet</i></div>";
   }
