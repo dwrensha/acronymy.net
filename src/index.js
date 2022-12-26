@@ -291,6 +291,11 @@ async function validate_definition(def, word, env) {
 }
 
 async function toot_submission(env, word, new_def, metadata) {
+  if (!env.MASTODON_URL) {
+    console.error("Environment variable MASTODON_URL is empty. Not tooting.");
+    return;
+  }
+  const url = env.MASTODON_URL + "/api/v1/statuses";
   const token = env.MASTODON_TOKEN;
   const data = new URLSearchParams();
 //  let attribution = "—defined anonymously";
@@ -302,7 +307,7 @@ async function toot_submission(env, word, new_def, metadata) {
 //              attribution + "\n\n" +
               `http://acronymy.net/define/${word}\n`);
 
-  return fetch(env.MASTODON_URL + "/api/v1/statuses",
+  return fetch(url,
         { method : 'POST',
           headers : {authorization: `Bearer ${token}`},
           body : data
