@@ -312,10 +312,10 @@ async function render_definition(env, word, definition, metadata) {
   return response_string;
 }
 
-function render_error(message) {
+function render_error(title, message) {
   let response_string = "";
   response_string += `<div class="big-error">`;
-  response_string += "Error";
+  response_string += title;
   response_string += `</div>`;
   response_string += `<div class="err">`;
   response_string += message;
@@ -362,7 +362,7 @@ async function handle_get(req, env) {
   }
 
   let response_string = "<!DOCTYPE html><html>" + HEADER + "<body>";
-
+  let response_status = 200;
   if (url.pathname == "/define") {
     // Result of submitting the "look up" form.
     // Redirect to "/define/<word>".
@@ -380,8 +380,9 @@ async function handle_get(req, env) {
     let definition = value;
     let input_starting_value = null;
     if (!definition && !(await WORD_LIST.is_word(word, env))) {
-      response_string += render_error(`${word} is not in the word list`);
+      response_string += render_error("Not Found", `${word} is not in the word list`);
       response_string += render_def_footer(word, username);
+      response_status = 404;
     } else {
       response_string += `<div class=\"word\">${word}</div>`;
       let error_message = null;
@@ -545,7 +546,8 @@ async function handle_get(req, env) {
 
   response_string += "</body></html>";
   return new Response(response_string,
-                      {headers: {'content-type': 'text/html;charset=UTF-8'}});
+                      {headers: {'content-type': 'text/html;charset=UTF-8'},
+                       status: response_status });
 }
 
 export default {
