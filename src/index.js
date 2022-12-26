@@ -27,7 +27,7 @@ div {
 }
 .big-error {
   text-align: center;
-  font-size: 500%;
+  font-size: 300%;
   font-weight: bold;
   color: #AA0000;
 }
