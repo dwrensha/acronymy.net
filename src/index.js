@@ -290,6 +290,24 @@ async function validate_definition(def, word, env) {
   return {valid: true};
 }
 
+async function toot_submission(env, word, new_def, metadata) {
+  const token = env.MASTODON_TOKEN;
+  const data = new URLSearchParams();
+//  let attribution = "—defined anonymously";
+//   if (metadata.user) {
+//    attribution = "—defined by " + metadata.user;
+//  }
+  data.append('status',
+              `${new_def}\n\n` +
+//              attribution + "\n\n" +
+              `http://acronymy.net/define/${word}\n`);
+
+  return fetch(env.MASTODON_URL + "/api/v1/statuses",
+        { method : 'POST',
+          headers : {authorization: `Bearer ${token}`},
+          body : data
+        });
+}
 
 async function render_definition(env, word, definition, metadata) {
   let response_string = "";
@@ -432,7 +450,10 @@ async function handle_get(req, env) {
               }
               let p1 = env.WORDS.put(word, new_def, {metadata});
               let p2 = env.WORDS_LOG.put(word + ":" + now, new_def, {metadata});
-              await Promise.all([p1, p2]);
+              let p3 = toot_submission(env, word, new_def, metadata).catch((e) => {
+                console.log("error on toot attempt: ", e);
+              });
+              await Promise.all([p1, p2, p3]);
               return new Response("",
                                   {status: 303,
                                    headers: {'Location': `/define/${word}` }});
