@@ -4,7 +4,9 @@ const MAIN_CSS =
         margin-left: auto;
         margin-right: auto;
         text-align: center;
-        box-sizing: border-box;
+}
+* {
+  box-sizing: border-box;
 }
 .definition {
    font-size: 28px;
