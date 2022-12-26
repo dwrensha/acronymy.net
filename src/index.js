@@ -130,28 +130,18 @@ a[class="home-link"] {
 }
 `;
 
-const FAVICON =
-"iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABhGlDQ1BJQ0MgcHJvZmlsZQAAKJF9"+
-"kT1Iw1AUhU9TRZGKgx20OGSoTi2IijhqFYpQIdQKrTqYvPQPmjQkKS6OgmvBwZ/FqoOLs64OroIg"+
-"+APi6OSk6CIl3pcUWsR44fE+zrvn8N59gNCoMM3qGgc03TbTyYSYza2KPa8IIYIAYhiWmWXMSVIK"+
-"vvV1T51Ud3Ge5d/3Z/WreYsBAZF4lhmmTbxBPL1pG5z3icOsJKvE58Qxky5I/Mh1xeM3zkWXBZ4Z"+
-"NjPpeeIwsVjsYKWDWcnUiKeIo6qmU76Q9VjlvMVZq9RY6578haG8vrLMdVojSGIRS5AgQkENZVRg"+
-"I067ToqFNJ0nfPwR1y+RSyFXGYwcC6hCg+z6wf/g92ytwuSElxRKAN0vjvMxCvTsAs2643wfO07z"+
-"BAg+A1d6219tADOfpNfbWvQIGNgGLq7bmrIHXO4AQ0+GbMquFKQlFArA+xl9Uw4YvAX61ry5tc5x"+
-"+gBkaFapG+DgEBgrUva6z7t7O+f2b09rfj99QXKrviVv+gAAAAZiS0dEAP8A/wD/oL2nkwAAAAlw"+
-"SFlzAAAuIwAALiMBeKU/dgAAAAd0SU1FB+YMGgIKB5GSoYIAAAAZdEVYdENvbW1lbnQAQ3JlYXRl"+
-"ZCB3aXRoIEdJTVBXgQ4XAAABEklEQVQ4y82TMYrCQBhGX7ZK4yUsLFJYh+AVvIBHsMoB0lhZeAch"+
-"RQ5gk9pGFJGBaWws01ilnCQIfhYLwhpMdrHZBwMDM7z5/g/GkyQ+4IsPaQlutxuTyQTP81iv1/0G"+
-"vWCMESBAQRDIOacuWgnyPGcwGJCmKefzGWPM7xOUZSlAy+XyuY/juDPBD0Ge5wJ0Op0kSYvFQoCK"+
-"ougX3O93zWYzjcdj1XUtSToejwKUZVm/4HK5PMt7XWEYqmma7hK32+3bng6HA9ba9yU65xQEgUaj"+
-"Uesla60AJUnyfoT9fi9Aq9WqdaGqKg2HQwG6Xq+SpOl0KkBlWX6PsNlsAIiiqJXQ933m8zkAu92u"+
-"de79v8/0Vx5mwY4nqgK15wAAAABJRU5ErkJggg=="
+const FAVICON =`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 135.47 135.47">
+ <rect width="100%" height="100%" fill="white"/>
+ <g>
+  <path transform="scale(.26458)" d="m179.65 92.162-140.08 350.83h52.348l33.422-89.998h165.39l33.424 89.998h51.609l-139.84-350.83h-56.277zm28.016 46.76 67.582 174.59h-134.92l67.338-174.59zm217.25 244.38v59.686h51.854v-59.686h-51.854z"/>
+ </g>
+</svg>`;
 
 const HEADER =
 `<head>
 <meta name="viewport" content="width=device-width">
 <title> acronymy </title><link rel="stylesheet" type="text/css" href="/main.css" >
-<link rel="icon" type="image/png" href="data:image/png;base64,${FAVICON}">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 </head>`;
 
 function define_form(word, initial_value) {
@@ -389,6 +379,10 @@ async function handle_get(req, env) {
 
   if (url.pathname == "/main.css") {
     return new Response(MAIN_CSS, {headers: {"Content-type": "text/css"}});
+  }
+
+  if (url.pathname == "/favicon.svg") {
+    return new Response(FAVICON, {headers: {"Content-type": "image/svg+xml"}});
   }
 
   let username = null;
