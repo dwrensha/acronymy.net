@@ -18,9 +18,19 @@ div {
 .word {
   text-align: center;
   font-size: 500%;
+  font-weight: bold;
 }
 @media (max-width: 530px) {
   .word { font-size: 11vw; }
+}
+.big-error {
+  text-align: center;
+  font-size: 500%;
+  font-weight: bold;
+  color: #AA0000;
+}
+@media (max-width: 530px) {
+  .big-error { font-size: 11vw; }
 }
 .err {
   font-size: 90%;
@@ -300,6 +310,17 @@ async function render_definition(env, word, definition, metadata) {
   return response_string;
 }
 
+function render_error(message) {
+  let response_string = "";
+  response_string += `<div class="big-error">`;
+  response_string += "Error";
+  response_string += `</div>`;
+  response_string += `<div class="err">`;
+  response_string += message;
+  response_string += `</div>`;
+  return response_string;
+}
+
 // returns either `{valid: true}` or
 // {invalid: true, reason: <string> }.
 function validate_username(username) {
@@ -357,10 +378,10 @@ async function handle_get(req, env) {
     let definition = value;
     let input_starting_value = null;
     if (!definition && !(await WORD_LIST.is_word(word, env))) {
-      response_string += `<div class="err">${word} is not in the word list</div>`;
+      response_string += render_error(`${word} is not in the word list`);
       response_string += render_def_footer(word, username);
     } else {
-      response_string += `<div class=\"word\"><b>${word}</b></div>`;
+      response_string += `<div class=\"word\">${word}</div>`;
       let error_message = null;
       let proposed_definition = null;
       if (req.method == "POST") {
