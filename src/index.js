@@ -130,10 +130,28 @@ a[class="home-link"] {
 }
 `;
 
+const FAVICON =
+"iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABhGlDQ1BJQ0MgcHJvZmlsZQAAKJF9"+
+"kT1Iw1AUhU9TRZGKgx20OGSoTi2IijhqFYpQIdQKrTqYvPQPmjQkKS6OgmvBwZ/FqoOLs64OroIg"+
+"+APi6OSk6CIl3pcUWsR44fE+zrvn8N59gNCoMM3qGgc03TbTyYSYza2KPa8IIYIAYhiWmWXMSVIK"+
+"vvV1T51Ud3Ge5d/3Z/WreYsBAZF4lhmmTbxBPL1pG5z3icOsJKvE58Qxky5I/Mh1xeM3zkWXBZ4Z"+
+"NjPpeeIwsVjsYKWDWcnUiKeIo6qmU76Q9VjlvMVZq9RY6578haG8vrLMdVojSGIRS5AgQkENZVRg"+
+"I067ToqFNJ0nfPwR1y+RSyFXGYwcC6hCg+z6wf/g92ytwuSElxRKAN0vjvMxCvTsAs2643wfO07z"+
+"BAg+A1d6219tADOfpNfbWvQIGNgGLq7bmrIHXO4AQ0+GbMquFKQlFArA+xl9Uw4YvAX61ry5tc5x"+
+"+gBkaFapG+DgEBgrUva6z7t7O+f2b09rfj99QXKrviVv+gAAAAZiS0dEAP8A/wD/oL2nkwAAAAlw"+
+"SFlzAAAuIwAALiMBeKU/dgAAAAd0SU1FB+YMGgE1GqgMWT4AAAAZdEVYdENvbW1lbnQAQ3JlYXRl"+
+"ZCB3aXRoIEdJTVBXgQ4XAAABIUlEQVQ4y8XTIYpCURiG4ffOOrS4ArtLMIlottg0uAV3IAhuwKSI"+
+"cLGYTEZNYhKEiwgGkxoEve80meE61xkM88FJ5/Dw8fOfQJU38sGbSQCdTocgCMhms5zP59eCX3I6"+
+"ncxkMgICzmYzX+Vbg+VyyW63o9frATAYDP7WoNVqCXg4HKzX6wJGUZTa4AHs93sBa7WaqmEYCtjv"+
+"938HjEYjAcfjsapRFAlYKBS8Xq/pwO12s1gsCrjdblWN49hyuSzgYrFIB9br9WPyz0673U4Hut1u"+
+"KgB4PB6fA5fLxVwu9+PEG42GgJPJ5Dkwn88FLJVKxnGceDCdTgWsVCre73dVm82mgKvVyo8wDAGo"+
+"VqsEQZDYk3w+D8BwOGSz2STug3//jZ8Ex9veGfX3QgAAAABJRU5ErkJggg==";
+
 const HEADER =
 `<head>
 <meta name="viewport" content="width=device-width">
 <title> acronymy </title><link rel="stylesheet" type="text/css" href="/main.css" >
+<link rel="icon" type="image/png" href="data:image/png;base64,${FAVICON}">
 </head>`;
 
 function define_form(word, initial_value) {
