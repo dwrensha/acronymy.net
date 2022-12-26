@@ -36,3 +36,6 @@ zone_name = "acronymy.net"
 
 [triggers]
 crons = ["0 0 * * *"] # every day at midnight
+
+[vars]
+MASTODON_URL = "https://social.wub.site"
