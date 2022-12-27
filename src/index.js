@@ -468,8 +468,9 @@ async function handle_get(req, env) {
                 `<p>(you should maybe try asking <a href="https://twitter.com/dwrensha">@dwrensha</a> to upgrade to a paid Cloudflare plan)<p>`;
             }
           }
-        } else {
+        } else { // invalid definition
           error_message = validation_result.reason;
+          response_status = 400;
           input_starting_value = def_words.join(" ");
         }
       }
