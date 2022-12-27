@@ -297,6 +297,9 @@ async function toot_submission(env, word, new_def, metadata) {
 //              attribution + "\n\n" +
               `http://acronymy.net/define/${word}\n`);
 
+  data.append('visibility',
+              'unlisted');
+
   return fetch(url,
         { method : 'POST',
           headers : {authorization: `Bearer ${token}`},
