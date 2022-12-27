@@ -137,12 +137,12 @@ const FAVICON =`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0
  </g>
 </svg>`;
 
-const HEADER =
-`<head>
-<meta name="viewport" content="width=device-width">
-<title> acronymy </title><link rel="stylesheet" type="text/css" href="/main.css" >
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
-</head>`;
+function header(title) {
+  return `<!DOCTYPE html><html><head> <meta name="viewport" content="width=device-width">
+   <title>${title}</title><link rel="stylesheet" type="text/css" href="/main.css" >
+   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+   </head><body>`;
+}
 
 function define_form(word, initial_value) {
   let maybe_value = "";
@@ -399,7 +399,7 @@ async function handle_get(req, env) {
     }
   }
 
-  let response_string = "<!DOCTYPE html><html>" + HEADER + "<body>";
+  let response_string = header(" Acronymy ");
   let response_status = 200;
   if (url.pathname == "/define") {
     // Result of submitting the "look up" form.
@@ -414,6 +414,7 @@ async function handle_get(req, env) {
                          headers: {'Location': `/define/${word}`, }});
   } else if (url.pathname.startsWith("/define/")) {
     let word = url.pathname.slice("/define/".length);
+    response_string = header(` Acronymy - ${word} `);
     let { value, metadata } = await env.WORDS.getWithMetadata(word);
     let definition = value;
     let input_starting_value = null;
