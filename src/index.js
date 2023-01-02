@@ -288,14 +288,14 @@ async function toot_submission(env, word, new_def, metadata) {
   const url = env.MASTODON_URL + "/api/v1/statuses";
   const token = env.MASTODON_TOKEN;
   const data = new URLSearchParams();
-//  let attribution = "—defined anonymously";
-//   if (metadata.user) {
-//    attribution = "—defined by " + metadata.user;
-//  }
+  let attribution = "—submitted anonymously";
+   if (metadata.user) {
+    attribution = "—submitted by " + metadata.user;
+  }
   data.append('status',
               `${new_def}\n\n` +
-//              attribution + "\n\n" +
-              `http://acronymy.net/define/${word}\n`);
+              `http://acronymy.net/define/${word}\n` +
+              attribution + "\n");
 
   data.append('visibility',
               'unlisted');
