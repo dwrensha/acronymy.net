@@ -294,11 +294,30 @@ async function toot_submission(env, word, new_def, metadata) {
   }
   data.append('status',
               `${new_def}\n\n` +
-              `http://acronymy.net/define/${word}\n` +
+              `https://acronymy.net/define/${word}\n` +
               attribution + "\n");
 
   data.append('visibility',
               'unlisted');
+
+  return fetch(url,
+        { method : 'POST',
+          headers : {authorization: `Bearer ${token}`},
+          body : data
+        });
+}
+
+async function toot_daily_update(env, toot_text) {
+  if (!env.MASTODON_URL) {
+    console.error("Environment variable MASTODON_URL is empty. Not tooting.");
+    return;
+  }
+  const url = env.MASTODON_URL + "/api/v1/statuses";
+  const token = env.DAILY_UPDATE_MASTODON_TOKEN;
+  const data = new URLSearchParams();
+  data.append('status', toot_text);
+  data.append('visibility',
+              'public');
 
   return fetch(url,
         { method : 'POST',
@@ -649,5 +668,19 @@ export default {
     };
 
     await env.META.put(STATUS_KEY, JSON.stringify(status));
+
+    // send @daily_acronymy toot
+    let word_of_the_day_def = await env.WORDS.get(word_of_the_day);
+    let percent = (100 * status.num_defined/status.total_num_words).toFixed(3);
+    let capitalized_def = word_of_the_day_def.split(' ').map(
+      str => str.charAt(0).toUpperCase() + str.slice(1)).join(' ');
+    let toot_text =
+        `The acronym of the day is ${word_of_the_day.toUpperCase()}:\n\n` +
+        capitalized_def + "\n\n"+
+        "--------------------------------------------\n\n" +
+        `To submit a new definition for this word, visit https://acronymy.net/define/${word_of_the_day}.\n\n` +
+        `So far, ${status.num_defined} out of ${status.total_num_words} `+
+        `words have been defined (${percent}%).`;
+    await toot_daily_update(env,toot_text);
   }
 }
