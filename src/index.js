@@ -130,6 +130,13 @@ a[class="home-link"] {
 }
 `;
 
+const ROBOTS_TXT =
+`User agent: serpstatbot
+Disallow: /
+
+User-agent: *
+Disallow: /history`
+
 const FAVICON =`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 135.47 135.47">
  <rect width="100%" height="100%" fill="white"/>
  <g>
@@ -397,6 +404,10 @@ async function handle_get(req, env) {
     const {pathname, search} = url;
     const destinationURL = "https://acronymy.net" + pathname + search;
     return Response.redirect(destinationURL, 301);
+  }
+
+  if (url.pathname == "/robots.txt") {
+    return new Response(ROBOTS_TXT);
   }
 
   if (url.pathname == "/main.css") {
