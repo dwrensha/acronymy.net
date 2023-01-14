@@ -577,6 +577,9 @@ async function handle_get(req, env) {
       let entry = entries[ii];
       response_string += `<li>${def}`
       let metadata = entry.metadata;
+      if (metadata && 0 == metadata.time) {
+        response_string += ` — defined before the beginning of history (October 2022)`;
+      }
       if (metadata && metadata.time) {
         let time = new Date(metadata.time);
         response_string += ` — defined ${time.toUTCString()}`;
