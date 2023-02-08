@@ -187,14 +187,19 @@ function render_home_footer(maybe_username) {
   return result;
 }
 
-function render_def_footer(word, maybe_username) {
+function render_def_footer(word, maybe_username, maybe_entered_word) {
   let result = `<div class="footer full-width">
                 <hr>
                 <div class="footer-row">`;
 
+  let entered_word = "";
+  if (maybe_entered_word) {
+    entered_word = `value="${maybe_entered_word}"`;
+  }
+
   result += `<form action="/define" method="get">
              <input name="word" maxlength="100" size="15"
-                    placeholder="enter word" required/>
+                    placeholder="enter word" ${entered_word} required/>
              <button>look up</button></form>`;
 
   result += `<a class="home-link" href=\"/\">Acronymy</a>`
@@ -450,7 +455,7 @@ async function handle_get(req, env) {
     let input_starting_value = null;
     if (!definition && !(await WORD_LIST.is_word(word, env))) {
       response_string += render_error("Not Found", `${word} is not in the word list`);
-      response_string += render_def_footer(word, username);
+      response_string += render_def_footer(word, username, word);
       response_status = 404;
     } else {
       response_string += `<div class=\"word\">${word}</div>`;
