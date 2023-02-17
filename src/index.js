@@ -17,6 +17,9 @@ const MAIN_CSS =
 div {
   padding-bottom: 10pt;
 }
+.follow {
+  font-size: 15px;
+}
 .word {
   text-align: center;
   font-size: 500%;
@@ -599,6 +602,9 @@ async function handle_get(req, env) {
   } else {
     response_string += "<div class=\"title\">Acronymy</div>";
     response_string += "<div>A user-editable, acronym-only dictionary.</div>";
+    response_string += `<div class="follow">Follow at <a href="https://social.wub.site/@acronymy">@acronymy</a> or `
+    response_string +=
+      `<a href="https://social.wub.site/@daily_acronymy">@daily_acronymy</a>.</div>`;
     response_string += `<div class="status full-width">`
     let status = JSON.parse(await env.META.get(STATUS_KEY));
     let word_of_the_day = status.word_of_the_day;
