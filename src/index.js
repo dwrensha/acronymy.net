@@ -224,6 +224,10 @@ function render_def_footer(word, maybe_username, maybe_entered_word) {
 const WORD_LIST_KEY = "word-list";
 const STATUS_KEY = "status";
 
+// META/bad-words contains a list of words that should not be selected
+// as a "word of the day".
+const BAD_WORDS_KEY = "bad-words";
+
 class WordList {
   constructor() {
     // One Set for each possible initial letter of a word.
@@ -685,8 +689,19 @@ export default {
     let word_list_raw = await env.META.get(WORD_LIST_KEY);
     let word_list_length = word_list_raw.match(/\n/g).length;
 
-    let idx = Math.floor(Math.random() * words.length);
-    let word_of_the_day = words[idx];
+    let bad_words_list = await env.META.get(BAD_WORDS_KEY);
+    const bad_words = new Set(bad_words_list.split(/\s+/))
+
+    let word_of_the_day = "error";
+    for (let jj = 0; jj < 25; ++jj) {
+      let idx = Math.floor(Math.random() * words.length);
+      if (bad_words.has(words[idx])) {
+        continue;
+      } else {
+        word_of_the_day = words[idx];
+        break;
+      }
+    }
 
     let status = {
       timestamp: Date.now(),
