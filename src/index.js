@@ -639,6 +639,10 @@ async function handle_get(req, env) {
 
 export default {
   async fetch(req, env) {
+    //if (req.headers.get('cf-connecting-ip') == "[BANNED_IP]") {
+    //  return new Response("You are being temporarily banned.",
+    //                      { status: 400 });
+    //}
     if (req.method == "GET" || req.method == "POST") {
       return await handle_get(req, env);
     } else {
