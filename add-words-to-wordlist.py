@@ -39,6 +39,8 @@ for word in completed_process.stdout.decode("utf-8").split("\n"):
 new_words = set()
 words_file = open(args.new_words_file, "r")
 
+new_initials = set()
+
 for line in words_file.readlines():
     word = line.strip()
     if len(word) == 0:
@@ -49,6 +51,7 @@ for line in words_file.readlines():
     new_words.add(word)
     all_words.add(word)
     initial = word[0]
+    new_initials.add(initial)
     if not initial in words_by_initial:
         words_by_initial[initial] = []
     words_by_initial[initial].append(word)
@@ -91,6 +94,8 @@ completed_process = subprocess.run(
     check=True)
 
 for (k,v) in words_by_initial.items():
+    if k not in new_initials:
+        continue
     v1 = "\n".join(v)
     filename = "/tmp/wordlist-{}.txt".format(k)
     with open(filename, 'w') as f:
