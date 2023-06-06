@@ -162,7 +162,8 @@ app and moved it to its current URL,
 Its source code is hosted <a href="https://github.com/dwrensha/acronymy-workers">here</a>.
 </p>
 
-For SIGBOVIK 2023, I submitted a <a href="http://youtu.be/LjOHnXRIp4Y">3-minute video</a>
+For SIGBOVIK 2023,
+I made a <a href="http://youtu.be/LjOHnXRIp4Y">3-minute video</a>
 about a tool I made to help me compose definitions.
 
 <p>— David Renshaw</p>
