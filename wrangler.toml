@@ -1,6 +1,6 @@
 name = "acronymy"
 main = "src/index.js"
-compatibility_date = "2022-10-30"
+compatibility_date = "2023-06-06"
 account_id = "c229cc48718600b3bd546f03383082e9"
 
 # make sure acronymy.word.workers.dev stays enabled,

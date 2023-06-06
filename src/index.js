@@ -341,7 +341,8 @@ async function toot_submission(env, word, new_def, metadata) {
 
   return fetch(url,
         { method : 'POST',
-          headers : {authorization: `Bearer ${token}`},
+          headers : {authorization: `Bearer ${token}`,
+                    "Content-Type": "application/x-www-form-urlencoded"},
           body : data
         });
 }
@@ -360,7 +361,8 @@ async function toot_daily_update(env, toot_text) {
 
   return fetch(url,
         { method : 'POST',
-          headers : {authorization: `Bearer ${token}`},
+          headers : {authorization: `Bearer ${token}`,
+                    "Content-Type": "application/x-www-form-urlencoded"},
           body : data
         });
 }
