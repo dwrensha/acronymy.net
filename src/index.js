@@ -75,8 +75,8 @@ input[name="definition"] {
 a[class="home-link"] {
   font-size: 15px;
 }
-.source-link {
-  font-size: 12px;
+.about-link {
+  font-size: 15px;
   margin-bottom: 13px;
 }
 .logged-in {
@@ -126,6 +126,12 @@ a[class="home-link"] {
   font-size: 17px;
 }
 
+.about {
+  text-align: left;
+  margin: auto;
+  font-size: 16px;
+}
+
 .status-title {
   margin-left: 20px;
   margin-top: 15px;
@@ -146,6 +152,25 @@ const FAVICON =`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0
   <path transform="scale(.26458)" d="m179.65 92.162-140.08 350.83h52.348l33.422-89.998h165.39l33.424 89.998h51.609l-139.84-350.83h-56.277zm28.016 46.76 67.582 174.59h-134.92l67.338-174.59zm217.25 244.38v59.686h51.854v-59.686h-51.854z"/>
  </g>
 </svg>`;
+
+const ABOUT = `<div class="about full-width">
+<p>I initially created Acronymy in 2014 as one of the first <a href="https://sandstorm.io/">Sandstorm</a> apps.</p>
+
+<p>In 2022, I rewrote it as a <a href="https://developers.cloudflare.com/workers/">Cloudflare Workers</a>
+app and moved it to its current URL,
+<a href="https://acronymy.net">https://acronymy.net</a>.
+Its source code is hosted <a href="https://github.com/dwrensha/acronymy-workers">here</a>.
+</p>
+
+For SIGBOVIK 2023, I submitted a <a href="http://youtu.be/LjOHnXRIp4Y">3-minute video</a>
+about a tool I made to help me compose definitions.
+
+<p>— David Renshaw</p>
+<ul>
+<li><a href="https://twitter.com/dwrensha">@dwrensha</a> on Twitter</li>
+<li><a href="https://social.wub.site/@david">@david@social.wub.site</a> on Mastodon</li>
+</ul>
+</div>`;
 
 function header(title) {
   return `<!DOCTYPE html><html><head> <meta name="viewport" content="width=device-width">
@@ -175,8 +200,30 @@ function render_home_footer(maybe_username) {
              <input name="word" maxlength="100" size="15"
                     placeholder="enter word" autofocus required/>
              <button>look up</button></form>`;
-  result += `<a class="source-link"
-                href="https://github.com/dwrensha/acronymy-workers">source code</a>`
+  result += `<a class="about-link"
+                href="/about">about</a>`
+
+  if (maybe_username) {
+    result += `<form class="logged-in" action="/logout">logged in as ${maybe_username}
+               <button>log out</button></form>`
+  } else {
+    result +=
+      `<form action="/login"><input name="username" placeholder="username" size="10" required/>
+       <button>log in</button>`;
+  }
+  result += `</form></div></div>`;
+  return result;
+}
+
+function render_about_footer(maybe_username) {
+  let result = `<div class="footer full-width">
+                    <hr>
+                <div class="footer-row">`;
+  result += `<form action="/define" method="get">
+             <input name="word" maxlength="100" size="15"
+                    placeholder="enter word" autofocus required/>
+             <button>look up</button></form>`;
+  result += `<a class="home-link" href=\"/\">Acronymy</a>`;
 
   if (maybe_username) {
     result += `<form class="logged-in" action="/logout">logged in as ${maybe_username}
@@ -603,6 +650,9 @@ async function handle_get(req, env) {
     }
     response_string += `</ul></div>`
     response_string += render_def_footer(word, username);
+  } else if (url.pathname == "/about") {
+    response_string += ABOUT;
+    response_string += render_about_footer(username);
   } else {
     response_string += "<div class=\"title\">Acronymy</div>";
     response_string += "<div>A user-editable, acronym-only dictionary.</div>";
