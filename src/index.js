@@ -224,7 +224,7 @@ function render_footer(options, home_or_about, login_redirect) {
 }
 
 function render_home_footer(maybe_username) {
-  return render_footer({"username" : maybe_username},
+  return render_footer({"username" : maybe_username, "autofocus_define": true},
                        `<a class="about-link" href="/about">about</a>`,
                        "/");
 }
