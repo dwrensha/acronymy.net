@@ -228,10 +228,12 @@ function render_about_footer(maybe_username) {
 
   if (maybe_username) {
     result += `<form class="logged-in" action="/logout">logged in as ${maybe_username}
+               <input name=\"redirect\" value=\"/about\" type=\"hidden\"/>
                <button>log out</button></form>`
   } else {
     result +=
       `<form action="/login"><input name="username" placeholder="username" size="10" required/>
+       <input name=\"redirect\" value=\"/about\" type=\"hidden\"/>
        <button>log in</button>`;
   }
   result += `</form></div></div>`;
@@ -257,12 +259,12 @@ function render_def_footer(word, maybe_username, maybe_entered_word) {
 
   if (maybe_username) {
     result += `<form action="/logout">logged in as ${maybe_username}
-               <input name=\"word\" value=\"${word}\" type=\"hidden\"/>
+               <input name=\"redirect\" value=\"/define/${word}\" type=\"hidden\"/>
                <button>log out</button></form>`
   } else {
     result +=
       `<form action="/login"><input name="username" placeholder="username" size="10" required/>
-       <input name=\"word\" value=\"${word}\" type=\"hidden\"/>
+       <input name=\"redirect\" value=\"/define/${word}\" type=\"hidden\"/>
        <button>log in</button>`;
   }
   result += `</form></div></div>`;
@@ -572,12 +574,7 @@ async function handle_get(req, env) {
       response_string += render_def_footer(word, username);
     }
   } else if (url.pathname == "/login") {
-    let word = url.searchParams.get('word');
-    let location = "/";
-    if (word) {
-      location = `/define/${word}`;
-    }
-
+    let location = url.searchParams.get('redirect') || "/";
     let username = url.searchParams.get('username') || "";
     let username_validation = validate_username(username);
     if (!username_validation.valid) {
@@ -590,11 +587,7 @@ async function handle_get(req, env) {
                                      'Set-Cookie': `username=${username}`}});
     }
   } else if (url.pathname == "/logout") {
-    let word = url.searchParams.get('word');
-    let location = "/";
-    if (word) {
-      location = `/define/${word}`;
-    }
+    let location = url.searchParams.get('redirect') || "/";
     return new Response("",
                         {status: 302,
                          headers: {'Location': location,
