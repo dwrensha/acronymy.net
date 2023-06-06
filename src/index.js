@@ -193,82 +193,52 @@ function define_form(word, initial_value) {
           </div>`;
 }
 
-function render_home_footer(maybe_username) {
+function render_footer(options, home_or_about, login_redirect) {
+  let entered_word = "";
+  if (options.entered_word) {
+    entered_word = `value="${options.entered_word}"`;
+  }
+  let autofocus_define = options.autofocus_define ? "autofocus" : "";
+
   let result = `<div class="footer full-width">
                     <hr>
                 <div class="footer-row">`;
   result += `<form action="/define" method="get">
              <input name="word" maxlength="100" size="15"
-                    placeholder="enter word" autofocus required/>
+                    placeholder="enter word" ${entered_word} ${autofocus_define} required/>
              <button>look up</button></form>`;
-  result += `<a class="about-link"
-                href="/about">about</a>`
+  result += home_or_about;
 
-  if (maybe_username) {
-    result += `<form class="logged-in" action="/logout">logged in as ${maybe_username}
+  if (options.username) {
+    result += `<form class="logged-in" action="/logout">logged in as ${options.username}
+               <input name=\"redirect\" value=\"${login_redirect}\" type=\"hidden\"/>
                <button>log out</button></form>`
   } else {
     result +=
       `<form action="/login"><input name="username" placeholder="username" size="10" required/>
+       <input name=\"redirect\" value=\"${login_redirect}\" type=\"hidden\"/>
        <button>log in</button>`;
   }
   result += `</form></div></div>`;
   return result;
+}
+
+function render_home_footer(maybe_username) {
+  return render_footer({"username" : maybe_username},
+                       `<a class="about-link" href="/about">about</a>`,
+                       "/");
 }
 
 function render_about_footer(maybe_username) {
-  let result = `<div class="footer full-width">
-                    <hr>
-                <div class="footer-row">`;
-  result += `<form action="/define" method="get">
-             <input name="word" maxlength="100" size="15"
-                    placeholder="enter word" autofocus required/>
-             <button>look up</button></form>`;
-  result += `<a class="home-link" href=\"/\">Acronymy</a>`;
-
-  if (maybe_username) {
-    result += `<form class="logged-in" action="/logout">logged in as ${maybe_username}
-               <input name=\"redirect\" value=\"/about\" type=\"hidden\"/>
-               <button>log out</button></form>`
-  } else {
-    result +=
-      `<form action="/login"><input name="username" placeholder="username" size="10" required/>
-       <input name=\"redirect\" value=\"/about\" type=\"hidden\"/>
-       <button>log in</button>`;
-  }
-  result += `</form></div></div>`;
-  return result;
+  return render_footer({"username" : maybe_username},
+                       `<a class="home-link" href=\"/\">Acronymy</a>`,
+                       "/about");
 }
 
 function render_def_footer(word, maybe_username, maybe_entered_word) {
-  let result = `<div class="footer full-width">
-                <hr>
-                <div class="footer-row">`;
-
-  let entered_word = "";
-  if (maybe_entered_word) {
-    entered_word = `value="${maybe_entered_word}"`;
-  }
-
-  result += `<form action="/define" method="get">
-             <input name="word" maxlength="100" size="15"
-                    placeholder="enter word" ${entered_word} required/>
-             <button>look up</button></form>`;
-
-  result += `<a class="home-link" href=\"/\">Acronymy</a>`
-
-  if (maybe_username) {
-    result += `<form action="/logout">logged in as ${maybe_username}
-               <input name=\"redirect\" value=\"/define/${word}\" type=\"hidden\"/>
-               <button>log out</button></form>`
-  } else {
-    result +=
-      `<form action="/login"><input name="username" placeholder="username" size="10" required/>
-       <input name=\"redirect\" value=\"/define/${word}\" type=\"hidden\"/>
-       <button>log in</button>`;
-  }
-  result += `</form></div></div>`;
-  return result;
+  return render_footer({"username" : maybe_username, entered_word: maybe_entered_word},
+                       `<a class="home-link" href=\"/\">Acronymy</a>`,
+                       "/define/" + word);
 }
 
 const WORD_LIST_KEY = "word-list";
@@ -643,7 +613,10 @@ async function handle_get(req, env) {
       response_string += `</li>`
     }
     response_string += `</ul></div>`
-    response_string += render_def_footer(word, username);
+    response_string += render_footer(
+      {"username" : username},
+      `<a class="home-link" href=\"/\">Acronymy</a>`,
+      "/history?word=" + word);
   } else if (url.pathname == "/about") {
     response_string += ABOUT;
     response_string += render_about_footer(username);
