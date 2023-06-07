@@ -319,27 +319,12 @@ async function validate_definition(def, word, env) {
   return {valid: true};
 }
 
-async function toot_submission(env, word, new_def, metadata) {
-  if (!env.MASTODON_URL) {
-    console.error("Environment variable MASTODON_URL is empty. Not tooting.");
-    return;
-  }
-  const url = env.MASTODON_URL + "/api/v1/statuses";
-  const token = env.MASTODON_TOKEN;
+async function send_toot(mastodon_url, token, status_text, visibility) {
   const data = new URLSearchParams();
-  let attribution = "—submitted anonymously";
-   if (metadata.user) {
-    attribution = "—submitted by " + metadata.user;
-  }
-  data.append('status',
-              `${new_def}\n\n` +
-              `https://acronymy.net/define/${word}\n` +
-              attribution + "\n");
+  data.append('status', status_text);
+  data.append('visibility', visibility);
 
-  data.append('visibility',
-              'unlisted');
-
-  return fetch(url,
+  return fetch(mastodon_url + "/api/v1/statuses",
         { method : 'POST',
           headers : {authorization: `Bearer ${token}`,
                     "Content-Type": "application/x-www-form-urlencoded"},
@@ -347,24 +332,30 @@ async function toot_submission(env, word, new_def, metadata) {
         });
 }
 
+async function toot_submission(env, word, new_def, metadata) {
+  if (!env.MASTODON_URL) {
+    console.error("Environment variable MASTODON_URL is empty. Not tooting.");
+    return;
+  }
+
+  let attribution = "—submitted anonymously";
+  if (metadata.user) {
+    attribution = "—submitted by " + metadata.user;
+  }
+
+  return send_toot(env.MASTODON_URL,
+                   env.MASTODON_TOKEN,
+                   `${new_def}\n\nhttps://acronymy.net/define/${word}\n${attribution}\n`,
+                   "unlisted");
+}
+
 async function toot_daily_update(env, toot_text) {
   if (!env.MASTODON_URL) {
     console.error("Environment variable MASTODON_URL is empty. Not tooting.");
     return;
   }
-  const url = env.MASTODON_URL + "/api/v1/statuses";
-  const token = env.DAILY_UPDATE_MASTODON_TOKEN;
-  const data = new URLSearchParams();
-  data.append('status', toot_text);
-  data.append('visibility',
-              'public');
 
-  return fetch(url,
-        { method : 'POST',
-          headers : {authorization: `Bearer ${token}`,
-                    "Content-Type": "application/x-www-form-urlencoded"},
-          body : data
-        });
+  return send_toot(env.MASTODON_URL, env.DAILY_UPDATE_MASTODON_TOKEN, toot_text, "public");
 }
 
 async function render_definition(env, word, definition, metadata) {
