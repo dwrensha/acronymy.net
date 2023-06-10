@@ -12,17 +12,26 @@ const FAVICON =`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0
 </svg>`;
 
 const ABOUT = `<div class="about full-width">
-<p>I initially created Acronymy in 2014 as one of the first <a href="https://sandstorm.io/">Sandstorm</a> apps.</p>
+<p>I created the initial basic version of Acronymy in 2014 as one of the first <a href="https://sandstorm.io/">Sandstorm</a> apps.</p>
 
-<p>In 2022, I rewrote it as a <a href="https://developers.cloudflare.com/workers/">Cloudflare Workers</a>
+<p>In September 2022, I rewrote it as a <a href="https://developers.cloudflare.com/workers/">Cloudflare Workers</a>
 app and moved it to its current URL,
 <a href="https://acronymy.net">https://acronymy.net</a>.
-Its source code is hosted <a href="https://github.com/dwrensha/acronymy-workers">here</a>.
+Over the subsequent months, I added mobile-friendly CSS, user logins, edit history,
+and lots of small optimizations.
 </p>
 
+<p>
+The source code of Acronymy is hosted
+<a href="https://github.com/dwrensha/acronymy-workers">on Github</a>.
+Please report any bugs or feature requests there.
+</p>
+
+<p>
 For SIGBOVIK 2023,
 I made a <a href="http://youtu.be/LjOHnXRIp4Y">3-minute video</a>
-about a tool I made to help me compose definitions.
+about a tool I made to help me compose definitions for Acronymy.
+</p>
 
 <p>— David Renshaw</p>
 <ul>
