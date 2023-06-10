@@ -18,7 +18,7 @@ const ABOUT = `<div class="about full-width">
 app and moved it to its current URL,
 <a href="https://acronymy.net">https://acronymy.net</a>.
 Over the subsequent months, I added mobile-friendly CSS, user logins, edit history,
-and lots of small optimizations.
+and lots of incremental improvements.
 </p>
 
 <p>
