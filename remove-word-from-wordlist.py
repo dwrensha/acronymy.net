@@ -3,20 +3,17 @@ import subprocess
 
 parser = argparse.ArgumentParser(description="remove a word from the wordlist")
 parser.add_argument("--word", type=str, required=True, help="word to remove")
-parser.add_argument("--preview", type=bool, default=False)
+parser.add_argument("--env", type=str, required=True)
 args = parser.parse_args()
 
-preview_arg = "--preview=false"
-if args.preview:
-    preview_arg = "--preview=true"
-
+env_arg = "--env={}".format(args.env)
 
 completed_process = subprocess.run(
       ["wrangler",
        "kv:key",
        "get",
        "--binding=META",
-       preview_arg,
+       env_arg,
        "word-list"],
       stdout=subprocess.PIPE)
 
@@ -53,7 +50,8 @@ completed_process = subprocess.run(
      "kv:key",
      "put",
      "--binding=META",
-     preview_arg,
+     "--preview=false",
+     env_arg,
      "word-list",
      "--path={}".format(NEW_WORDLIST_FILE)],
     check=True)
@@ -68,7 +66,8 @@ subprocess.run(
      "kv:key",
      "put",
      "--binding=META",
-     preview_arg,
+     "--preview=false",
+     env_arg,
      "word-list-" + initial,
      "--path={}".format(filename)],
     check=True)
