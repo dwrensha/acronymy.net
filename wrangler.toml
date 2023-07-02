@@ -3,39 +3,49 @@ main = "src/index.js"
 compatibility_date = "2023-05-18"
 account_id = "c229cc48718600b3bd546f03383082e9"
 
-# make sure acronymy.word.workers.dev stays enabled,
-# so that it redirect to acronymy.net
-workers_dev = true
+[env.prod]
+routes = [{pattern = "acronymy.net", custom_domain = true, zone_name = "acronymy.net"}]
 
-[[kv_namespaces]]
+[env.prod.triggers]
+crons = ["1 0 * * *"] # every day at one minute past midnight
+
+[env.prod.vars]
+MASTODON_URL = "https://social.wub.site"
+
+[[env.prod.kv_namespaces]]
 # WORDS stores definitions, keyed by word
 # These get overwritten when new definitions are submitted.
 binding = "WORDS"
 id = "9e629eee35a74db189a3f2b5b6e7d22e"
-preview_id = "a145bd25755d40a4a7254baf916f4122"
+preview_id = "9e629eee35a74db189a3f2b5b6e7d22e"
 
-[[kv_namespaces]]
+[[env.prod.kv_namespaces]]
 # WORDS_LOG stores definitions, keyed by word:timestamp
 # These never get overwritten.
 binding = "WORDS_LOG"
 id = "4cce34eaa52c40ef86a9f8371ebde3e7"
-preview_id = "de8dc6d270b24862a150320f0f8fe573"
+preview_id = "4cce34eaa52c40ef86a9f8371ebde3e7"
 
-[[kv_namespaces]]
+[[env.prod.kv_namespaces]]
 # META stores miscellaneous information, such as the word of the day
 binding = "META"
 id = "8c703fb07e54401084e6e7ce5dc7da2e"
+preview_id = "8c703fb07e54401084e6e7ce5dc7da2e"
+
+[env.dev.vars]
+MASTODON_URL = ""
+
+[[env.dev.kv_namespaces]]
+binding = "WORDS"
+id = "a145bd25755d40a4a7254baf916f4122"
+preview_id = "a145bd25755d40a4a7254baf916f4122"
+
+[[env.dev.kv_namespaces]]
+binding = "WORDS_LOG"
+id = "de8dc6d270b24862a150320f0f8fe573"
+preview_id ="de8dc6d270b24862a150320f0f8fe573"
+
+[[env.dev.kv_namespaces]]
+binding = "META"
+id = "75d13e911a294abcb3f71ac23a908acc"
 preview_id = "75d13e911a294abcb3f71ac23a908acc"
-
-
-[[routes]]
-pattern = "acronymy.net"
-custom_domain = true
-zone_name = "acronymy.net"
-
-
-[triggers]
-crons = ["1 0 * * *"] # every day at one minute past midnight
-
-[vars]
-MASTODON_URL = "https://social.wub.site"

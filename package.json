@@ -6,7 +6,7 @@
   },
   "private": true,
   "scripts": {
-    "start": "wrangler dev --remote",
-    "deploy": "wrangler deploy"
+    "start": "wrangler dev --remote -e dev",
+    "deploy": "wrangler deploy -e prod"
   }
 }
