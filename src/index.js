@@ -490,7 +490,7 @@ async function handle_get(req, env) {
     let status = JSON.parse(await env.META.get(STATUS_KEY));
     let word_of_the_day = status.word_of_the_day;
     let timestamp = new Date(status.timestamp);
-    response_string += `<h5 class="status-title">status as of ${timestamp.toUTCString()}:</h5>`
+    response_string += `<h5 class="status-title">status as of ${timestamp.toUTCString()} (updated daily):</h5>`
     response_string += `<ul>`;
     let percent = (100 * status.num_defined/status.total_num_words).toFixed(3);
     response_string +=
