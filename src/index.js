@@ -341,8 +341,9 @@ async function handle_get(req, env) {
     let definition = value;
     let input_starting_value = null;
     if (!definition && !(await WORD_LIST.is_word(word, env))) {
-      response_string += render_error("Not Found", `${word} is not in the word list`);
-      response_string += render_def_footer(word, username, word);
+      let decoded_word = decodeURI(word);
+      response_string += render_error("Not Found", `${decoded_word} is not in the word list`);
+      response_string += render_def_footer(word, username, decoded_word);
       response_status = 404;
     } else {
       response_string += `<div class=\"word\">${word}</div>`;
