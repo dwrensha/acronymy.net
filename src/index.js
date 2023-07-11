@@ -483,7 +483,7 @@ async function handle_get(req, env) {
     response_string += render_about_footer(username);
   } else {
     response_string += "<div class=\"title\">Acronymy</div>";
-    response_string += "<div>A user-editable, acronym-only dictionary.</div>";
+    response_string += "<div>Can we define every word as an acronym?</div>";
     response_string += `<div class="follow">Follow at <a href="https://social.wub.site/@acronymy">@acronymy</a> or `
     response_string +=
       `<a href="https://social.wub.site/@daily_acronymy">@daily_acronymy</a>.</div>`;
