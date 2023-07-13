@@ -14,8 +14,9 @@ const FAVICON =`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0
 const ABOUT = `<div class="about full-width">
 <p>I created the initial basic version of Acronymy in 2014 as one of the first <a href="https://sandstorm.io/">Sandstorm</a> apps.</p>
 
-<p>In September 2022, I rewrote it as a <a href="https://developers.cloudflare.com/workers/">Cloudflare Workers</a>
-app and moved it to its current URL,
+<p>In September 2022, I rewrote it
+using <a href="https://developers.cloudflare.com/workers/">Cloudflare Workers</a>
+and moved it to its current URL,
 <a href="https://acronymy.net">https://acronymy.net</a>.
 Over the subsequent months, I added mobile-friendly CSS, user logins, edit history,
 and lots of incremental improvements.
