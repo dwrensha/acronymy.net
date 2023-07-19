@@ -331,10 +331,10 @@ async function handle_get(req, env) {
     if (!word) {
       return new Response("need to specify word", { status: 400 })
     }
-    word = word.toLowerCase().trim();
+    let encoded_word = encodeURI(word.toLowerCase().trim());
     return new Response("",
                         {status: 302,
-                         headers: {'Location': `/define/${word}`, }});
+                         headers: {'Location': `/define/${encoded_word}`, }});
   } else if (url.pathname.startsWith("/define/")) {
     let word = url.pathname.slice("/define/".length);
     response_string = header(` Acronymy - ${word} `);
