@@ -6,6 +6,7 @@ import subprocess
 import sys
 
 completed_process = subprocess.run(["wrangler", "kv:key", "list",
+                                    "--env=prod",
                                     "--binding", "WORDS_LOG"],
                                    stdout=subprocess.PIPE,
                                    check=True)
@@ -17,6 +18,7 @@ for item in listed:
         try:
             name = item['name']
             item_process = subprocess.run(["wrangler", "kv:key", "get", name,
+                                           "--env=prod",
                                            "--binding", "WORDS_LOG"],
                                           stdout=subprocess.PIPE,
                                           check=True)
