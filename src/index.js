@@ -386,10 +386,7 @@ async function handle_get(req, env) {
                                    headers: {'Location': `/define/${word}` }});
             } catch (e) {
               console.log(e);
-              error_message =
-                "<p>error (daily quota?) while attempting to write definition</p>"
-              error_message +=
-                `<p>(you should maybe try asking <a href="https://twitter.com/dwrensha">@dwrensha</a> to upgrade to a paid Cloudflare plan)<p>`;
+              error_message = "<p>error occurred while attempting to write definition</p>";
             }
           }
         } else { // invalid definition
