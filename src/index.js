@@ -519,15 +519,24 @@ async function handle_get(req, env) {
 
 export default {
   async fetch(req, env) {
-    //if (req.headers.get('cf-connecting-ip') == "[BANNED_IP]") {
-    //  return new Response("You are being temporarily banned.",
-    //                      { status: 400 });
-    //}
-    if (req.method == "GET" || req.method == "POST") {
-      return await handle_get(req, env);
-    } else {
-      return new Response("bad request",
-                          { status: 400 });
+    try {
+      //if (req.headers.get('cf-connecting-ip') == "[BANNED_IP]") {
+      //  return new Response("You are being temporarily banned.",
+      //                      { status: 400 });
+      //}
+
+      if (req.method == "GET" || req.method == "POST") {
+        return await handle_get(req, env);
+      } else {
+        return new Response("bad request",
+                            { status: 400 });
+      }
+    } catch (e) {
+      console.log("error caught at top level:", e);
+      return new Response("Oops! Something went wrong. If this keeps happening, " +
+                          "consider notifying David (at https://twitter.com/dwrensha or " +
+                          "https://social.wub.site/@david).",
+                          { status: 500 });
     }
   },
 
