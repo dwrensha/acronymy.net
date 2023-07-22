@@ -103,6 +103,12 @@ function render_about_footer(maybe_username) {
                        "/about");
 }
 
+function render_not_found_footer(maybe_username) {
+  return render_footer({"username" : maybe_username},
+                       `<a class="home-link" href=\"/\">Acronymy</a>`,
+                       "/");
+}
+
 function render_def_footer(word, maybe_username, maybe_entered_word) {
   return render_footer({"username" : maybe_username, entered_word: maybe_entered_word},
                        `<a class="home-link" href=\"/\">Acronymy</a>`,
@@ -479,7 +485,7 @@ async function handle_get(req, env) {
   } else if (url.pathname == "/about") {
     response_string += ABOUT;
     response_string += render_about_footer(username);
-  } else {
+  } else if (url.pathname == "/") {
     response_string += "<div class=\"title\">Acronymy</div>";
     response_string += "<div>Can we define every word as an acronym?</div>";
     response_string += `<div class="follow">Follow at <a href="https://social.wub.site/@acronymy">@acronymy</a> or `
@@ -509,6 +515,11 @@ async function handle_get(req, env) {
     response_string += "</li>";
     response_string += `</div>`;
     response_string += render_home_footer(username);
+  } else {
+    response_status = 404;
+    response_string += render_error("Not Found",
+                                    `"${url.pathname}" was not found`);
+    response_string += render_not_found_footer(username);
   }
 
   response_string += "</body></html>";
