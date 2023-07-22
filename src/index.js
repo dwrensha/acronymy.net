@@ -525,6 +525,10 @@ export default {
     //}
     if (req.method == "GET" || req.method == "POST") {
       return await handle_get(req, env);
+    } else if (req.method == "HEAD") {
+      let full_response = await handle_get(req, env);
+      return new Response("", { headers: full_response.headers,
+                                status: full_response.status });
     } else {
       return new Response("bad request",
                           { status: 400 });
