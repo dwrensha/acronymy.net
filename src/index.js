@@ -68,24 +68,22 @@ function render_footer(options, home_or_about, login_redirect) {
   }
   let autofocus_define = options.autofocus_define ? "autofocus" : "";
 
-  let result = `<div class="footer full-width">
-                    <hr>
-                <div class="footer-row">`;
-  result += `<form action="/define" method="get">
-             <input name="word" maxlength="100" size="15"
-                    placeholder="enter word" ${entered_word} ${autofocus_define} required/>
-             <button>look up</button></form>`;
+  let result = `\n<div class="footer full-width"><hr><div class="footer-row">`;
+  result += `<form action="/define" method="get">`;
+  result += `<input name="word" maxlength="100" size="15"`;
+  result +=        `placeholder="enter word" ${entered_word} ${autofocus_define} required/>`;
+  result += `<button>look up</button></form>`;
   result += home_or_about;
 
   if (options.username) {
-    result += `<form class="logged-in" action="/logout">logged in as ${options.username}
-               <input name=\"redirect\" value=\"${login_redirect}\" type=\"hidden\"/>
-               <button>log out</button></form>`
+    result += `<form class="logged-in" action="/logout">logged in as ${options.username}`;
+    result += `<input name=\"redirect\" value=\"${login_redirect}\" type=\"hidden\"/>`;
+    result += `<button>log out</button></form>`
   } else {
     result +=
-      `<form action="/login"><input name="username" placeholder="username" size="10" required/>
-       <input name=\"redirect\" value=\"${login_redirect}\" type=\"hidden\"/>
-       <button>log in</button>`;
+      `<form action="/login"><input name="username" placeholder="username" size="10" required/>`;
+    result += `<input name=\"redirect\" value=\"${login_redirect}\" type=\"hidden\"/>`;
+    result += `<button>log in</button>`;
   }
   result += `</form></div></div>`;
   return result;
