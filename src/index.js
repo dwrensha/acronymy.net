@@ -297,11 +297,6 @@ function validate_username(username) {
 
 async function handle_get(req, env) {
   let url = new URL(req.url);
-  if (url.origin == "https://acronymy.word.workers.dev") {
-    const {pathname, search} = url;
-    const destinationURL = "https://acronymy.net" + pathname + search;
-    return Response.redirect(destinationURL, 301);
-  }
 
   if (url.pathname == "/robots.txt") {
     return new Response(ROBOTS_TXT);
