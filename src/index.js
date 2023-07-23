@@ -310,6 +310,11 @@ async function handle_get(req, env) {
     return new Response(FAVICON, {headers: {"Content-type": "image/svg+xml"}});
   }
 
+  if (url.pathname == "/apple-touch-icon.png") {
+    let icon = await env.META.get("apple-touch-icon.png", {type: "arrayBuffer"});
+    return new Response(icon, { headers: {"Content-type": "image/png" }});
+  }
+
   let username = null;
   if (req.headers.has('Cookie')) {
     for (let cookie of req.headers.get('Cookie').split(";")) {
