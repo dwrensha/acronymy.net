@@ -12,6 +12,17 @@ const FAVICON =`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0
 </svg>`;
 
 const ABOUT = `<div class="about full-width">
+<p>
+I like to think of Acronymy as a massively-multiplayer
+collaborative online word game.
+</p>
+<p>
+This <a href="http://youtu.be/LjOHnXRIp4Y">3-minute video from SIGBOVIK 2023</a>
+provides a good introduction.
+The video also describes a tool called Acronymy Assistant
+that can compose definitions automatically.
+</p>
+
 <p>I created the initial basic version of Acronymy in 2014 as one of the first <a href="https://sandstorm.io/">Sandstorm</a> apps.</p>
 
 <p>In September 2022, I rewrote it
@@ -26,12 +37,6 @@ and lots of incremental improvements.
 The source code of Acronymy is hosted
 <a href="https://github.com/dwrensha/acronymy-workers">on Github</a>.
 Please report any bugs or feature requests there.
-</p>
-
-<p>
-For SIGBOVIK 2023,
-I made a <a href="http://youtu.be/LjOHnXRIp4Y">3-minute video</a>
-about a tool I made to help me compose definitions for Acronymy.
 </p>
 
 <p>— David Renshaw</p>
