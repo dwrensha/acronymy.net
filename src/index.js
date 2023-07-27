@@ -13,7 +13,7 @@ const FAVICON =`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0
 
 const ABOUT = `<div class="about full-width">
 <p>
-I like to think of Acronymy as a massively-multiplayer
+I like to think of Acronymy as a massively multiplayer
 collaborative online word game.
 </p>
 <p>
