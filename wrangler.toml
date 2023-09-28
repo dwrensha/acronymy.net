@@ -1,6 +1,6 @@
 name = "acronymy"
 main = "src/index.js"
-compatibility_date = "2023-05-18"
+compatibility_date = "2023-09-28"
 account_id = "c229cc48718600b3bd546f03383082e9"
 
 [env.prod]
