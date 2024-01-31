@@ -5,8 +5,14 @@ import random
 import subprocess
 import sys
 
+parser = argparse.ArgumentParser(description="create a JSON backup")
+parser.add_argument("--env", type=str, required=True)
+args = parser.parse_args()
+
+env_arg = "--env={}".format(args.env)
+
 completed_process = subprocess.run(["wrangler", "kv:key", "list",
-                                    "--env=prod",
+                                    env_arg,
                                     "--binding", "WORDS_LOG"],
                                    stdout=subprocess.PIPE,
                                    check=True)
@@ -18,7 +24,7 @@ for item in listed:
         try:
             name = item['name']
             item_process = subprocess.run(["wrangler", "kv:key", "get", name,
-                                           "--env=prod",
+                                           env_arg,
                                            "--binding", "WORDS_LOG"],
                                           stdout=subprocess.PIPE,
                                           check=True)
@@ -28,7 +34,6 @@ for item in listed:
             break
         except:
             print("error: ", sys.exc_info()[0])
-
 
 outfile = open("backup.json", "w")
 outfile.write(json.dumps(listed))
