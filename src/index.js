@@ -184,7 +184,8 @@ async function send_toot(mastodon_url, token, status_text, visibility) {
         { method : 'POST',
           headers : {authorization: `Bearer ${token}`,
                     "Content-Type": "application/x-www-form-urlencoded"},
-          body : data
+          body : data,
+          signal: AbortSignal.timeout(5000), // timeout after 5 seconds
         });
 }
 
