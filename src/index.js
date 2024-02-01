@@ -118,40 +118,19 @@ function render_def_footer(word, maybe_username, maybe_entered_word) {
                        "/define/" + word);
 }
 
-const WORD_LIST_KEY = "word-list";
 const STATUS_KEY = "status";
 
-// META/bad-words contains a list of words that should not be selected
-// as a "word of the day".
-const BAD_WORDS_KEY = "bad-words";
-
-class WordList {
-  constructor() {
-    // One Set for each possible initial letter of a word.
-    // The wordlist is sharded like this to decrease the cold-start
-    // cost of looking up a single word.
-    this.subsets = new Map();
-  }
-
-  async is_word(query, env) {
-    if (query.length == 0) return false;
-    let first_letter = query[0];
-    if (!this.subsets.has(first_letter)) {
-      let raw_word_list = await env.META.get(WORD_LIST_KEY + "-" + first_letter);
-      if (!raw_word_list) {
-        return false;
-      }
-      let subset = new Set();
-      this.subsets.set(first_letter, subset);
-      let words = raw_word_list.split(/\s+/);
-      for (let word of words) {
-        subset.add(word);
-      }
-    }
-    return this.subsets.get(first_letter).has(query);
+async function is_word(query, env) {
+  if (query.length == 0) return false;
+  const db = env.DB;
+  let stmt = db.prepare("SELECT word FROM words WHERE word = ?1;").bind(query);
+  const result = await stmt.run();
+  if (result.results.length > 0) {
+    return true;
+  } else {
+    return false;
   }
 }
-const WORD_LIST = new WordList();
 
 // returns either `{valid: true}` or
 // {invalid: true, reason: <string> }.
@@ -172,7 +151,7 @@ async function validate_definition(def, word, env) {
         reason: `invalid character: '${match}'`
       };
     }
-    def_promises.push(WORD_LIST.is_word(def_word, env));
+    def_promises.push(is_word(def_word, env));
   }
   let defs = await Promise.all(def_promises);
   for (let ii = 0; ii < def.length; ++ii) {
@@ -387,7 +366,7 @@ async function handle_get(req, env) {
     let { value, metadata } = await env.WORDS.getWithMetadata(word);
     let definition = value;
     let input_starting_value = null;
-    if (!definition && !(await WORD_LIST.is_word(word, env))) {
+    if (!definition && !(await is_word(word, env))) {
       let decoded_word = decodeURI(word);
       response_string += render_error("Not Found", `${decoded_word} is not in the word list`);
       response_string += render_def_footer(word, username, decoded_word);
