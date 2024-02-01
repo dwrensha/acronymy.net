@@ -558,10 +558,6 @@ async function refresh_status(env) {
   const status_row = rows[0].results[0];
   const recently_defined = rows[1].results.map((x) => x.word);
 
-  console.log("results = ", status_row.num_defined);
-  console.log("recents: ", JSON.stringify(recently_defined));
-
-
   let status = {
     timestamp: status_row.wotd_timestamp,
     word_of_the_day: status_row.word_of_the_day,
