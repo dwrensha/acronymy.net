@@ -32,6 +32,11 @@ binding = "META"
 id = "8c703fb07e54401084e6e7ce5dc7da2e"
 preview_id = "8c703fb07e54401084e6e7ce5dc7da2e"
 
+[[env.prod.d1_databases]]
+binding = "DB"
+database_name = "acronymy-prod"
+database_id = "09491cb7-cd9f-4fea-9bd8-52a49da0d985"
+
 [env.dev.vars]
 MASTODON_URL = ""
 
@@ -41,11 +46,16 @@ id = "a145bd25755d40a4a7254baf916f4122"
 preview_id = "a145bd25755d40a4a7254baf916f4122"
 
 [[env.dev.kv_namespaces]]
+binding = "META"
+id = "75d13e911a294abcb3f71ac23a908acc"
+preview_id = "75d13e911a294abcb3f71ac23a908acc"
+
+[[env.dev.kv_namespaces]]
 binding = "WORDS_LOG"
 id = "de8dc6d270b24862a150320f0f8fe573"
 preview_id ="de8dc6d270b24862a150320f0f8fe573"
 
-[[env.dev.kv_namespaces]]
-binding = "META"
-id = "75d13e911a294abcb3f71ac23a908acc"
-preview_id = "75d13e911a294abcb3f71ac23a908acc"
+[[env.dev.d1_databases]]
+binding = "DB"
+database_name = "acronymy-dev"
+database_id = "4c4bbc9a-694c-454f-8584-578671af510b"

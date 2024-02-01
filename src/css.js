@@ -17,6 +17,9 @@ export const MAIN_CSS =
 div {
   padding-bottom: 10pt;
 }
+.status {
+  padding-bottom: 0;
+}
 .follow {
   font-size: 15px;
 }

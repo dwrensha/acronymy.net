@@ -209,15 +209,15 @@ async function send_toot(mastodon_url, token, status_text, visibility) {
         });
 }
 
-async function toot_submission(env, word, new_def, metadata) {
+async function toot_submission(env, word, new_def, user) {
   if (!env.MASTODON_URL) {
     console.error("Environment variable MASTODON_URL is empty. Not tooting.");
     return;
   }
 
   let attribution = "—submitted anonymously";
-  if (metadata.user) {
-    attribution = "—submitted by " + metadata.user;
+  if (user) {
+    attribution = "—submitted by " + user;
   }
 
   return send_toot(env.MASTODON_URL,
@@ -300,6 +300,43 @@ function validate_username(username) {
   return {valid: true};
 }
 
+async function update_def(req, env, word, definition, username) {
+  const db = env.DB;
+  let stmt1 = db.prepare(
+    "INSERT INTO defs_log (word, def, author, timestamp, ip) VALUES (?1, ?2, ?3, ?4, ?5)");
+  let timestamp = Date.now();
+  let metadata= { time: timestamp };
+
+  let ip = null;
+  if (req.headers.has('cf-connecting-ip')) {
+    ip = req.headers.get('cf-connecting-ip');
+    metadata['ip'] = ip;
+  }
+  let author = null;
+  if (username && validate_username(username).valid) {
+    author = username;
+    metadata['user'] = author;
+  }
+
+  stmt1 = stmt1.bind(word, definition, author, timestamp, ip);
+  let stmt2 = db.prepare(
+    "INSERT INTO defs (word, def_id) VALUES (?1, last_insert_rowid()) " +
+      "ON CONFLICT (word) DO UPDATE SET def_id = excluded.def_id;");
+  stmt2 = stmt2.bind(word);
+
+  await db.batch([stmt1, stmt2]);
+
+  let p3 = toot_submission(env, word, definition, username).catch((e) => {
+    console.log("error on toot attempt: ", e);
+  });
+
+  await Promise.all(
+    [refresh_status(env),
+     env.WORDS.put(word, definition, {metadata}),
+     env.WORDS_LOG.put(word + ":" + timestamp, definition, {metadata}),
+     p3]);
+}
+
 async function handle_get(req, env) {
   let url = new URL(req.url);
 
@@ -374,22 +411,7 @@ async function handle_get(req, env) {
           let new_def = def_words.join(" ");
           if (new_def != definition) {
             try {
-              let now = Date.now();
-              metadata= {
-                time: now
-              };
-              if (req.headers.has('cf-connecting-ip')) {
-                metadata['ip'] = req.headers.get('cf-connecting-ip');
-              }
-              if (username && validate_username(username).valid) {
-                metadata['user'] = username;
-              }
-              let p1 = env.WORDS.put(word, new_def, {metadata});
-              let p2 = env.WORDS_LOG.put(word + ":" + now, new_def, {metadata});
-              let p3 = toot_submission(env, word, new_def, metadata).catch((e) => {
-                console.log("error on toot attempt: ", e);
-              });
-              await Promise.all([p1, p2, p3]);
+              await update_def(req, env, word, new_def, username);
               return new Response("",
                                   {status: 303,
                                    headers: {'Location': `/define/${word}` }});
@@ -437,45 +459,26 @@ async function handle_get(req, env) {
       return new Response("need to specify word", { status: 400 })
     }
 
-    let entries = [];
-    try {
-      while (true) {
-        let chunk = await env.WORDS_LOG.list({prefix: word + ":"});
-        for (let key of chunk['keys']) {
-          entries.push(key);
-        }
-        if (chunk['list_complete']) {
-          break;
-        }
-      }
-    } catch (e) {
-      console.log(e);
-      return new Response("Error while listing history. Maybe we've hit daily quota?",
-                          { status: 500 })
-    }
-    entries.reverse();
+    const db = env.DB;
+    let stmt1 = db.prepare(
+      "SELECT def, author, timestamp FROM defs_log WHERE word = ?1 ORDER BY timestamp DESC");
+    stmt1 = stmt1.bind(word);
+    let db_result = await stmt1.run();
+    let entries = db_result.results;
 
     response_string += `<div>history of definitions for
                         <a href="/define/${word}">${word}</a>:</div>`;
     response_string += `<div class="history full-width"><ul>`
-    let promises = [];
-    for (let entry of entries) {
-      promises.push(await env.WORDS_LOG.get(entry.name));
-    }
-    let defs = await Promise.all(promises);
-    for (let ii = 0; ii < defs.length; ++ii) {
-      let def = defs[ii];
+    for (let ii = 0; ii < entries.length; ++ii) {
       let entry = entries[ii];
-      response_string += `<li>${def}`
-      let metadata = entry.metadata;
-      if (metadata && 0 == metadata.time) {
+      response_string += `<li>${entry.def}`
+      if (!entry.timestamp) {
         response_string += ` — defined before the beginning of history (October 2022)`;
-      }
-      if (metadata && metadata.time) {
-        let time = new Date(metadata.time);
+      } else {
+        let time = new Date(entry.timestamp);
         response_string += ` — defined ${time.toUTCString()}`;
-        if (metadata.user) {
-          response_string += ` by ${metadata.user}`;
+        if (entry.author) {
+          response_string += ` by ${entry.author}`;
         }
       }
       response_string += `</li>`
@@ -498,7 +501,6 @@ async function handle_get(req, env) {
     let status = JSON.parse(await env.META.get(STATUS_KEY));
     let word_of_the_day = status.word_of_the_day;
     let timestamp = new Date(status.timestamp);
-    response_string += `<h5 class="status-title">status as of ${timestamp.toUTCString()} (updated daily):</h5>`
     response_string += `<ul>`;
     let percent = (100 * status.num_defined/status.total_num_words).toFixed(3);
     response_string +=
@@ -531,6 +533,47 @@ async function handle_get(req, env) {
                        status: response_status });
 }
 
+async function choose_new_word_of_the_day(env) {
+  const db = env.DB;
+  let stmt1 = db.prepare(
+    `SELECT defs.word FROM defs LEFT JOIN bad_words ON defs.word = bad_words.word
+     WHERE bad_words.word IS NULL ORDER BY random() LIMIT 1;`);
+  const rows = await stmt1.run();
+  let word = rows.results[0].word;
+  let stmt2 = db.prepare(
+    "UPDATE status SET word_of_the_day = ?1, wotd_timestamp = ?2;").bind(word, Date.now());
+  await stmt2.run();
+  return word;
+}
+
+// Reads the authoritative status from d1 and writes it to kv.
+async function refresh_status(env) {
+  const db = env.DB;
+  let stmt1 = db.prepare(
+    "SELECT word_of_the_day, wotd_timestamp, num_defined, total_num_words FROM status;");
+  let stmt2 = db.prepare(
+    "SELECT DISTINCT(word) FROM defs_log ORDER BY timestamp DESC LIMIT 10;");
+  const rows = await db.batch([stmt1, stmt2]);
+
+  const status_row = rows[0].results[0];
+  const recently_defined = rows[1].results.map((x) => x.word);
+
+  console.log("results = ", status_row.num_defined);
+  console.log("recents: ", JSON.stringify(recently_defined));
+
+
+  let status = {
+    timestamp: status_row.wotd_timestamp,
+    word_of_the_day: status_row.word_of_the_day,
+    num_defined: status_row.num_defined,
+    total_num_words: status_row.total_num_words,
+    recently_defined: recently_defined
+  };
+
+  await env.META.put(STATUS_KEY, JSON.stringify(status));
+  return status;
+}
+
 export default {
   async fetch(req, env) {
     //if (req.headers.get('cf-connecting-ip') == "[BANNED_IP]") {
@@ -552,60 +595,8 @@ export default {
   async scheduled(event, env, ctx) {
     // event.cron is a string, the name of the cron trigger.
 
-    let words = [];
-    let keys = [];
-    let options = {};
-    while (true) {
-      let chunk = await env.WORDS.list(options);
-      console.log('keys length: ' + chunk['keys'].length);
-      for (let key of chunk['keys']) {
-        keys.push(key);
-        words.push(key['name']);
-      }
-      if (chunk['list_complete']) {
-        break;
-      } else {
-        options.cursor = chunk['cursor'];
-      }
-    }
-
-    keys.sort((k1,k2) => {
-      let t1 = (k1.metadata || {}).time || 0;
-      let t2 = (k2.metadata || {}).time || 0;
-      return t2 - t1;
-    });
-
-    let recently_defined = [];
-    for (let idx = 0; idx < keys.length && idx < 10; ++idx) {
-      recently_defined.push(keys[idx].name);
-    }
-
-    let word_list_raw = await env.META.get(WORD_LIST_KEY);
-    let word_list_length = word_list_raw.match(/\n/g).length;
-
-    let bad_words_list = await env.META.get(BAD_WORDS_KEY);
-    const bad_words = new Set(bad_words_list.split(/\s+/))
-
-    let word_of_the_day = "error";
-    for (let jj = 0; jj < 25; ++jj) {
-      let idx = Math.floor(Math.random() * words.length);
-      if (bad_words.has(words[idx])) {
-        continue;
-      } else {
-        word_of_the_day = words[idx];
-        break;
-      }
-    }
-
-    let status = {
-      timestamp: Date.now(),
-      word_of_the_day: word_of_the_day,
-      num_defined: words.length,
-      total_num_words: word_list_length,
-      recently_defined: recently_defined
-    };
-
-    await env.META.put(STATUS_KEY, JSON.stringify(status));
+    const word_of_the_day = await choose_new_word_of_the_day(env);
+    const status = await refresh_status(env);
 
     // send @daily_acronymy toot
     let word_of_the_day_def = await env.WORDS.get(word_of_the_day);
