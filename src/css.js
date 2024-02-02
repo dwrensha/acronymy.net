@@ -139,4 +139,17 @@ a[class="home-link"] {
   margin-left: 20px;
   margin-top: 15px;
   margin-bottom: 5px;
-}`;
+}
+
+.feeling-lucky {
+  margin: auto;
+  display: flex;
+  justify-content: space-around;
+  padding-top: 10px;
+
+}
+
+.lucky-link {
+  font-size: 17px;
+}
+`;

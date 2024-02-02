@@ -317,6 +317,43 @@ async function update_def(req, env, word, definition, username) {
      p3]);
 }
 
+async function get_random_defined_word(env) {
+  const db = env.DB;
+  let stmt1 = db.prepare("SELECT max(rowid) as rowid FROM defs");
+  const result = await stmt1.run();
+  const max_rowid = result.results[0].rowid;
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    let rowid = Math.floor(Math.random() * max_rowid) + 1;
+    let stmt2 = db.prepare("SELECT word FROM defs WHERE rowid = ?1").bind(rowid);
+    const result = await stmt2.run();
+    if (result.results.length > 0) {
+      return result.results[0].word;
+    }
+  }
+  return null;
+}
+
+async function get_random_undefined_word(env) {
+  const db = env.DB;
+  let stmt1 = db.prepare("SELECT max(rowid) as rowid FROM words");
+  const result = await stmt1.run();
+  const max_rowid = result.results[0].rowid;
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    let rowid = Math.floor(Math.random() * max_rowid) + 1;
+    let stmt2 = db.prepare("SELECT word FROM words WHERE rowid = ?1").bind(rowid);
+    const result2 = await stmt2.run();
+    let word = result2.results[0].word;
+
+    let stmt3 = db.prepare("SELECT word FROM defs WHERE word = ?1").bind(word);
+    const result3 = await stmt3.run();
+    if (result3.results.length == 0) {
+      // This word is not defined yet.
+      return word;
+    }
+  }
+  return null;
+}
+
 async function handle_get(req, env) {
   let url = new URL(req.url);
 
@@ -471,6 +508,24 @@ async function handle_get(req, env) {
   } else if (url.pathname == "/about") {
     response_string += ABOUT;
     response_string += render_about_footer(username);
+  } else if (url.pathname == "/random") {
+    const word = await get_random_defined_word(env);
+    if (word) {
+      return new Response("", {status: 302, headers: {'Location': `/define/${word}`}});
+    } else {
+      response_status = 500;
+      response_string += render_error("Error", "Failed to select random word");
+      response_string += render_not_found_footer(username);
+    }
+  } else if (url.pathname == "/random-todo") {
+    const word = await get_random_undefined_word(env);
+    if (word) {
+      return new Response("", {status: 302, headers: {'Location': `/define/${word}`}});
+    } else {
+      response_status = 500;
+      response_string += render_error("Error", "Failed to select random word");
+      response_string += render_not_found_footer(username);
+    }
   } else if (url.pathname == "/") {
     response_string += "<div class=\"title\">Acronymy</div>";
     response_string += "<div>Can we define every word as an acronym?</div>";
@@ -497,8 +552,13 @@ async function handle_get(req, env) {
     response_string += ".</li>";
     response_string += "<li>Today's featured word is ";
     response_string += `<b><a href="/define/${word_of_the_day}">${word_of_the_day}</a></b>.`;
-    response_string += "</li>";
     response_string += `</div>`;
+
+    response_string += '<div class="feeling-lucky full-width">'
+    response_string += `<a class="lucky-link" href="/random">random defined word</a>
+                        <a class="lucky-link" href="/random-todo">random undefined word</a>`;
+    response_string += "</div>"
+
     response_string += render_home_footer(username);
   } else {
     response_status = 404;
