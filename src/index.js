@@ -362,7 +362,9 @@ async function handle_get(req, env) {
   }
 
   if (url.pathname == "/main.css") {
-    return new Response(MAIN_CSS, {headers: {"Content-type": "text/css"}});
+    return new Response(MAIN_CSS,
+                        {headers: {"Content-type": "text/css",
+                                   "Cache-Control": "max-age=600"}});
   }
 
   if (url.pathname == "/favicon.svg") {
