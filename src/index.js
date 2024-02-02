@@ -35,7 +35,7 @@ and lots of incremental improvements.
 
 <p>
 The source code of Acronymy is hosted
-<a href="https://github.com/dwrensha/acronymy-workers">on Github</a>.
+<a href="https://github.com/dwrensha/acronymy.net">on Github</a>.
 Please report any bugs or feature requests there.
 </p>
 
