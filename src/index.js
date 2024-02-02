@@ -368,12 +368,15 @@ async function handle_get(req, env) {
   }
 
   if (url.pathname == "/favicon.svg") {
-    return new Response(FAVICON, {headers: {"Content-type": "image/svg+xml"}});
+    return new Response(FAVICON,
+                        {headers: {"Content-type": "image/svg+xml",
+                                   "Cache-Control": "max-age=86400"}});
   }
 
   if (url.pathname == "/apple-touch-icon.png") {
     let icon = await env.META.get("apple-touch-icon.png", {type: "arrayBuffer"});
-    return new Response(icon, { headers: {"Content-type": "image/png" }});
+    return new Response(icon, { headers: {"Content-type": "image/png",
+                                          "Cache-Control": "max-age=86400"}});
   }
 
   let username = null;
