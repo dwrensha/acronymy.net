@@ -151,5 +151,28 @@ a[class="home-link"] {
 
 .lucky-link {
   font-size: 17px;
+  background-color: #f1f2f3;
+  cursor: pointer;
+  border-radius: 3px;
+  border: 1px solid #c1c2c3;
+  text-decoration: none;
+  color: buttontext;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.lucky-link:hover {
+  background-color: #e1e2e3;
+}
+
+button {
+  background-color: #f1f2f3;
+  cursor: pointer;
+  border-radius: 3px;
+  border: 1px solid #c1c2c3;
+}
+
+button:hover {
+  background-color: #e1e2e3;
 }
 `;
