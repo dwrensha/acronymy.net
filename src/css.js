@@ -146,7 +146,6 @@ a[class="home-link"] {
   display: flex;
   justify-content: space-around;
   padding-top: 10px;
-
 }
 
 .lucky-link {
@@ -157,8 +156,18 @@ a[class="home-link"] {
   border: 1px solid #c1c2c3;
   text-decoration: none;
   color: buttontext;
-  padding-left: 4px;
-  padding-right: 4px;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 530px) {
+  .lucky-link { width: 40vw; }
 }
 
 .lucky-link:hover {
