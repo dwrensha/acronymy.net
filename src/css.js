@@ -97,6 +97,10 @@ a[class="home-link"] {
   width: 110px;
 }
 
+.footer form button {
+  width: 65px;
+}
+
 @media (max-width: 475px) {
   a[class="home-link"] {
     font-size: 3vw;
