@@ -149,7 +149,7 @@ a[class="home-link"] {
 }
 
 .lucky-link {
-  font-size: 17px;
+  font-size: 16px;
   background-color: #f1f2f3;
   cursor: pointer;
   border-radius: 3px;
@@ -167,7 +167,7 @@ a[class="home-link"] {
 }
 
 @media (max-width: 530px) {
-  .lucky-link { width: 40vw; }
+  .lucky-link { width: 47vw; }
 }
 
 .lucky-link:hover {
