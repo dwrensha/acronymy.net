@@ -157,7 +157,7 @@ a[class="home-link"] {
   background-color: #f1f2f3;
   cursor: pointer;
   border-radius: 3px;
-  border: 1px solid #c1c2c3;
+  border: 1px solid #a1a2a3;
   text-decoration: none;
   color: buttontext;
   padding-left: 2px;
@@ -182,7 +182,7 @@ button {
   background-color: #f1f2f3;
   cursor: pointer;
   border-radius: 3px;
-  border: 1px solid #c1c2c3;
+  border: 1px solid #a1a2a3;
 }
 
 button:hover {
