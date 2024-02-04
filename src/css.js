@@ -28,8 +28,13 @@ div {
   font-size: 500%;
   font-weight: bold;
 }
+.extra-long {
+  font-size: min(300%);
+}
+
 @media (max-width: 530px) {
   .word { font-size: 11vw; }
+  .extra-long { font-size: 7vw; }
 }
 .big-error {
   text-align: center;

@@ -415,7 +415,11 @@ async function handle_get(req, env) {
       response_string += render_def_footer(word, username, decoded_word);
       response_status = 404;
     } else {
-      response_string += `<div class=\"word\">${word}</div>`;
+      let word_class = "word";
+      if (word.length > 15) {
+        word_class = "word extra-long";
+      }
+      response_string += `<div class=\"${word_class}\">${word}</div>`;
       let error_message = null;
       let proposed_definition = null;
       if (req.method == "POST") {
