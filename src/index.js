@@ -469,8 +469,10 @@ async function handle_get(req, env) {
     } else {
       return new Response("",
                           {status: 302,
-                           headers: {'Location': location,
-                                     'Set-Cookie': `username=${username}`}});
+                           headers: {
+                             'Location': location,
+                             'Set-Cookie':
+                               `username=${username}; Max-Age=315360000`}});
     }
   } else if (url.pathname == "/logout") {
     let location = url.searchParams.get('redirect') || "/";
