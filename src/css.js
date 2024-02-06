@@ -164,7 +164,7 @@ a[class="home-link"] {
   border-radius: 3px;
   border: 1px solid #a1a2a3;
   text-decoration: none;
-  color: buttontext;
+  color: black;
   padding-left: 2px;
   padding-right: 2px;
   padding-top: 1px;
@@ -185,6 +185,7 @@ a[class="home-link"] {
 
 button {
   background-color: #f1f2f3;
+  color: black;
   cursor: pointer;
   border-radius: 3px;
   border: 1px solid #a1a2a3;
