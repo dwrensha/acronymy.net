@@ -354,6 +354,36 @@ async function get_random_undefined_word(env) {
   return null;
 }
 
+async function get_word_definition(env, word, defined_just_now) {
+  if (defined_just_now == word) {
+    // The user just defined the word, so we use D1, the primary datastore, to
+    // look up the latest value. If we used KV instead (the faster default path),
+    // then we would risk serving a stale cached value and confusing the user.
+    let stmt = env.DB.prepare(
+      `SELECT def, author, timestamp from defs JOIN defs_log ON def_id = defs_log.rowid
+       WHERE defs.word = ?1`).bind(word);
+    const result = await stmt.run();
+    if (result.results.length < 1) {
+      return { value : null, metadata: null };
+    }
+    let row = result.results[0];
+    let metadata = {};
+    if (row.timestamp) {
+      metadata.time =  row.timestamp;
+    }
+    if (row.author) {
+      metadata.user = row.author;
+    }
+    return {
+      value: row.def,
+      metadata
+    }
+  } else {
+    // The common case: use the faster KV cache.
+    return await env.WORDS.getWithMetadata(word);
+  }
+}
+
 async function handle_get(req, env) {
   let url = new URL(req.url);
 
@@ -380,12 +410,15 @@ async function handle_get(req, env) {
   }
 
   let username = null;
+  let defined_just_now = null; // If non-null, the word the user just now submitted a definition for.
   if (req.headers.has('Cookie')) {
     for (let cookie of req.headers.get('Cookie').split(";")) {
       let components = cookie.split('=');
       let name = components[0].trim();
       if (name == 'username') {
         username = components[1];
+      } else if (name == 'defined-just-now') {
+        defined_just_now = components[1];
       }
     }
   }
@@ -406,7 +439,7 @@ async function handle_get(req, env) {
   } else if (url.pathname.startsWith("/define/")) {
     let word = url.pathname.slice("/define/".length);
     response_string = header(` Acronymy - ${word} `);
-    let { value, metadata } = await env.WORDS.getWithMetadata(word);
+    let { value, metadata } = await get_word_definition(env, word, defined_just_now);
     let definition = value;
     let input_starting_value = null;
     if (!definition && !(await is_word(word, env))) {
@@ -440,7 +473,10 @@ async function handle_get(req, env) {
               await update_def(req, env, word, new_def, username);
               return new Response("",
                                   {status: 303,
-                                   headers: {'Location': `/define/${word}` }});
+                                   headers:
+                                   {'Location': `/define/${word}`,
+                                    'Set-Cookie':
+                                      `defined-just-now=${word}; Max-Age=5`}});
             } catch (e) {
               console.log(e);
               error_message = "<p>error occurred while attempting to write definition</p>";
