@@ -476,7 +476,7 @@ async function handle_get(req, env) {
                                    headers:
                                    {'Location': `/define/${word}`,
                                     'Set-Cookie':
-                                      `defined-just-now=${word}; Max-Age=5`}});
+                                      `defined-just-now=${word}; Max-Age=60`}});
             } catch (e) {
               console.log(e);
               error_message = "<p>error occurred while attempting to write definition</p>";
