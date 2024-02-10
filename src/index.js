@@ -508,7 +508,7 @@ async function handle_get(req, env) {
                            headers: {
                              'Location': location,
                              'Set-Cookie':
-                               `username=${username}; Max-Age=315360000`}});
+                               `username=${username}; Max-Age=315360000; Path=/`}});
     }
   } else if (url.pathname == "/logout") {
     let location = url.searchParams.get('redirect') || "/";
@@ -516,7 +516,7 @@ async function handle_get(req, env) {
                         {status: 302,
                          headers: {'Location': location,
                                    'Set-Cookie':
-                                      `username=X; expires=Thu, 01 Jan 1970 00:00:00 GMT`}});
+                                      `username=X; expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/`}});
   } else if (url.pathname == "/history") {
     let word = url.searchParams.get('word');
     if (!word) {
@@ -615,9 +615,13 @@ async function handle_get(req, env) {
   }
 
   response_string += "</body></html>";
+  let headers = { 'content-type': 'text/html;charset=UTF-8' };
+  if (username) {
+    // renew login cookie
+    headers['Set-Cookie'] = `username=${username}; Max-Age=315360000; Path=/`;
+  }
   return new Response(response_string,
-                      {headers: {'content-type': 'text/html;charset=UTF-8'},
-                       status: response_status });
+                      { headers, status: response_status });
 }
 
 async function choose_new_word_of_the_day(env) {
