@@ -124,7 +124,7 @@ async function is_word(query, env) {
   if (query.length == 0) return false;
   const db = env.DB;
   let stmt = db.prepare("SELECT word FROM words WHERE word = ?1;").bind(query);
-  const result = await stmt.run();
+  const result = await stmt.all();
   if (result.results.length > 0) {
     return true;
   } else {
@@ -320,12 +320,12 @@ async function update_def(req, env, word, definition, username) {
 async function get_random_defined_word(env) {
   const db = env.DB;
   let stmt1 = db.prepare("SELECT max(rowid) as rowid FROM defs");
-  const result = await stmt1.run();
+  const result = await stmt1.all();
   const max_rowid = result.results[0].rowid;
   for (let attempt = 0; attempt < 10; attempt += 1) {
     let rowid = Math.floor(Math.random() * max_rowid) + 1;
     let stmt2 = db.prepare("SELECT word FROM defs WHERE rowid = ?1").bind(rowid);
-    const result = await stmt2.run();
+    const result = await stmt2.all();
     if (result.results.length > 0) {
       return result.results[0].word;
     }
@@ -336,16 +336,16 @@ async function get_random_defined_word(env) {
 async function get_random_undefined_word(env) {
   const db = env.DB;
   let stmt1 = db.prepare("SELECT max(rowid) as rowid FROM words");
-  const result = await stmt1.run();
+  const result = await stmt1.all();
   const max_rowid = result.results[0].rowid;
   for (let attempt = 0; attempt < 10; attempt += 1) {
     let rowid = Math.floor(Math.random() * max_rowid) + 1;
     let stmt2 = db.prepare("SELECT word FROM words WHERE rowid = ?1").bind(rowid);
-    const result2 = await stmt2.run();
+    const result2 = await stmt2.all();
     let word = result2.results[0].word;
 
     let stmt3 = db.prepare("SELECT word FROM defs WHERE word = ?1").bind(word);
-    const result3 = await stmt3.run();
+    const result3 = await stmt3.all();
     if (result3.results.length == 0) {
       // This word is not defined yet.
       return word;
@@ -362,7 +362,7 @@ async function get_word_definition(env, word, defined_just_now) {
     let stmt = env.DB.prepare(
       `SELECT def, author, timestamp from defs JOIN defs_log ON def_id = defs_log.rowid
        WHERE defs.word = ?1`).bind(word);
-    const result = await stmt.run();
+    const result = await stmt.all();
     if (result.results.length < 1) {
       return { value : null, metadata: null };
     }
@@ -527,7 +527,7 @@ async function handle_get(req, env) {
     let stmt1 = db.prepare(
       "SELECT def, author, timestamp FROM defs_log WHERE word = ?1 ORDER BY timestamp DESC");
     stmt1 = stmt1.bind(word);
-    let db_result = await stmt1.run();
+    let db_result = await stmt1.all();
     let entries = db_result.results;
 
     response_string += `<div>history of definitions for
@@ -629,7 +629,7 @@ async function choose_new_word_of_the_day(env) {
   let stmt1 = db.prepare(
     `SELECT defs.word FROM defs LEFT JOIN bad_words ON defs.word = bad_words.word
      WHERE bad_words.word IS NULL ORDER BY random() LIMIT 1;`);
-  const rows = await stmt1.run();
+  const rows = await stmt1.all();
   let word = rows.results[0].word;
   let stmt2 = db.prepare(
     "UPDATE status SET word_of_the_day = ?1, wotd_timestamp = ?2;").bind(word, Date.now());
