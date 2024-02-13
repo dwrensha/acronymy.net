@@ -629,8 +629,7 @@ async function choose_new_word_of_the_day(env) {
   let stmt1 = db.prepare(
     `SELECT defs.word FROM defs LEFT JOIN bad_words ON defs.word = bad_words.word
      WHERE bad_words.word IS NULL ORDER BY random() LIMIT 1;`);
-  const rows = await stmt1.all();
-  let word = rows.results[0].word;
+  const word = (await stmt1.first()).word;
   let stmt2 = db.prepare(
     "UPDATE status SET word_of_the_day = ?1, wotd_timestamp = ?2;").bind(word, Date.now());
   await stmt2.run();
