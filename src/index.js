@@ -320,8 +320,7 @@ async function update_def(req, env, word, definition, username) {
 async function get_random_defined_word(env) {
   const db = env.DB;
   let stmt1 = db.prepare("SELECT max(rowid) as rowid FROM defs");
-  const result = await stmt1.all();
-  const max_rowid = result.results[0].rowid;
+  const max_rowid = await stmt1.first('rowid');
   for (let attempt = 0; attempt < 10; attempt += 1) {
     let rowid = Math.floor(Math.random() * max_rowid) + 1;
     let stmt2 = db.prepare("SELECT word FROM defs WHERE rowid = ?1").bind(rowid);
@@ -336,14 +335,11 @@ async function get_random_defined_word(env) {
 async function get_random_undefined_word(env) {
   const db = env.DB;
   let stmt1 = db.prepare("SELECT max(rowid) as rowid FROM words");
-  const result = await stmt1.all();
-  const max_rowid = result.results[0].rowid;
+  const max_rowid = await stmt1.first('rowid');
   for (let attempt = 0; attempt < 10; attempt += 1) {
     let rowid = Math.floor(Math.random() * max_rowid) + 1;
     let stmt2 = db.prepare("SELECT word FROM words WHERE rowid = ?1").bind(rowid);
-    const result2 = await stmt2.all();
-    let word = result2.results[0].word;
-
+    const word = await stmt2.first('word');
     let stmt3 = db.prepare("SELECT word FROM defs WHERE word = ?1").bind(word);
     const result3 = await stmt3.all();
     if (result3.results.length == 0) {
@@ -362,11 +358,10 @@ async function get_word_definition(env, word, defined_just_now) {
     let stmt = env.DB.prepare(
       `SELECT def, author, timestamp from defs JOIN defs_log ON def_id = defs_log.rowid
        WHERE defs.word = ?1`).bind(word);
-    const result = await stmt.all();
-    if (result.results.length < 1) {
+    const row = await stmt.first();
+    if (!row) {
       return { value : null, metadata: null };
     }
-    let row = result.results[0];
     let metadata = {};
     if (row.timestamp) {
       metadata.time =  row.timestamp;
