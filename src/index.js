@@ -324,9 +324,9 @@ async function get_random_defined_word(env) {
   for (let attempt = 0; attempt < 10; attempt += 1) {
     let rowid = Math.floor(Math.random() * max_rowid) + 1;
     let stmt2 = db.prepare("SELECT word FROM defs WHERE rowid = ?1").bind(rowid);
-    const result = await stmt2.all();
-    if (result.results.length > 0) {
-      return result.results[0].word;
+    const word = await stmt2.first("word");
+    if (word) {
+      return word;
     }
   }
   return null;
