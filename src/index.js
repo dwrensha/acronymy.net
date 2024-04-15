@@ -313,7 +313,6 @@ async function update_def(req, env, word, definition, username) {
   await Promise.all(
     [refresh_status(env),
      env.WORDS.put(word, definition, {metadata}),
-     env.WORDS_LOG.put(word + ":" + timestamp, definition, {metadata}),
      p3]);
 }
 

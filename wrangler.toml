@@ -20,13 +20,6 @@ id = "9e629eee35a74db189a3f2b5b6e7d22e"
 preview_id = "9e629eee35a74db189a3f2b5b6e7d22e"
 
 [[env.prod.kv_namespaces]]
-# WORDS_LOG stores definitions, keyed by word:timestamp
-# These never get overwritten.
-binding = "WORDS_LOG"
-id = "4cce34eaa52c40ef86a9f8371ebde3e7"
-preview_id = "4cce34eaa52c40ef86a9f8371ebde3e7"
-
-[[env.prod.kv_namespaces]]
 # META stores miscellaneous information, such as the word of the day
 binding = "META"
 id = "8c703fb07e54401084e6e7ce5dc7da2e"
@@ -49,11 +42,6 @@ preview_id = "a145bd25755d40a4a7254baf916f4122"
 binding = "META"
 id = "75d13e911a294abcb3f71ac23a908acc"
 preview_id = "75d13e911a294abcb3f71ac23a908acc"
-
-[[env.dev.kv_namespaces]]
-binding = "WORDS_LOG"
-id = "de8dc6d270b24862a150320f0f8fe573"
-preview_id ="de8dc6d270b24862a150320f0f8fe573"
 
 [[env.dev.d1_databases]]
 binding = "DB"
