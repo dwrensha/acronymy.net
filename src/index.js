@@ -11,7 +11,18 @@ const FAVICON =`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0
  </g>
 </svg>`;
 
-const ABOUT = `<div class="about full-width">
+function render_about_page() {
+  let about_defs = ["a bit of unembellished truth",
+                    "a bunch of unimportant things",
+                    "additional background outlining underlying themes",
+                    "amazing book offering unlikely thoughts",
+                    "amusing because of unforeseen twists",
+                    "acronyms bolster our understanding tremendously"];
+  let idx = Math.floor(Math.random() * about_defs.length);
+  let about = about_defs[idx];
+  return `<div class="about full-width">
+<div class=\"word\">about</div>
+<div class=\"about-definition\">${about}</div>
 <p>
 I like to think of Acronymy as a massively multiplayer
 collaborative online word game.
@@ -45,6 +56,7 @@ Please report any bugs or feature requests there.
 <li><a href="https://social.wub.site/@david">@david@social.wub.site</a> on Mastodon</li>
 </ul>
 </div>`;
+}
 
 function header(title) {
   return `<!DOCTYPE html><html><head> <meta name="viewport" content="width=device-width">
@@ -547,7 +559,7 @@ async function handle_get(req, env) {
       `<a class="home-link" href=\"/\">Acronymy</a>`,
       "/history?word=" + word);
   } else if (url.pathname == "/about") {
-    response_string += ABOUT;
+    response_string += render_about_page();
     response_string += render_about_footer(username);
   } else if (url.pathname == "/random") {
     const word = await get_random_defined_word(env);

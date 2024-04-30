@@ -11,6 +11,10 @@ export const MAIN_CSS =
 .definition {
    font-size: 28px;
 }
+.about-definition {
+   font-size: 30px;
+   text-align: center;
+}
 @media (max-width: 530px) {
   .definition { font-size: 7vw; }
 }
