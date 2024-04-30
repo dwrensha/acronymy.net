@@ -17,7 +17,8 @@ function render_about_page() {
                     "additional background outlining underlying themes",
                     "amazing book offering unlikely thoughts",
                     "amusing because of unforeseen twists",
-                    "acronyms bolster our understanding tremendously"];
+                    "acronyms bolster our understanding tremendously",
+                    "always be obsessively uploading things"];
   let idx = Math.floor(Math.random() * about_defs.length);
   let about = about_defs[idx];
   return `<div class="about full-width">
