@@ -13,7 +13,7 @@ const FAVICON =`<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0
 
 function render_about_page() {
   let about_defs = ["a bit of unembellished truth",
-                    "a bunch of unimportant things",
+                    "a bunch of unfamiliar terminology",
                     "additional background outlining underlying themes",
                     "amazing book offering unlikely thoughts",
                     "amusing because of unforeseen twists",
