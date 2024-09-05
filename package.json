@@ -2,7 +2,7 @@
   "name": "acronymy-workers",
   "version": "0.0.0",
   "devDependencies": {
-    "wrangler": "^3.25.0"
+    "wrangler": "^3.74.0"
   },
   "private": true,
   "scripts": {
