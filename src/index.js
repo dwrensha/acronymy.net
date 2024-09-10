@@ -448,7 +448,7 @@ async function insert_suggestion(env, word, definition, username) {
   const id = get_random_id();
   stmt1 = stmt1.bind(id, word, definition, author, timestamp);
   await db.batch([stmt1]);
-  await toot_admin_notification(env, "new suggestion!");
+  await toot_admin_notification(env, `new suggestion: ${word} = ${definition}`);
   return id;
 }
 
