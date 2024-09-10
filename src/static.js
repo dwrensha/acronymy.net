@@ -11,7 +11,6 @@ export const FAVICON =
  </g>
 </svg>`;
 
-
 export const MAIN_CSS =
 `body { font-family: Helvetica, Sans, Arial;
         font-size: 24px;

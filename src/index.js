@@ -305,6 +305,46 @@ async function render_definition(env, word, definition, metadata) {
   return response_string;
 }
 
+function render_suggestion_status(row) {
+  const word = row.word;
+  let word_class = "word";
+  if (word.length > 15) {
+    word_class = "word extra-long";
+  }
+  let response_string = `<div class=\"${word_class}\">${word}</div>`;
+
+  const definition = row.def;
+  let def_words = definition.split(" ");
+  response_string += `<div class="definition">`
+  for (let ii = 0; ii < def_words.length; ++ii){
+    let def_word = def_words[ii];
+    response_string += ` ${def_word} `;
+  }
+  response_string += "</div>";
+  response_string += `<div class="attribution">`;
+  let time = new Date(row.timestamp);
+  response_string += `—suggested ${time.toUTCString()}`;
+  if (row.author) {
+    response_string += ` by ${row.author}`;
+  }
+
+  response_string += `</div>`;
+
+  response_string += `<div class="suggestion-status">`;
+  if (row.status == 0) {
+    response_string += "<p>This suggested word is pending moderator approval.</p>";
+  } else if (row.status > 0) {
+    response_string += `<p>This suggested word <a href="/define/${word}">has been accepted!</a></p>`;
+  } else if (row.status < 0) {
+    response_string += `<p>This suggested word has been rejected.</p>`;
+  }
+  if (row.moderator_note) {
+    response_string += `<p> The moderator left a note: ${row.moderator_note}</p>`
+  }
+  response_string += `</div>`;
+  return response_string;
+}
+
 function render_error(title, message) {
   let response_string = "";
   response_string += `<div class="big-error">`;
@@ -710,43 +750,7 @@ async function handle_get(req, env) {
                                       `suggestion "${id}" was not found`);
       response_string += render_not_found_footer(username);
     } else {
-      const row = entries[0];
-      const word = row.word;
-      let word_class = "word";
-      if (word.length > 15) {
-        word_class = "word extra-long";
-      }
-      response_string += `<div class=\"${word_class}\">${word}</div>`;
-
-      const definition = row.def;
-      let def_words = definition.split(" ");
-      response_string += `<div class="definition">`
-      for (let ii = 0; ii < def_words.length; ++ii){
-        let def_word = def_words[ii];
-        response_string += ` ${def_word} `;
-      }
-      response_string += "</div>";
-      response_string += `<div class="attribution">`;
-      let time = new Date(row.timestamp);
-      response_string += `—suggested ${time.toUTCString()}`;
-      if (row.author) {
-        response_string += ` by ${row.author}`;
-      }
-
-      response_string += `</div>`;
-
-      response_string += `<div class="suggestion-status">`;
-      if (row.status == 0) {
-        response_string += "<p>This suggested word is pending moderator approval.</p>";
-      } else if (row.status > 0) {
-        response_string += `<p>This suggested word <a href="/define/${word}">has been accepted!</a></p>`;
-      } else if (row.status < 0) {
-        response_string += `<p>This suggested word has been rejected.</p>`;
-      }
-      if (row.moderator_note) {
-        response_string += `<p> The moderator left a note: ${row.moderator_note}</p>`
-      }
-      response_string += `</div>`;
+      response_string += render_suggestion_status(entries[0]);
       response_string += render_footer({"username" : username},
                                        `<a class="home-link" href=\"/\">Acronymy</a>`,
                                        `/suggest-word-status/${id}`);
@@ -770,8 +774,6 @@ async function handle_get(req, env) {
       response_string += render_not_found_footer(username);
     } else {
       const row = entries[0];
-      const word = row.word;
-
       if (req.method == "POST") {
         const form_data = await req.formData();
         let status = 0;
@@ -794,53 +796,18 @@ async function handle_get(req, env) {
         if (meta.changes == 1 && status == 1) {
           // The change happened and it added a word.
           let stmt3 = env.DB.prepare(
-            "INSERT INTO words (word) VALUES (?1)").bind(word);
+            "INSERT INTO words (word) VALUES (?1)").bind(row.word);
           let stmt4 = env.DB.prepare(
             "UPDATE status SET total_num_words = total_num_words + 1");
           await env.DB.batch([stmt3, stmt4]);
-          await update_def(null, env, word, row.def, row.author);
+          await update_def(null, env, row.word, row.def, row.author);
         }
         return new Response("",
                             {status: 303,
                              headers:
                              {'Location': `/suggest-word-admin/${id}`}});
       }
-
-      let word_class = "word";
-      if (word.length > 15) {
-        word_class = "word extra-long";
-      }
-      response_string += `<div class=\"${word_class}\">${word}</div>`;
-
-      const definition = row.def;
-      let def_words = definition.split(" ");
-      response_string += `<div class="definition">`
-      for (let ii = 0; ii < def_words.length; ++ii){
-        let def_word = def_words[ii];
-        response_string += ` ${def_word} `;
-      }
-      response_string += "</div>";
-      response_string += `<div class="attribution">`;
-      let time = new Date(row.timestamp);
-      response_string += `—suggested ${time.toUTCString()}`;
-      if (row.author) {
-        response_string += ` by ${row.author}`;
-      }
-
-      response_string += `</div>`;
-
-      response_string += `<div class="suggestion-status">`;
-      if (row.status == 0) {
-        response_string += "<p>This suggested word is pending moderator approval.</p>";
-      } else if (row.status > 0) {
-        response_string += `<p>This suggested word <a href="/define/${word}">has been accepted!</a></p>`;
-      } else if (row.status < 0) {
-        response_string += `<p>This suggested word has been rejected</p>`;
-      }
-      if (row.moderator_note) {
-        response_string += `<p> The moderator left a note: ${row.moderator_note}</p>`
-      }
-      response_string += `</div>`;
+      response_string += render_suggestion_status(row);
       if (row.status == 0) {
         response_string += `<form action="/suggest-word-admin/${id}" method="post">
         <input type="radio" id="accept" name="action" value="accept">
