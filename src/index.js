@@ -793,7 +793,9 @@ async function handle_get(req, env) {
           // The change happened and it added a word.
           let stmt3 = env.DB.prepare(
             "INSERT INTO words (word) VALUES (?1)").bind(word);
-          await stmt3.run();
+          let stmt4 = env.DB.prepare(
+            "UPDATE status SET total_num_words = total_num_words + 1");
+          await env.DB.batch([stmt3, stmt4]);
           await update_def(null, env, word, row.def, row.author);
         }
         return new Response("",
