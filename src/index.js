@@ -60,6 +60,38 @@ Please report any bugs or feature requests there.
 </div>`;
 }
 
+async function render_home_page(env) {
+  let status = JSON.parse(await env.META.get(STATUS_KEY));
+  let word_of_the_day = status.word_of_the_day;
+  let timestamp = new Date(status.timestamp);
+  let percent = (100 * status.num_defined / status.total_num_words).toFixed(4);
+
+  let response_string = `<div class=\"title\">Acronymy</div>
+<div>Can we define every word as an acronym?</div>
+<div class="follow">Follow at <a href="https://social.wub.site/@acronymy">@acronymy</a> or
+<a href="https://social.wub.site/@daily_acronymy">@daily_acronymy</a>.</div>
+<div class="status full-width"><ul>
+<li>${status.num_defined} out of ${status.total_num_words} words have been defined (${percent}%).</li>
+<li>Recently defined words include: `;
+  for (let ii = 0; ii < status.recently_defined.length; ++ii) {
+    let w = status.recently_defined[ii];
+    response_string += `<a href="/define/${w}">${w}</a>`;
+    if (ii + 1 < status.recently_defined.length) {
+      response_string += ", ";
+    }
+  }
+  response_string += ".</li>";
+  response_string += "<li>Today's featured word is ";
+  response_string += `<b><a href="/define/${word_of_the_day}">${word_of_the_day}</a></b>.`;
+  response_string += `</div>`;
+
+  response_string += '<div class="feeling-lucky full-width">'
+  response_string += `<a class="lucky-link" href="/random">random defined word</a>
+                        <a class="lucky-link" href="/random-todo">random undefined word</a>`;
+  response_string += "</div>"
+  return response_string;
+}
+
 function header(title) {
   return `<!DOCTYPE html><html><head> <meta name="viewport" content="width=device-width">
    <title>${title}</title><link rel="stylesheet" type="text/css" href="/main.css" >
@@ -582,38 +614,7 @@ async function handle_get(req, env) {
       response_string += render_not_found_footer(username);
     }
   } else if (url.pathname == "/") {
-    response_string += "<div class=\"title\">Acronymy</div>";
-    response_string += "<div>Can we define every word as an acronym?</div>";
-    response_string += `<div class="follow">Follow at <a href="https://social.wub.site/@acronymy">@acronymy</a> or `
-    response_string +=
-      `<a href="https://social.wub.site/@daily_acronymy">@daily_acronymy</a>.</div>`;
-    response_string += `<div class="status full-width">`
-    let status = JSON.parse(await env.META.get(STATUS_KEY));
-    let word_of_the_day = status.word_of_the_day;
-    let timestamp = new Date(status.timestamp);
-    response_string += `<ul>`;
-    let percent = (100 * status.num_defined/status.total_num_words).toFixed(4);
-    response_string +=
-      `<li>${status.num_defined} out of ${status.total_num_words}
-           words have been defined (${percent}%).</li>`;
-    response_string += "<li>Recently defined words include: ";
-    for (let ii = 0; ii < status.recently_defined.length; ++ii) {
-      let w = status.recently_defined[ii];
-      response_string += `<a href="/define/${w}">${w}</a>`;
-      if (ii+1 < status.recently_defined.length) {
-        response_string += ", ";
-      }
-    }
-    response_string += ".</li>";
-    response_string += "<li>Today's featured word is ";
-    response_string += `<b><a href="/define/${word_of_the_day}">${word_of_the_day}</a></b>.`;
-    response_string += `</div>`;
-
-    response_string += '<div class="feeling-lucky full-width">'
-    response_string += `<a class="lucky-link" href="/random">random defined word</a>
-                        <a class="lucky-link" href="/random-todo">random undefined word</a>`;
-    response_string += "</div>"
-
+    response_string += await render_home_page(env);
     response_string += render_home_footer(username);
   } else {
     response_status = 404;
