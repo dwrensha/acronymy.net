@@ -1,4 +1,6 @@
+import { bounce_if_not_authed } from "./auth.js";
 import { FAVICON, MAIN_CSS, ROBOTS_TXT } from "./static.js";
+
 
 function render_about_page() {
   let about_defs = ["a bit of unembellished truth",
@@ -100,6 +102,18 @@ function define_form(word, initial_value) {
           </div>`;
 }
 
+function suggest_word_form(initial_word, initial_definition) {
+  let maybe_word_value = initial_word ? `value="${initial_word}"` : "";
+  let maybe_def_value = initial_definition ? `value="${initial_definition}"` : "";
+  return `<div class="suggest-word-form full-width">
+          <form action="/suggest-word" method="post">
+          <input name=\"new-word\" maxlength=\"30\" placeholder="new word" class="new-word-input-text" ${maybe_word_value} autofocus required/>
+          <input name=\"definition\" maxlength=\"2000\" placeholder="definition" class="definition-input-text" ${maybe_def_value} required/>
+          <br>
+          <button>submit</button></form>
+          </div>`;
+}
+
 function render_footer(options, home_or_about, login_redirect) {
   let entered_word = "";
   if (options.entered_word) {
@@ -194,7 +208,7 @@ async function validate_definition(def, word, env) {
     if (!def_word_def) {
       return {
         invalid: true,
-        reason: `${def_word} is not in the word list`
+        reason: `${def_word} is not in the word list. (Should we <a href="/suggest-word">add it</a>?)`
       };
     }
     if (def_word[0] != word[idx]) {
@@ -210,6 +224,15 @@ async function validate_definition(def, word, env) {
 }
 
 async function send_toot(mastodon_url, token, status_text, visibility) {
+  if (!mastodon_url) {
+    console.error("No mastodon url found. Not tooting.");
+    return;
+  }
+
+  if (!token) {
+    console.error("No token. Not tooting.");
+    return;
+  }
   const data = new URLSearchParams();
   data.append('status', status_text);
   data.append('visibility', visibility);
@@ -224,11 +247,6 @@ async function send_toot(mastodon_url, token, status_text, visibility) {
 }
 
 async function toot_submission(env, word, new_def, user) {
-  if (!env.MASTODON_URL) {
-    console.error("Environment variable MASTODON_URL is empty. Not tooting.");
-    return;
-  }
-
   let attribution = "—submitted anonymously";
   if (user) {
     attribution = "—submitted by " + user;
@@ -241,12 +259,11 @@ async function toot_submission(env, word, new_def, user) {
 }
 
 async function toot_daily_update(env, toot_text) {
-  if (!env.MASTODON_URL) {
-    console.error("Environment variable MASTODON_URL is empty. Not tooting.");
-    return;
-  }
-
   return send_toot(env.MASTODON_URL, env.DAILY_UPDATE_MASTODON_TOKEN, toot_text, "public");
+}
+
+async function toot_admin_notification(env, toot_text) {
+  return send_toot(env.MASTODON_URL, env.ADMIN_NOTIFICATIONS_MASTODON_TOKEN, toot_text, "private");
 }
 
 async function render_definition(env, word, definition, metadata) {
@@ -322,7 +339,7 @@ async function update_def(req, env, word, definition, username) {
   let metadata= { time: timestamp };
 
   let ip = null;
-  if (req.headers.has('cf-connecting-ip')) {
+  if (req && req.headers.has('cf-connecting-ip')) {
     ip = req.headers.get('cf-connecting-ip');
     metadata['ip'] = ip;
   }
@@ -412,6 +429,29 @@ async function get_word_definition(env, word, defined_just_now) {
   }
 }
 
+function get_random_id() {
+  let array = Array.from(self.crypto.getRandomValues(new Uint8Array(10)));
+  return array.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function insert_suggestion(env, word, definition, username) {
+  const db = env.DB;
+  let stmt1 = db.prepare(
+    "INSERT INTO suggestions (id, word, def, author, timestamp, status) VALUES (?1, ?2, ?3, ?4, ?5, 0)");
+  let timestamp = Date.now();
+
+  let author = null;
+  if (username && validate_username(username).valid) {
+    author = username;
+  }
+
+  const id = get_random_id();
+  stmt1 = stmt1.bind(id, word, definition, author, timestamp);
+  await db.batch([stmt1]);
+  await toot_admin_notification(env, "new suggestion!");
+  return id;
+}
+
 async function handle_get(req, env) {
   let url = new URL(req.url);
 
@@ -472,7 +512,8 @@ async function handle_get(req, env) {
     let input_starting_value = null;
     if (!definition && !(await is_word(word, env))) {
       let decoded_word = decodeURI(word);
-      response_string += render_error("Not Found", `${decoded_word} is not in the word list`);
+      response_string +=
+        render_error("Not Found", `${decoded_word} is not in the word list. (Should we <a href="/suggest-word">add it</a>?)`);
       response_string += render_def_footer(word, username, decoded_word);
       response_status = 404;
     } else {
@@ -604,6 +645,208 @@ async function handle_get(req, env) {
   } else if (url.pathname == "/") {
     response_string += await render_home_page(env);
     response_string += render_home_footer(username);
+  } else if (url.pathname == "/suggest-word") {
+    response_string = header(` Acronymy - suggest word `);
+    response_string += "<h3>suggest a new word</h3>"
+    let error_message = null;
+    let proposed_word = null;
+    let proposed_definition = null;
+    let input_starting_word = null;
+    let input_starting_definition = null;
+    if (req.method == "POST") {
+      const form_data = await req.formData();
+      for (const entry of form_data.entries()) {
+        if (entry[0] == "new-word") {
+          proposed_word = entry[1];
+        } else if (entry[0] == "definition") {
+          proposed_definition = entry[1];
+        }
+      }
+    }
+    if (proposed_definition && proposed_word) {
+      let def_words = proposed_definition.trim().toLowerCase().split(/\s+/);
+      let new_def = def_words.join(" ");
+      if (await is_word(proposed_word, env)) {
+        error_message = `${proposed_word} is already in the word list`;
+        response_status = 400;
+        input_starting_word = proposed_word;
+        input_starting_definition = new_def;
+      } else {
+        let validation_result = await validate_definition(def_words, proposed_word, env);
+        if (validation_result.valid) {
+          let id = await insert_suggestion(env, proposed_word, proposed_definition, username);
+          return new Response("",
+                              {status: 303,
+                               headers:
+                               {'Location': `/suggest-word-status/${id}`}});
+        } else { // invalid definition
+          error_message = validation_result.reason;
+          response_status = 400;
+          input_starting_word = proposed_word;
+          input_starting_definition = new_def;
+        }
+      }
+    }
+    response_string += suggest_word_form(input_starting_word, input_starting_definition);
+    if (error_message) {
+      response_string += `<div class="err"> ${error_message} </div>`;
+    }
+    response_string += render_footer({"username" : username},
+                       `<a class="home-link" href=\"/\">Acronymy</a>`,
+                       "/suggest-word");
+  } else if (url.pathname.startsWith("/suggest-word-status/")) {
+    response_string = header(` Acronymy - suggested word `);
+    let id = url.pathname.slice("/suggest-word-status/".length);
+    let stmt = env.DB.prepare(
+      "SELECT word, def, author, timestamp, status, moderator_note FROM suggestions WHERE id = ?1");
+    stmt = stmt.bind(id);
+    let db_result = await stmt.all();
+    let entries = db_result.results;
+    if (entries.length < 1) {
+      response_status = 404;
+      response_string += render_error("Not Found",
+                                      `suggestion "${id}" was not found`);
+      response_string += render_not_found_footer(username);
+    } else {
+      const row = entries[0];
+      const word = row.word;
+      let word_class = "word";
+      if (word.length > 15) {
+        word_class = "word extra-long";
+      }
+      response_string += `<div class=\"${word_class}\">${word}</div>`;
+
+      const definition = row.def;
+      let def_words = definition.split(" ");
+      response_string += `<div class="definition">`
+      for (let ii = 0; ii < def_words.length; ++ii){
+        let def_word = def_words[ii];
+        response_string += ` ${def_word} `;
+      }
+      response_string += "</div>";
+      response_string += `<div class="attribution">`;
+      let time = new Date(row.timestamp);
+      response_string += `—suggested ${time.toUTCString()}`;
+      if (row.author) {
+        response_string += ` by ${row.author}`;
+      }
+
+      response_string += `</div>`;
+
+      response_string += `<div class="suggestion-status">`;
+      if (row.status == 0) {
+        response_string += "<p>This suggested word is pending moderator approval.</p>";
+      } else if (row.status > 0) {
+        response_string += `<p>This suggested word <a href="/define/${word}">has been accepted!</a></p>`;
+      } else if (row.status < 0) {
+        response_string += `<p>This suggested word has been rejected.</p>`;
+      }
+      if (row.moderator_note) {
+        response_string += `<p> The moderator left a note: ${row.moderator_note}</p>`
+      }
+      response_string += `</div>`;
+      response_string += render_footer({"username" : username},
+                                       `<a class="home-link" href=\"/\">Acronymy</a>`,
+                                       `/suggest-word-status/${id}`);
+    }
+  } else if (url.pathname.startsWith("/suggest-word-admin/")) {
+    const bounce = bounce_if_not_authed(env, req);
+    if (bounce) {
+      return bounce;
+    }
+    let id = url.pathname.slice("/suggest-word-admin/".length);
+
+    let stmt = env.DB.prepare(
+      "SELECT word, def, author, timestamp, status, moderator_note FROM suggestions WHERE id = ?1");
+    stmt = stmt.bind(id);
+    let db_result = await stmt.all();
+    let entries = db_result.results;
+    if (entries.length < 1) {
+      response_status = 404;
+      response_string += render_error("Not Found",
+                                      `suggestion "${id}" was not found`);
+      response_string += render_not_found_footer(username);
+    } else {
+      const row = entries[0];
+      const word = row.word;
+
+      if (req.method == "POST") {
+        const form_data = await req.formData();
+        let status = 0;
+        let note = null;
+        for (const entry of form_data.entries()) {
+          if (entry[0] == "action") {
+            if (entry[1] == "accept") {
+              status = 1;
+            } else if (entry[1] == "reject") {
+              status = -1;
+            }
+          } else if (entry[0] == "note") {
+            note = entry[1];
+          }
+        }
+        let stmt = env.DB.prepare(
+          "UPDATE suggestions SET status = ?1, moderator_note = ?2 WHERE id = ?3 AND status = 0");
+        stmt = stmt.bind(status, note, id);
+        let {results, success, meta} = await stmt.run();
+        if (meta.changes == 1 && status == 1) {
+          // The change happened and it added a word.
+          let stmt3 = env.DB.prepare(
+            "INSERT INTO words (word) VALUES (?1)").bind(word);
+          await stmt3.run();
+          await update_def(null, env, word, row.def, row.author);
+        }
+        return new Response("",
+                            {status: 303,
+                             headers:
+                             {'Location': `/suggest-word-admin/${id}`}});
+      }
+
+      let word_class = "word";
+      if (word.length > 15) {
+        word_class = "word extra-long";
+      }
+      response_string += `<div class=\"${word_class}\">${word}</div>`;
+
+      const definition = row.def;
+      let def_words = definition.split(" ");
+      response_string += `<div class="definition">`
+      for (let ii = 0; ii < def_words.length; ++ii){
+        let def_word = def_words[ii];
+        response_string += ` ${def_word} `;
+      }
+      response_string += "</div>";
+      response_string += `<div class="attribution">`;
+      let time = new Date(row.timestamp);
+      response_string += `—suggested ${time.toUTCString()}`;
+      if (row.author) {
+        response_string += ` by ${row.author}`;
+      }
+
+      response_string += `</div>`;
+
+      response_string += `<div class="suggestion-status">`;
+      if (row.status == 0) {
+        response_string += "<p>This suggested word is pending moderator approval.</p>";
+      } else if (row.status > 0) {
+        response_string += `<p>This suggested word <a href="/define/${word}">has been accepted!</a></p>`;
+      } else if (row.status < 0) {
+        response_string += `<p>This suggested word has been rejected</p>`;
+      }
+      if (row.moderator_note) {
+        response_string += `<p> The moderator left a note: ${row.moderator_note}</p>`
+      }
+      response_string += `</div>`;
+      if (row.status == 0) {
+        response_string += `<form action="/suggest-word-admin/${id}" method="post">
+        <input type="radio" id="accept" name="action" value="accept">
+        <label for="accept">Accept</label><br>
+        <input type="radio" id="reject" name="action" value="reject">
+        <label for="reject">Reject</label><br>`
+        response_string += `<textarea name="note"></textarea>`
+        response_string += `<button>submit</button></form>`
+      }
+    }
   } else {
     response_status = 404;
     response_string += render_error("Not Found",

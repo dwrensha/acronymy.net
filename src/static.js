@@ -79,6 +79,10 @@ div {
    text-align: right;
    margin: auto;
 }
+.suggest-word-form {
+   text-align: right;
+   margin: auto;
+}
 .full-width {
    width: 500px;
 }
@@ -90,6 +94,11 @@ div {
      width: 97vw;
   }
 }
+input[name="new-word"] {
+   width: 90%;
+   font-size: 26px;
+}
+
 input[name="definition"] {
    width: 100%;
    font-size: 22px;
