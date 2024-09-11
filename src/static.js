@@ -220,4 +220,13 @@ button {
 button:hover {
   background-color: #e1e2e3;
 }
+.suggestion-pending {
+  background-color: #ffffbb;
+}
+.suggestion-accepted {
+  background-color: #ccffcc;
+}
+.suggestion-rejected {
+  background-color: #cccccc;
+}
 `;

@@ -307,11 +307,29 @@ async function render_definition(env, word, definition, metadata) {
 
 function render_suggestion_status(row) {
   const word = row.word;
+
+  let suggestion_class = "suggestion-pending";
+  let suggestion_status = `<div class="suggestion-status">`;
+  if (row.status == 0) {
+    suggestion_status += "<p>This suggested word is pending moderator approval.</p>";
+  } else if (row.status > 0) {
+    suggestion_class = "suggestion-accepted";
+    suggestion_status += `<p>This suggested word <a href="/define/${word}">has been accepted!</a></p>`;
+  } else if (row.status < 0) {
+    suggestion_class = "suggestion-rejected";
+    suggestion_status += `<p>This suggested word has been rejected.</p>`;
+  }
+  if (row.moderator_note) {
+    suggestion_status += `<p> The moderator left a note: ${row.moderator_note}</p>`
+  }
+  suggestion_status += `</div>`;
+
   let word_class = "word";
   if (word.length > 15) {
     word_class = "word extra-long";
   }
-  let response_string = `<div class=\"${word_class}\">${word}</div>`;
+  let response_string =
+      `<div class=\"${word_class}\"><span class="${suggestion_class}">${word}</span></div>`;
 
   const definition = row.def;
   let def_words = definition.split(" ");
@@ -327,21 +345,10 @@ function render_suggestion_status(row) {
   if (row.author) {
     response_string += ` by ${row.author}`;
   }
-
   response_string += `</div>`;
 
-  response_string += `<div class="suggestion-status">`;
-  if (row.status == 0) {
-    response_string += "<p>This suggested word is pending moderator approval.</p>";
-  } else if (row.status > 0) {
-    response_string += `<p>This suggested word <a href="/define/${word}">has been accepted!</a></p>`;
-  } else if (row.status < 0) {
-    response_string += `<p>This suggested word has been rejected.</p>`;
-  }
-  if (row.moderator_note) {
-    response_string += `<p> The moderator left a note: ${row.moderator_note}</p>`
-  }
-  response_string += `</div>`;
+  response_string += suggestion_status;
+
   return response_string;
 }
 
