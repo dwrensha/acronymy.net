@@ -716,7 +716,7 @@ async function handle_get(req, env) {
       } else {
         let validation_result = await validate_definition(def_words, proposed_word, env);
         if (validation_result.valid) {
-          let id = await insert_suggestion(env, proposed_word, proposed_definition, username);
+          let id = await insert_suggestion(env, proposed_word, new_def, username);
           return new Response("",
                               {status: 303,
                                headers:
