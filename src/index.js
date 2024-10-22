@@ -435,13 +435,13 @@ async function get_random_undefined_word(env) {
   const max_rowid = await stmt1.first('rowid');
   for (let attempt = 0; attempt < 10; attempt += 1) {
     let rowid = Math.floor(Math.random() * max_rowid) + 1;
-    let stmt2 = db.prepare("SELECT word FROM words WHERE rowid = ?1").bind(rowid);
-    const word = await stmt2.first('word');
-    let stmt3 = db.prepare("SELECT word FROM defs WHERE word = ?1").bind(word);
-    const result3 = await stmt3.all();
-    if (result3.results.length == 0) {
+    let stmt2 = db.prepare("SELECT words.word, def_id from words " +
+                           "LEFT JOIN defs ON words.word = defs.word " +
+                           "WHERE words.rowid = ?1").bind(rowid);
+    const result = await stmt2.first();
+    if (!result.def_id) {
       // This word is not defined yet.
-      return word;
+      return result.word;
     }
   }
   return null;
