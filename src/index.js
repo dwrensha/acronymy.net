@@ -439,7 +439,7 @@ async function get_random_undefined_word(env) {
                            "LEFT JOIN defs ON words.word = defs.word " +
                            "WHERE words.rowid = ?1").bind(rowid);
     const result = await stmt2.first();
-    if (!result.def_id) {
+    if (result && !result.def_id) {
       // This word is not defined yet.
       return result.word;
     }
