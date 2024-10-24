@@ -706,7 +706,7 @@ async function handle_get(req, env) {
       const form_data = await req.formData();
       for (const entry of form_data.entries()) {
         if (entry[0] == "new-word") {
-          proposed_word = entry[1];
+          proposed_word = entry[1].toLowerCase().trim();
         } else if (entry[0] == "definition") {
           proposed_definition = entry[1];
         }
