@@ -12,7 +12,7 @@ export const FAVICON =
 </svg>`;
 
 export const MAIN_CSS =
-`body { font-family: Helvetica, Sans, Arial;
+`body { font-family: Georgia, Serif;
         font-size: 24px;
         margin-left: auto;
         margin-right: auto;
@@ -21,6 +21,7 @@ export const MAIN_CSS =
 * {
   box-sizing: border-box;
 }
+.word { font-family: Helvetica, Sans, Arial; }
 .definition {
    font-size: 28px;
 }
