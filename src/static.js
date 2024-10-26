@@ -95,8 +95,8 @@ div {
   }
 }
 input[name="new-word"] {
-   width: 90%;
-   font-size: 26px;
+   width: 100%;
+   font-size: 27px;
 }
 
 input[name="definition"] {
