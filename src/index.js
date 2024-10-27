@@ -107,8 +107,8 @@ function suggest_word_form(initial_word, initial_definition) {
   let maybe_def_value = initial_definition ? `value="${initial_definition}"` : "";
   return `<div class="suggest-word-form full-width">
           <form action="/suggest-word" method="post">
-          <input name=\"new-word\" maxlength=\"30\" placeholder="new word" class="new-word-input-text" ${maybe_word_value} autofocus required/>
-          <input name=\"definition\" maxlength=\"2000\" placeholder="definition" class="definition-input-text" ${maybe_def_value} required/>
+          <input name=\"new-word\" maxlength=\"30\" placeholder="new word" class="new-word-input-text" ${maybe_word_value} ${initial_word ? "" : "autofocus"} required/>
+          <input name=\"definition\" maxlength=\"2000\" placeholder="definition" class="definition-input-text" ${maybe_def_value} ${initial_word ? "autofocus" : ""} required/>
           <br>
           <button>submit</button></form>
           </div>`;
@@ -208,7 +208,8 @@ async function validate_definition(def, word, env) {
     if (!def_word_def) {
       return {
         invalid: true,
-        reason: `${def_word} is not in the word list. (Should we <a href="/suggest-word">add it</a>?)`
+        reason: `${def_word} is not in the word list.
+                 (Should we <a href="/suggest-word?word=${def_word}">add it</a>?)`
       };
     }
     if (def_word[0] != word[idx]) {
@@ -562,7 +563,9 @@ async function handle_get(req, env) {
     if (!definition && !(await is_word(word, env))) {
       let decoded_word = decodeURI(word);
       response_string +=
-        render_error("Not Found", `${decoded_word} is not in the word list. (Should we <a href="/suggest-word">add it</a>?)`);
+        render_error("Not Found",
+                     `${decoded_word} is not in the word list.
+                      (Should we <a href="/suggest-word?word=${decoded_word}">add it</a>?)`);
       response_string += render_def_footer(word, username, decoded_word);
       response_status = 404;
     } else {
@@ -700,7 +703,7 @@ async function handle_get(req, env) {
     let error_message = null;
     let proposed_word = null;
     let proposed_definition = null;
-    let input_starting_word = null;
+    let input_starting_word = url.searchParams.get('word');
     let input_starting_definition = null;
     if (req.method == "POST") {
       const form_data = await req.formData();
