@@ -247,6 +247,40 @@ async function send_toot(mastodon_url, token, status_text, visibility) {
         });
 }
 
+async function send_bloot(app_password, record) {
+  if (!app_password) {
+    console.error("No token. Not posting to Bluesky.");
+    return;
+  }
+
+  const DID = "did:plc:qlphhhwkaycflchuflwocd7b" // @acronymy.bsky.social
+  const data = {"identifier": DID, "password": app_password};
+  const API_KEY_URL='https://bsky.social/xrpc/com.atproto.server.createSession'
+  const api_key_response = await fetch(API_KEY_URL,
+        { method : 'POST',
+          headers : {"Content-Type": "application/json"},
+          body : JSON.stringify(data),
+          signal: AbortSignal.timeout(3000), // timeout after 3 seconds
+        });
+  const resp = await api_key_response.json();
+  const jwt = resp.accessJwt;
+  console.log("record", JSON.stringify(record));
+
+  const post_response = await fetch("https://bsky.social/xrpc/com.atproto.repo.createRecord",
+        { method : 'POST',
+          headers : {
+            "Authorization": "Bearer " + jwt,
+            'Content-Type': 'application/json'
+          },
+          body : JSON.stringify({ "collection": "app.bsky.feed.post",
+                                  "repo": DID,
+                                  record : record }),
+          signal: AbortSignal.timeout(3000) // timeout after 3 seconds
+        });
+  console.log("post response", post_response);
+  return
+}
+
 async function toot_submission(env, word, new_def, user) {
   let attribution = "—submitted anonymously";
   if (user) {
@@ -258,6 +292,31 @@ async function toot_submission(env, word, new_def, user) {
                    `${new_def}\n\nhttps://acronymy.net/define/${word}\n${attribution}\n`,
                    "unlisted");
 }
+
+async function bloot_submission(env, word, new_def, user) {
+  const link_uri = `https://acronymy.net/define/${word}`
+  const link_text = `acronymy.net/define/${word}`
+  let attribution = "—submitted anonymously";
+  if (user) {
+    attribution = "—submitted by " + user;
+  }
+  const text = new_def + '\n\n' + `${link_text}` + `\n${attribution}`;
+  const record = {
+    "text": text,
+    "facets" : [{
+      index : { byteStart: new_def.length + 2,
+                byteEnd: new_def.length + 2 + link_text.length },
+      features : [{
+        '$type': 'app.bsky.richtext.facet#link',
+        uri: `https://acronymy.net/define/${word}`
+      }]
+    }],
+    "createdAt": (new Date()).toISOString(),
+    "$type": "app.bsky.feed.post"
+  };
+  await send_bloot(env.BLUESKY_PASSWORD, record);
+}
+
 
 async function toot_daily_update(env, toot_text) {
   return send_toot(env.MASTODON_URL, env.DAILY_UPDATE_MASTODON_TOKEN, toot_text, "public");
@@ -409,10 +468,14 @@ async function update_def(req, env, word, definition, username) {
     console.log("error on toot attempt: ", e);
   });
 
+  let p4 = bloot_submission(env, word, definition, username).catch((e) => {
+    console.log("error on bloot attempt: ", e);
+  });
+
   await Promise.all(
     [refresh_status(env),
      env.WORDS.put(word, definition, {metadata}),
-     p3]);
+     p3, p4]);
 }
 
 async function get_random_defined_word(env) {
