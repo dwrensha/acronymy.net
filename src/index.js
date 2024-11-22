@@ -247,14 +247,13 @@ async function send_toot(mastodon_url, token, status_text, visibility) {
         });
 }
 
-async function send_bloot(app_password, record) {
+async function send_bloot(did, app_password, record) {
   if (!app_password) {
     console.error("No token. Not posting to Bluesky.");
     return;
   }
 
-  const DID = "did:plc:qlphhhwkaycflchuflwocd7b" // @acronymy.bsky.social
-  const data = {"identifier": DID, "password": app_password};
+  const data = {"identifier": did, "password": app_password};
   const API_KEY_URL='https://bsky.social/xrpc/com.atproto.server.createSession'
   const api_key_response = await fetch(API_KEY_URL,
         { method : 'POST',
@@ -264,7 +263,6 @@ async function send_bloot(app_password, record) {
         });
   const resp = await api_key_response.json();
   const jwt = resp.accessJwt;
-  console.log("record", JSON.stringify(record));
 
   const post_response = await fetch("https://bsky.social/xrpc/com.atproto.repo.createRecord",
         { method : 'POST',
@@ -273,11 +271,13 @@ async function send_bloot(app_password, record) {
             'Content-Type': 'application/json'
           },
           body : JSON.stringify({ "collection": "app.bsky.feed.post",
-                                  "repo": DID,
+                                  "repo": did,
                                   record : record }),
           signal: AbortSignal.timeout(3000) // timeout after 3 seconds
         });
-  console.log("post response", post_response);
+  if (post_response.status != 200) {
+    console.error("failed to post to bluesky");
+  }
   return
 }
 
@@ -308,18 +308,58 @@ async function bloot_submission(env, word, new_def, user) {
                 byteEnd: new_def.length + 2 + link_text.length },
       features : [{
         '$type': 'app.bsky.richtext.facet#link',
-        uri: `https://acronymy.net/define/${word}`
+        uri: link_uri
       }]
     }],
     "createdAt": (new Date()).toISOString(),
     "$type": "app.bsky.feed.post"
   };
-  await send_bloot(env.BLUESKY_PASSWORD, record);
+  const DID = "did:plc:qlphhhwkaycflchuflwocd7b" // @acronymy.net
+  await send_bloot(DID, env.BLUESKY_PASSWORD, record);
 }
 
+async function send_daily_updates(env) {
+  const word_of_the_day = await choose_new_word_of_the_day(env);
+  const status = await refresh_status(env);
 
-async function toot_daily_update(env, toot_text) {
-  return send_toot(env.MASTODON_URL, env.DAILY_UPDATE_MASTODON_TOKEN, toot_text, "public");
+  // send @daily_acronymy toot
+  let word_of_the_day_def = await env.WORDS.get(word_of_the_day);
+  let percent = (100 * status.num_defined/status.total_num_words).toFixed(3);
+  let capitalized_def = word_of_the_day_def.split(' ').map(
+    str => str.charAt(0).toUpperCase() + str.slice(1)).join(' ');
+  let prefix = `The acronym of the day is ${word_of_the_day.toUpperCase()}:\n\n` +
+      capitalized_def + "\n\n"+
+      "--------------------------------------------\n\n" +
+      `To submit a new definition for this word, visit `;
+
+  const link_text = `acronymy.net/define/${word_of_the_day}`;
+  const link_uri = `https://acronymy.net/define/${word_of_the_day}`;
+  let toot_text = prefix + link_text + "\n\n" +
+      `So far, ${status.num_defined} out of ${status.total_num_words} `+
+      `words have been defined (${percent}%).`;
+
+  const p1 =
+        send_toot(env.MASTODON_URL, env.DAILY_UPDATE_MASTODON_TOKEN, toot_text, "public")
+        .catch(e => console.error("error tooting daily update: ", e));
+
+  const record = {
+    "text": toot_text,
+    "facets" : [{
+      index : { byteStart: prefix.length,
+                byteEnd: prefix.length + link_text.length },
+      features : [{
+        '$type': 'app.bsky.richtext.facet#link',
+        uri: link_uri
+      }]
+    }],
+    "createdAt": (new Date()).toISOString(),
+    "$type": "app.bsky.feed.post"
+  };
+
+  const DID = "did:plc:qazqvgjsbl7cucuu373w64nx" // @daily.acronymy.net
+  const p2 = send_bloot(DID, env.BLUESKY_DAILY_PASSWORD, record)
+        .catch(e => console.error("error posting daily bluesky update: ", e));
+  await Promise.all([p1, p2]);
 }
 
 async function toot_admin_notification(env, toot_text) {
@@ -914,6 +954,7 @@ async function choose_new_word_of_the_day(env) {
     `SELECT defs.word FROM defs LEFT JOIN bad_words ON defs.word = bad_words.word
      WHERE bad_words.word IS NULL ORDER BY random() LIMIT 1;`);
   const word = (await stmt1.first()).word;
+  console.log("word", word);
   let stmt2 = db.prepare(
     "UPDATE status SET word_of_the_day = ?1, wotd_timestamp = ?2;").bind(word, Date.now());
   await stmt2.run();
@@ -964,22 +1005,6 @@ export default {
 
   async scheduled(event, env, ctx) {
     // event.cron is a string, the name of the cron trigger.
-
-    const word_of_the_day = await choose_new_word_of_the_day(env);
-    const status = await refresh_status(env);
-
-    // send @daily_acronymy toot
-    let word_of_the_day_def = await env.WORDS.get(word_of_the_day);
-    let percent = (100 * status.num_defined/status.total_num_words).toFixed(3);
-    let capitalized_def = word_of_the_day_def.split(' ').map(
-      str => str.charAt(0).toUpperCase() + str.slice(1)).join(' ');
-    let toot_text =
-        `The acronym of the day is ${word_of_the_day.toUpperCase()}:\n\n` +
-        capitalized_def + "\n\n"+
-        "--------------------------------------------\n\n" +
-        `To submit a new definition for this word, visit https://acronymy.net/define/${word_of_the_day}.\n\n` +
-        `So far, ${status.num_defined} out of ${status.total_num_words} `+
-        `words have been defined (${percent}%).`;
-    await toot_daily_update(env,toot_text);
+    await send_daily_updates(env);
   }
 }
