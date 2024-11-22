@@ -276,7 +276,7 @@ async function send_bloot(did, app_password, record) {
           signal: AbortSignal.timeout(3000) // timeout after 3 seconds
         });
   if (post_response.status != 200) {
-    console.error("failed to post to bluesky");
+    console.error("failed to post to bluesky: ", post_response.status);
   }
   return
 }
