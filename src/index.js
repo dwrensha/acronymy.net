@@ -334,16 +334,20 @@ async function send_daily_updates(env) {
 
   const link_text = `acronymy.net/define/${word_of_the_day}`;
   const link_uri = `https://acronymy.net/define/${word_of_the_day}`;
-  let toot_text = prefix + link_text + "\n\n" +
-      `So far, ${status.num_defined} out of ${status.total_num_words} `+
+  let suffix =
+      `\n\nSo far, ${status.num_defined} out of ${status.total_num_words} `+
       `words have been defined (${percent}%).`;
+  // Mastodon does automatic linkification if we include the 'https://'.
+  let toot_text = prefix + link_uri + suffix;
 
   const p1 =
         send_toot(env.MASTODON_URL, env.DAILY_UPDATE_MASTODON_TOKEN, toot_text, "public")
         .catch(e => console.error("error tooting daily update: ", e));
 
+  // In Bluesky, we manually linkify via 'facets', so we drop the 'https://' in the text.
+  let bloot_text = prefix + link_text + suffix;
   const record = {
-    "text": toot_text,
+    "text": bloot_text,
     "facets" : [{
       index : { byteStart: prefix.length,
                 byteEnd: prefix.length + link_text.length },
