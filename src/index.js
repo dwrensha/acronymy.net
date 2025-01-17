@@ -498,15 +498,10 @@ async function update_def(req, env, word, definition, username) {
   }
 
   let stmt1 = db.prepare(
-    "INSERT INTO defs_log (word, def, author, timestamp, ip, original_author, original_timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)");
+    "INSERT INTO defs_log (word, def, author, timestamp, original_author, original_timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)");
   let timestamp = Date.now();
   let metadata= { time: timestamp };
 
-  let ip = null;
-  if (req && req.headers.has('cf-connecting-ip')) {
-    ip = req.headers.get('cf-connecting-ip');
-    metadata['ip'] = ip;
-  }
   let author = null;
   if (username && validate_username(username).valid) {
     author = username;
@@ -517,8 +512,7 @@ async function update_def(req, env, word, definition, username) {
     metadata['user'] = original_author;
   }
 
-  stmt1 = stmt1.bind(word, definition, author, timestamp, ip,
-                     original_author, original_timestamp);
+  stmt1 = stmt1.bind(word, definition, author, timestamp, original_author, original_timestamp);
   let stmt2 = db.prepare(
     "INSERT INTO defs (word, def_id) VALUES (?1, last_insert_rowid()) " +
       "ON CONFLICT (word) DO UPDATE SET def_id = excluded.def_id;");
