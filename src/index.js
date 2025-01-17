@@ -282,6 +282,7 @@ async function send_bloot(did, app_password, record) {
 }
 
 async function toot_submission(env, word, new_def, user) {
+  return; // disable while fighting troll
   let attribution = "—submitted anonymously";
   if (user) {
     attribution = "—submitted by " + user;
@@ -294,6 +295,7 @@ async function toot_submission(env, word, new_def, user) {
 }
 
 async function bloot_submission(env, word, new_def, user) {
+  return; // disable while fighting troll
   const link_uri = `https://acronymy.net/define/${word}`
   const link_text = `acronymy.net/define/${word}`
   let attribution = "—submitted anonymously";
