@@ -153,6 +153,14 @@ a[class="home-link"] {
    font-style: italic;
 }
 
+.restored {
+  font-size: 10px;
+}
+
+.restore-form {
+  display: inline;
+}
+
 .not-defined {
   border-style: dotted;
   border-width: 1px;

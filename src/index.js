@@ -484,8 +484,21 @@ function validate_username(username) {
 
 async function update_def(req, env, word, definition, username) {
   const db = env.DB;
+
+  // First, check whether this is a restoration of an old definition.
+  let stmt0 = db.prepare(
+      "SELECT word, def, author, timestamp FROM defs_log WHERE word = ?1 AND def = ?2 ORDER BY timestamp ASC LIMIT 1;");
+  stmt0 = stmt0.bind(word, definition);
+  const result = await stmt0.first();
+  let original_author = null;
+  let original_timestamp = null;
+  if (result) {
+    original_author = result.author;
+    original_timestamp = result.timestamp;
+  }
+
   let stmt1 = db.prepare(
-    "INSERT INTO defs_log (word, def, author, timestamp, ip) VALUES (?1, ?2, ?3, ?4, ?5)");
+    "INSERT INTO defs_log (word, def, author, timestamp, ip, original_author, original_timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)");
   let timestamp = Date.now();
   let metadata= { time: timestamp };
 
@@ -499,8 +512,13 @@ async function update_def(req, env, word, definition, username) {
     author = username;
     metadata['user'] = author;
   }
+  if (original_timestamp != null) {
+    metadata['time'] = original_timestamp;
+    metadata['user'] = original_author;
+  }
 
-  stmt1 = stmt1.bind(word, definition, author, timestamp, ip);
+  stmt1 = stmt1.bind(word, definition, author, timestamp, ip,
+                     original_author, original_timestamp);
   let stmt2 = db.prepare(
     "INSERT INTO defs (word, def_id) VALUES (?1, last_insert_rowid()) " +
       "ON CONFLICT (word) DO UPDATE SET def_id = excluded.def_id;");
@@ -561,17 +579,18 @@ async function get_word_definition(env, word, defined_just_now) {
     // look up the latest value. If we used KV instead (the faster default path),
     // then we would risk serving a stale cached value and confusing the user.
     let stmt = env.DB.prepare(
-      `SELECT def, author, timestamp from defs JOIN defs_log ON def_id = defs_log.rowid
+      `SELECT def, author, timestamp, original_author, original_timestamp from defs JOIN defs_log ON def_id = defs_log.rowid
        WHERE defs.word = ?1`).bind(word);
     const row = await stmt.first();
     if (!row) {
       return { value : null, metadata: null };
     }
     let metadata = {};
-    if (row.timestamp) {
-      metadata.time =  row.timestamp;
-    }
-    if (row.author) {
+    if (row.original_timestamp != null) {
+      metadata.time = row.original_timestamp;
+      metadata.user = row.original_author;
+    } else {
+      metadata.time = row.timestamp;
       metadata.user = row.author;
     }
     return {
@@ -753,7 +772,7 @@ async function handle_get(req, env) {
 
     const db = env.DB;
     let stmt1 = db.prepare(
-      "SELECT def, author, timestamp FROM defs_log WHERE word = ?1 ORDER BY timestamp DESC");
+      "SELECT def, author, timestamp, original_author, original_timestamp FROM defs_log WHERE word = ?1 ORDER BY timestamp DESC");
     stmt1 = stmt1.bind(word);
     let db_result = await stmt1.all();
     let entries = db_result.results;
@@ -763,15 +782,40 @@ async function handle_get(req, env) {
     response_string += `<div class="history full-width"><ul>`
     for (let ii = 0; ii < entries.length; ++ii) {
       let entry = entries[ii];
+      let author = entry.author;
+      let timestamp = entry.timestamp;
+      let is_restoration = false;
+      if (entry.original_timestamp != null) {
+        is_restoration = true;
+        timestamp = entry.original_timestamp;
+        author = entry.original_author;
+      }
       response_string += `<li>${entry.def}`
-      if (!entry.timestamp) {
+
+      if (ii != 0) {
+        response_string +=
+          `<form action="/define/${word}" method="post" class='restore-form'>
+           <input name=\"definition\" type="hidden" value="${entry.def}"> </input>
+           <button>restore</button>
+           </form>`;
+      }
+
+      if (!timestamp) {
         response_string += ` — defined before the beginning of history (October 2022)`;
       } else {
-        let time = new Date(entry.timestamp);
+        let time = new Date(timestamp);
         response_string += ` — defined ${time.toUTCString()}`;
+        if (author) {
+          response_string += ` by ${author}`;
+        }
+      }
+      if (is_restoration) {
+        let time = new Date(entry.timestamp);
+        response_string += `, <span class='restored'>restored ${time.toUTCString()}`
         if (entry.author) {
           response_string += ` by ${entry.author}`;
         }
+        response_string += `</span>`;
       }
       response_string += `</li>`
     }
