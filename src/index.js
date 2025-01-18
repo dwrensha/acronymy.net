@@ -487,14 +487,21 @@ async function update_def(req, env, word, definition, username) {
 
   // First, check whether this is a restoration of an old definition.
   let stmt0 = db.prepare(
-      "SELECT word, def, author, timestamp FROM defs_log WHERE word = ?1 AND def = ?2 ORDER BY timestamp ASC LIMIT 1;");
+    "SELECT word, def, author, timestamp, original_author, original_timestamp FROM defs_log WHERE word = ?1 AND def = ?2 ORDER BY timestamp ASC LIMIT 1;");
   stmt0 = stmt0.bind(word, definition);
   const result = await stmt0.first();
   let original_author = null;
   let original_timestamp = null;
   if (result) {
-    original_author = result.author;
-    original_timestamp = result.timestamp;
+    if (result.original_timestamp == null) {
+      original_author = result.author;
+      original_timestamp = result.timestamp;
+    } else {
+      // The oldest entry in the log is a restoration.
+      // Apparently the original was deleted somehow.
+      original_author = result.original_author;
+      original_timestamp = result.original_timestamp;
+    }
   }
 
   let stmt1 = db.prepare(
