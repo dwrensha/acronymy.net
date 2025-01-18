@@ -42,7 +42,7 @@ export function authorization_header_validates_as_admin(admin_password, authoriz
 
 
   if (!timingSafeEqual("admin", user) ||
-      !timingSafeEqual(env.ADMIN_PASSWORD, pass)) {
+      !timingSafeEqual(admin_password, pass)) {
     return false;
   }
   return true;
