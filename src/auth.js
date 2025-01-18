@@ -24,6 +24,30 @@ function timingSafeEqual(a, b) {
   return crypto.subtle.timingSafeEqual(aBytes, bBytes);
 }
 
+
+export function authorization_header_validates_as_admin(admin_password, authorization) {
+  const [scheme, encoded] = authorization.split(" ");
+  // The Authorization header must start with Basic, followed by a space.
+  if (!encoded || scheme !== "Basic") {
+    return false;
+  }
+
+  const credentials = Buffer.from(encoded, "base64").toString();
+
+  // The username & password are split by the first colon.
+  //=> example: "username:password"
+  const index = credentials.indexOf(":");
+  const user = credentials.substring(0, index);
+  const pass = credentials.substring(index + 1);
+
+
+  if (!timingSafeEqual("admin", user) ||
+      !timingSafeEqual(env.ADMIN_PASSWORD, pass)) {
+    return false;
+  }
+  return true;
+}
+
 export function bounce_if_not_authed(env, request) {
   if (!env.ADMIN_PASSWORD) {
     return new Response("Admin password is not configured.", {
@@ -41,27 +65,7 @@ export function bounce_if_not_authed(env, request) {
       },
     });
   }
-  const [scheme, encoded] = authorization.split(" ");
-
-  // The Authorization header must start with Basic, followed by a space.
-  if (!encoded || scheme !== "Basic") {
-    return new Response("Malformed authorization header.", {
-      status: 400,
-    });
-  }
-
-  const credentials = Buffer.from(encoded, "base64").toString();
-
-  // The username & password are split by the first colon.
-  //=> example: "username:password"
-  const index = credentials.indexOf(":");
-  const user = credentials.substring(0, index);
-  const pass = credentials.substring(index + 1);
-
-  if (
-    !timingSafeEqual("admin", user) ||
-      !timingSafeEqual(env.ADMIN_PASSWORD, pass)
-  ) {
+  if (!authorization_header_validates_as_admin(env.ADMIN_PASSWORD, authorization)) {
     return new Response("You need to login.", {
       status: 401,
       headers: {
