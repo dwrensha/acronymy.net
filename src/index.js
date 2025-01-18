@@ -1,4 +1,4 @@
-import { bounce_if_not_authed } from "./auth.js";
+import { bounce_if_not_authed, authorization_header_validates_as_admin } from "./auth.js";
 import { FAVICON, MAIN_CSS, ROBOTS_TXT } from "./static.js";
 
 
@@ -781,7 +781,7 @@ async function handle_get(req, env) {
 
     const db = env.DB;
     let stmt1 = db.prepare(
-      "SELECT def, author, timestamp, original_author, original_timestamp FROM defs_log WHERE word = ?1 ORDER BY timestamp DESC");
+      "SELECT rowid, def, author, timestamp, original_author, original_timestamp FROM defs_log WHERE word = ?1 ORDER BY timestamp DESC");
     stmt1 = stmt1.bind(word);
     let db_result = await stmt1.all();
     let entries = db_result.results;
@@ -807,6 +807,12 @@ async function handle_get(req, env) {
            <input name=\"definition\" type="hidden" value="${entry.def}"> </input>
            <button>restore</button>
            </form>`;
+        if (authorization_header_validates_as_admin(env.ADMIN_PASSWORD, req.headers.get("Authorization"))) {
+          response_string +=
+            `<form action="/expunge/${entry.rowid}" method="post" class='expunge-form'>
+             <button>expunge</button>
+             </form>`;
+        }
       }
 
       if (!timestamp) {
@@ -833,6 +839,25 @@ async function handle_get(req, env) {
       {"username" : username},
       `<a class="home-link" href=\"/\">Acronymy</a>`,
       "/history?word=" + word);
+  } else if (url.pathname == "/admin-login") {
+    const bounce = bounce_if_not_authed(env, req);
+    if (bounce) {
+      return bounce;
+    }
+    return new Response("logged in", {status : 200});
+  } else if (url.pathname.startsWith("/expunge/")) {
+    const bounce = bounce_if_not_authed(env, req);
+    if (bounce) {
+      return bounce;
+    }
+    let rowid_string = url.pathname.slice("/expunge/".length);
+    const rowid = parseInt(rowid_string, 10);
+    console.log("rowid =", rowid);
+    const db = env.DB;
+    let stmt1 = db.prepare("DELETE from defs_log where rowid = ?1 RETURNING word;")
+    stmt1 = stmt1.bind(rowid);
+    const row = await stmt1.first();
+    return new Response("", {status: 302, headers: {'Location': `/history?word=${row.word}`}});
   } else if (url.pathname == "/about") {
     response_string += render_about_page();
     response_string += render_about_footer(username);

@@ -26,6 +26,9 @@ function timingSafeEqual(a, b) {
 
 
 export function authorization_header_validates_as_admin(admin_password, authorization) {
+  if (!admin_password || !authorization) {
+    return false;
+  }
   const [scheme, encoded] = authorization.split(" ");
   // The Authorization header must start with Basic, followed by a space.
   if (!encoded || scheme !== "Basic") {

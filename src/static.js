@@ -161,6 +161,10 @@ a[class="home-link"] {
   display: inline;
 }
 
+.expunge-form {
+  display: inline;
+}
+
 .not-defined {
   border-style: dotted;
   border-width: 1px;
