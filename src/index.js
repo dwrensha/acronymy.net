@@ -282,7 +282,6 @@ async function send_bloot(did, app_password, record) {
 }
 
 async function toot_submission(env, word, new_def, user) {
-  return; // disable while fighting troll
   let attribution = "—submitted anonymously";
   if (user) {
     attribution = "—submitted by " + user;
@@ -295,7 +294,6 @@ async function toot_submission(env, word, new_def, user) {
 }
 
 async function bloot_submission(env, word, new_def, user) {
-  return; // disable while fighting troll
   const link_uri = `https://acronymy.net/define/${word}`
   const link_text = `acronymy.net/define/${word}`
   let attribution = "—submitted anonymously";
@@ -809,7 +807,7 @@ async function handle_get(req, env) {
            </form>`;
         if (authorization_header_validates_as_admin(env.ADMIN_PASSWORD, req.headers.get("Authorization"))) {
           response_string +=
-            `<form action="/expunge/${entry.rowid}" method="post" class='expunge-form'>
+            `<form action="/expunge/${entry.rowid}" method="post" class='restore-form'>
              <button>expunge</button>
              </form>`;
         }
@@ -845,7 +843,7 @@ async function handle_get(req, env) {
       return bounce;
     }
     return new Response("logged in", {status : 200});
-  } else if (url.pathname.startsWith("/expunge/")) {
+/*  } else if (url.pathname.startsWith("/expunge/")) {
     const bounce = bounce_if_not_authed(env, req);
     if (bounce) {
       return bounce;
@@ -858,6 +856,7 @@ async function handle_get(req, env) {
     stmt1 = stmt1.bind(rowid);
     const row = await stmt1.first();
     return new Response("", {status: 302, headers: {'Location': `/history?word=${row.word}`}});
+*/
   } else if (url.pathname == "/about") {
     response_string += render_about_page();
     response_string += render_about_footer(username);
