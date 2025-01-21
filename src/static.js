@@ -184,6 +184,9 @@ a[class="home-link"] {
   margin: auto;
   font-size: 18px;
 }
+.leaderboard .timestamp {
+font-size: 12px;
+}
 
 .leaderboard-holder {
     display: flex;

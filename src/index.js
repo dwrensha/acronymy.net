@@ -53,8 +53,8 @@ Please report any bugs or feature requests there.
 const LEADERBOARD_KEY = "leaderboard";
 
 async function render_leaderboard(env) {
-  let leaderboard_array = JSON.parse(await env.META.get(LEADERBOARD_KEY));
-  if (leaderboard_array == null) {
+  let leaderboard_obj = JSON.parse(await env.META.get(LEADERBOARD_KEY));
+  if (leaderboard_obj == null) {
     const db = env.DB;
     let stmt = db.prepare(
       `select
@@ -68,17 +68,24 @@ async function render_leaderboard(env) {
        where not author is null
        group by author order by count DESC LIMIT 30;`);
     const result = await stmt.all();
-    leaderboard_array = result.results;
-    await env.META.put(LEADERBOARD_KEY, JSON.stringify(leaderboard_array),
+    let leaderboard_array = result.results;
+    leaderboard_obj = {
+      timestamp: Date.now(),
+      rows: leaderboard_array
+    };
+    await env.META.put(LEADERBOARD_KEY, JSON.stringify(leaderboard_obj),
                        {expirationTtl: 60 * 60 * 6})
   }
+  console.log(leaderboard_obj.timestamp);
+  let timestamp = (new Date(leaderboard_obj.timestamp)).toUTCString();
   let response = "<div class='leaderboard full-width'>";
   response += "<h2>Leaderboard</h2>";
+  response += `<div class='timestamp'>(as of ${timestamp})</div>`;
   response += "<div class='leaderboard-holder'><table>";
   response += "<thead><tr><th>author</th><th>defs</th></tr></thead>";
   response += "<tbody>"
-  for (let ii = 0; ii < leaderboard_array.length; ++ii) {
-    let row = leaderboard_array[ii];
+  for (let ii = 0; ii < leaderboard_obj.rows.length; ++ii) {
+    let row = leaderboard_obj.rows[ii];
     response += `<tr><td>${row.author}</td><td>${row.count}</td></tr>`;
   }
   response += "</tbody></table></div>"
