@@ -50,6 +50,42 @@ Please report any bugs or feature requests there.
 </div>`;
 }
 
+const LEADERBOARD_KEY = "leaderboard";
+
+async function render_leaderboard(env) {
+  let leaderboard_array = JSON.parse(await env.META.get(LEADERBOARD_KEY));
+  if (leaderboard_array == null) {
+    const db = env.DB;
+    let stmt = db.prepare(
+      `select
+         case
+           when original_timestamp is null then author
+           else original_author
+         end as author,
+         count(*) as count
+       from (select * from defs left join defs_log
+             where defs.def_id = defs_log.rowid)
+       where not author is null
+       group by author order by count DESC LIMIT 30;`);
+    const result = await stmt.all();
+    leaderboard_array = result.results;
+    await env.META.put(LEADERBOARD_KEY, JSON.stringify(leaderboard_array),
+                       {expirationTtl: 60 * 60 * 6})
+  }
+  let response = "<div class='leaderboard full-width'>";
+  response += "<h2>Leaderboard</h2>";
+  response += "<div class='leaderboard-holder'><table>";
+  response += "<thead><tr><th>author</th><th>defs</th></tr></thead>";
+  response += "<tbody>"
+  for (let ii = 0; ii < leaderboard_array.length; ++ii) {
+    let row = leaderboard_array[ii];
+    response += `<tr><td>${row.author}</td><td>${row.count}</td></tr>`;
+  }
+  response += "</tbody></table></div>"
+  response += "<div>";
+  return response;
+}
+
 async function render_home_page(env) {
   let status = JSON.parse(await env.META.get(STATUS_KEY));
   let word_of_the_day = status.word_of_the_day;
@@ -62,6 +98,7 @@ async function render_home_page(env) {
 <a href="https://social.wub.site/@daily_acronymy">@daily_acronymy</a>.</div>
 <div class="status full-width"><ul>
 <li>${status.num_defined} out of ${status.total_num_words} words have been defined (${percent}%).</li>
+<li>Prolific contributors are tracked on the <a href="/leaderboard">leaderboard</a>.</li>
 <li>Recently defined words include: `;
   for (let ii = 0; ii < status.recently_defined.length; ++ii) {
     let w = status.recently_defined[ii];
@@ -152,6 +189,12 @@ function render_about_footer(maybe_username) {
   return render_footer({"username" : maybe_username},
                        `<a class="home-link" href=\"/\">Acronymy</a>`,
                        "/about");
+}
+
+function render_leaderboard_footer(maybe_username) {
+  return render_footer({"username" : maybe_username},
+                       `<a class="home-link" href=\"/\">Acronymy</a>`,
+                       "/leaderboard");
 }
 
 function render_not_found_footer(maybe_username) {
@@ -860,6 +903,9 @@ async function handle_get(req, env) {
   } else if (url.pathname == "/about") {
     response_string += render_about_page();
     response_string += render_about_footer(username);
+  } else if (url.pathname == "/leaderboard") {
+    response_string += await render_leaderboard(env);
+    response_string += render_leaderboard_footer(username);
   } else if (url.pathname == "/random") {
     const word = await get_random_defined_word(env);
     if (word) {

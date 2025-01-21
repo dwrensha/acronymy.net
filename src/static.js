@@ -179,6 +179,26 @@ a[class="home-link"] {
   font-size: 16px;
 }
 
+.leaderboard {
+  text-align: center;
+  margin: auto;
+  font-size: 18px;
+}
+
+.leaderboard-holder {
+    display: flex;
+    justify-content: center; /* Centers horizontally */
+}
+.leaderboard-holder table {
+  text-align: left;
+  border-collapse: collapse;
+}
+.leaderboard-holder table td {
+  border: 1px solid #ccc;
+  padding: 5px;
+}
+
+
 .status-title {
   margin-left: 20px;
   margin-top: 15px;
