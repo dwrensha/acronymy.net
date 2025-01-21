@@ -74,7 +74,7 @@ async function render_leaderboard(env) {
       rows: leaderboard_array
     };
     await env.META.put(LEADERBOARD_KEY, JSON.stringify(leaderboard_obj),
-                       {expirationTtl: 60 * 60 * 6})
+                       {expirationTtl: 60 * 60 * 4})
   }
   console.log(leaderboard_obj.timestamp);
   let timestamp = (new Date(leaderboard_obj.timestamp)).toUTCString();
@@ -105,7 +105,7 @@ async function render_home_page(env) {
 <a href="https://social.wub.site/@daily_acronymy">@daily_acronymy</a>.</div>
 <div class="status full-width"><ul>
 <li>${status.num_defined} out of ${status.total_num_words} words have been defined (${percent}%).</li>
-<li>Prolific contributors are tracked on the <a href="/leaderboard">leaderboard</a>.</li>
+<li>Top contributors are listed on the <a href="/leaderboard">leaderboard</a>.</li>
 <li>Recently defined words include: `;
   for (let ii = 0; ii < status.recently_defined.length; ++ii) {
     let w = status.recently_defined[ii];
