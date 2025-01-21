@@ -86,7 +86,7 @@ async function render_leaderboard(env) {
   response += "<tbody>"
   for (let ii = 0; ii < leaderboard_obj.rows.length; ++ii) {
     let row = leaderboard_obj.rows[ii];
-    response += `<tr><td>${ii}</td><td>${row.author}</td><td>${row.count}</td></tr>`;
+    response += `<tr><td>${ii + 1}</td><td>${row.author}</td><td>${row.count}</td></tr>`;
   }
   response += "</tbody></table></div>"
   response += "<div>";
