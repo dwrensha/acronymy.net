@@ -82,11 +82,11 @@ async function render_leaderboard(env) {
   response += "<h2>Leaderboard</h2>";
   response += `<div class='timestamp'>(as of ${timestamp})</div>`;
   response += "<div class='leaderboard-holder'><table>";
-  response += "<thead><tr><th>author</th><th>defs</th></tr></thead>";
+  response += "<thead><tr><th></th><th>author</th><th>defs</th></tr></thead>";
   response += "<tbody>"
   for (let ii = 0; ii < leaderboard_obj.rows.length; ++ii) {
     let row = leaderboard_obj.rows[ii];
-    response += `<tr><td>${row.author}</td><td>${row.count}</td></tr>`;
+    response += `<tr><td>${ii}</td><td>${row.author}</td><td>${row.count}</td></tr>`;
   }
   response += "</tbody></table></div>"
   response += "<div>";
