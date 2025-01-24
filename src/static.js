@@ -132,7 +132,7 @@ a[class="home-link"] {
 }
 
 .footer form button {
-  width: 65px;
+  width: 64px;
 }
 
 @media (max-width: 475px) {
