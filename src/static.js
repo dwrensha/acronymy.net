@@ -118,12 +118,14 @@ a[class="home-link"] {
   font-style: italic;
   font-size: 11px;
 }
+.logged-in span {
+  margin: 1px;
+}
 
 .footer-row {
  display:flex;
  justify-content: space-between;
 }
-
 
 .footer form input {
   width: 110px;

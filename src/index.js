@@ -173,7 +173,7 @@ function render_footer(options, home_or_about, login_redirect) {
   result += home_or_about;
 
   if (options.username) {
-    result += `<form class="logged-in" action="/logout">logged in as ${options.username}`;
+    result += `<form class="logged-in" action="/logout"><span>logged in as ${options.username}</span>`;
     result += `<input name=\"redirect\" value=\"${login_redirect}\" type=\"hidden\"/>`;
     result += `<button>log out</button></form>`
   } else {
