@@ -330,25 +330,39 @@ async function send_bloot(did, app_password, record) {
   return
 }
 
-async function toot_submission(env, word, new_def, user) {
-  let attribution = "—submitted anonymously";
-  if (user) {
-    attribution = "—submitted by " + user;
+function credit_to_attribution_string(credit) {
+  if (credit.hasOwnProperty("restorer")) {
+    let author_text = "anonymously";
+    if (credit.author) {
+      author_text = "by " + credit.author;
+    }
+    let restorer_text = "anonymously";
+    if (credit.restorer) {
+      restorer_text = "by " + credit.restorer;
+    }
+    return `—submitted ${author_text}, restored ${restorer_text}`;
+  } else {
+    let attribution = "—submitted anonymously";
+    if (credit.author) {
+      attribution = "—submitted by " + credit.author;
+    }
+    return attribution;
   }
+}
 
+async function toot_submission(env, word, new_def, credit) {
+  const attribution = credit_to_attribution_string(credit);
   return send_toot(env.MASTODON_URL,
                    env.MASTODON_TOKEN,
                    `${new_def}\n\nhttps://acronymy.net/define/${word}\n${attribution}\n`,
                    "unlisted");
 }
 
-async function bloot_submission(env, word, new_def, user) {
-  const link_uri = `https://acronymy.net/define/${word}`
-  const link_text = `acronymy.net/define/${word}`
-  let attribution = "—submitted anonymously";
-  if (user) {
-    attribution = "—submitted by " + user;
-  }
+async function bloot_submission(env, word, new_def, credit) {
+  const link_uri = `https://acronymy.net/define/${word}`;
+  const link_text = `acronymy.net/define/${word}`;
+
+  const attribution = credit_to_attribution_string(credit);
   const text = new_def + '\n\n' + `${link_text}` + `\n${attribution}`;
   const record = {
     "text": text,
@@ -533,47 +547,49 @@ function validate_username(username) {
 
 async function update_def(req, env, word, definition, username) {
   const db = env.DB;
+  let timestamp = Date.now();
 
   // First, check whether this is a restoration of an old definition.
   let stmt0 = db.prepare(
     "SELECT word, def, author, timestamp, original_author, original_timestamp FROM defs_log WHERE word = ?1 AND def = ?2 ORDER BY timestamp ASC LIMIT 1;");
   stmt0 = stmt0.bind(word, definition);
   const result = await stmt0.first();
-  let original_author = null;
-  let original_timestamp = null;
+  let credit = { author: username, timestamp: timestamp };
+  let is_restoration = false;
   if (result) {
+    is_restoration = true;
+    credit.restorer = username;
     if (result.original_timestamp == null) {
-      original_author = result.author;
-      original_timestamp = result.timestamp;
+      credit.author = result.author;
+      credit.timestamp = result.timestamp;
     } else {
       // The oldest entry in the log is a restoration.
       // Apparently the original was deleted somehow.
-      original_author = result.original_author;
-      original_timestamp = result.original_timestamp;
+      credit.author = result.original_author;
+      credit.timestamp = result.original_timestamp;
     }
   }
+  // credit.author is the original author
+  // credit.timestamp is the time of the original submission
+  // credit.restorer is the restoring author
+  //    (this key is not present if this is not a restoration)
 
   let stmt1 = db.prepare(
     "INSERT INTO defs_log (word, def, author, timestamp, ip, original_author, original_timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)");
-  let timestamp = Date.now();
-  let metadata= { time: timestamp };
+  let metadata = { time: credit.timestamp };
 
   let ip = null;
   if (req && req.headers.has('cf-connecting-ip')) {
     ip = req.headers.get('cf-connecting-ip');
     metadata['ip'] = ip;
   }
-  let author = null;
-  if (username && validate_username(username).valid) {
-    author = username;
-    metadata['user'] = author;
-  }
-  if (original_timestamp != null) {
-    metadata['time'] = original_timestamp;
-    metadata['user'] = original_author;
+  if (credit.author) {
+    metadata['user'] = credit.author;
   }
 
-  stmt1 = stmt1.bind(word, definition, author, timestamp, ip,
+  const original_author = is_restoration ? credit.author : null;
+  const original_timestamp = is_restoration ? credit.timestamp : null;
+  stmt1 = stmt1.bind(word, definition, username, timestamp, ip,
                      original_author, original_timestamp);
   let stmt2 = db.prepare(
     "INSERT INTO defs (word, def_id) VALUES (?1, last_insert_rowid()) " +
@@ -582,11 +598,11 @@ async function update_def(req, env, word, definition, username) {
 
   await db.batch([stmt1, stmt2]);
 
-  let p3 = toot_submission(env, word, definition, username).catch((e) => {
+  let p3 = toot_submission(env, word, definition, credit).catch((e) => {
     console.log("error on toot attempt: ", e);
   });
 
-  let p4 = bloot_submission(env, word, definition, username).catch((e) => {
+  let p4 = bloot_submission(env, word, definition, credit).catch((e) => {
     console.log("error on bloot attempt: ", e);
   });
 
@@ -717,6 +733,9 @@ async function handle_get(req, env) {
       let name = components[0].trim();
       if (name == 'username') {
         username = components[1];
+        if (!validate_username(username).valid) {
+          return new Response("invalid username", {status: 400});
+        }
       } else if (name == 'defined-just-now') {
         defined_just_now = components[1];
       }
