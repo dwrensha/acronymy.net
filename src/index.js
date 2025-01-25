@@ -982,7 +982,7 @@ async function handle_get(req, env) {
     }
     response_string += render_footer({"username" : username},
                        `<a class="home-link" href=\"/\">Acronymy</a>`,
-                       "/suggest-word");
+                       url.pathname + url.search);
   } else if (url.pathname.startsWith("/suggest-word-status/")) {
     response_string = header(` Acronymy - suggested word `);
     let id = url.pathname.slice("/suggest-word-status/".length);
