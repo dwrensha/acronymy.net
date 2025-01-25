@@ -76,7 +76,6 @@ async function render_leaderboard(env) {
     await env.META.put(LEADERBOARD_KEY, JSON.stringify(leaderboard_obj),
                        {expirationTtl: 60 * 60 * 4})
   }
-  console.log(leaderboard_obj.timestamp);
   let timestamp = (new Date(leaderboard_obj.timestamp)).toUTCString();
   let response = "<div class='leaderboard full-width'>";
   response += "<h2>Leaderboard</h2>";
