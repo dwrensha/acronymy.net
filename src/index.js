@@ -100,7 +100,10 @@ async function render_home_page(env) {
 
   let response_string = `<div class=\"title\">Acronymy</div>
 <div>Can we define every word as an acronym?</div>
-<div class="status full-width"><ul>
+<div class="status full-width">
+<ul>
+<li>Today's featured word is
+  <b><a href="/define/${word_of_the_day}">${word_of_the_day}</a></b>.</li>
 <li>${status.num_defined} out of ${status.total_num_words} words have been defined (${percent}%).</li>
 <li>Top contributors are listed on the <a href="/leaderboard">leaderboard</a>.</li>
 <li>
@@ -115,8 +118,6 @@ Activity is logged at <a href="https://bsky.app/profile/acronymy.net">@acronymy.
     }
   }
   response_string += ".</li>";
-  response_string += "<li>Today's featured word is ";
-  response_string += `<b><a href="/define/${word_of_the_day}">${word_of_the_day}</a></b>.`;
   response_string += `</div>`;
 
   response_string += '<div class="feeling-lucky full-width">'
