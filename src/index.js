@@ -112,7 +112,8 @@ async function render_home_page(env) {
   let response_string = `<div class=\"title\">Acronymy</div>
 <div class="catchphrase">Can we define every word as an acronym?</div>
 <div class="status full-width">
-<div class="progress-bar">
+<div class="progress-bar"
+     title="So far, we have defined ${status.num_defined} words out of ${status.total_num_words}.">
  <div class="progress-bar-total">
    <div class="progress-bar-done" style="width:${percent}%"> </div>
  </div>
