@@ -38,6 +38,11 @@ div {
 .status {
   padding-bottom: 0;
 }
+.featured {
+  padding-bottom: 3px;
+  padding-top: 3px;
+  font-style: italic;
+}
 .word {
   text-align: center;
   font-size: 500%;

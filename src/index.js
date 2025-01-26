@@ -95,15 +95,25 @@ async function render_leaderboard(env) {
 async function render_home_page(env) {
   let status = JSON.parse(await env.META.get(STATUS_KEY));
   let word_of_the_day = status.word_of_the_day;
+  let word_of_the_day_def = status.word_of_the_day_def;
   let timestamp = new Date(status.timestamp);
   let percent = (100 * status.num_defined / status.total_num_words).toFixed(4);
+
+  let wotd = `Today's featured word is
+              <b><a href="/define/${word_of_the_day}">${word_of_the_day}</a></b>:`;
+  wotd += `<div class="featured">"`;
+  let ii = 0;
+  for (let def_word of word_of_the_day_def.split(" ")) {
+    if (ii++ != 0) { wotd += " "; }
+    wotd += "<b>" + def_word[0] + "</b>" + def_word.slice(1);
+  }
+  wotd += `"</div>`;
 
   let response_string = `<div class=\"title\">Acronymy</div>
 <div>Can we define every word as an acronym?</div>
 <div class="status full-width">
 <ul>
-<li>Today's featured word is
-  <b><a href="/define/${word_of_the_day}">${word_of_the_day}</a></b>.</li>
+<li>${wotd}</li>
 <li>${status.num_defined} out of ${status.total_num_words} words have been defined (${percent}%).</li>
 <li>Top contributors are listed on the <a href="/leaderboard">leaderboard</a>.</li>
 <li>
