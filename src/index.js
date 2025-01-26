@@ -115,10 +115,6 @@ async function render_home_page(env) {
 <ul>
 <li>${wotd}</li>
 <li>${status.num_defined} out of ${status.total_num_words} words have been defined (${percent}%).</li>
-<li>Top contributors are listed on the <a href="/leaderboard">leaderboard</a>.</li>
-<li>
-Activity is logged at <a href="https://bsky.app/profile/acronymy.net">@acronymy.net</a>, and <a href="https://bsky.app/profile/daily.acronymy.net">@daily.acronymy.net</a>.
-</li>
 <li>Recently defined words include: `;
   for (let ii = 0; ii < status.recently_defined.length; ++ii) {
     let w = status.recently_defined[ii];
@@ -127,7 +123,13 @@ Activity is logged at <a href="https://bsky.app/profile/acronymy.net">@acronymy.
       response_string += ", ";
     }
   }
-  response_string += ".</li></ul>";
+  response_string += `.</li>`;
+  response_string +=
+   `<li>
+     Activity is logged at <a href="https://bsky.app/profile/acronymy.net">@acronymy.net</a> and <a href="https://bsky.app/profile/daily.acronymy.net">@daily.acronymy.net</a>.
+   </li>
+  <li>Top contributors are listed on the <a href="/leaderboard">leaderboard</a>.</li>`
+  response_string += `</ul>`;
   response_string += `</div>`;
 
   response_string += '<div class="feeling-lucky full-width">'
