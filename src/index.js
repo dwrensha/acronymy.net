@@ -110,7 +110,7 @@ async function render_home_page(env) {
   wotd += `"</div>`;
 
   let response_string = `<div class=\"title\">Acronymy</div>
-<div>Can we define every word as an acronym?</div>
+<div class="catchphrase">Can we define every word as an acronym?</div>
 <div class="status full-width">
 <div class="progress-bar">
  <div class="progress-bar-total">

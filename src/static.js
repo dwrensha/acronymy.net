@@ -35,6 +35,9 @@ export const MAIN_CSS =
 div {
   padding-bottom: 10pt;
 }
+.catchphrase {
+  padding-bottom: 9px;
+}
 .progress-bar {
   width: 100%;
   height: 16px;
@@ -89,7 +92,7 @@ div {
 .title {
   text-align: center;
   font-size: 500%;
-  padding-bottom: 5px;
+  padding-bottom: 3px;
 }
 .attribution {
    font-size: 11px;
