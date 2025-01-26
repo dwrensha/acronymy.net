@@ -39,12 +39,16 @@ div {
   padding-bottom: 9px;
 }
 .progress-bar {
+  box-sizing: content-box;
+  padding-bottom: 4px;
   width: 100%;
   height: 16px;
   display: flex;
   justify-content: center;
 }
 .progress-bar-total {
+  box-sizing: content-box;
+  padding: 0px;
   border: 1px solid #000;
   width: 75%;
   background-color: #e1e2e3;
