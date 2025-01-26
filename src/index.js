@@ -100,11 +100,12 @@ async function render_home_page(env) {
 
   let response_string = `<div class=\"title\">Acronymy</div>
 <div>Can we define every word as an acronym?</div>
-<div class="follow">Follow at <a href="https://social.wub.site/@acronymy">@acronymy</a> or
-<a href="https://social.wub.site/@daily_acronymy">@daily_acronymy</a>.</div>
 <div class="status full-width"><ul>
 <li>${status.num_defined} out of ${status.total_num_words} words have been defined (${percent}%).</li>
 <li>Top contributors are listed on the <a href="/leaderboard">leaderboard</a>.</li>
+<li>
+Activity is logged at <a href="https://bsky.app/profile/acronymy.net">@acronymy.net</a>, and <a href="https://bsky.app/profile/daily.acronymy.net">@daily.acronymy.net</a>.
+</li>
 <li>Recently defined words include: `;
   for (let ii = 0; ii < status.recently_defined.length; ++ii) {
     let w = status.recently_defined[ii];

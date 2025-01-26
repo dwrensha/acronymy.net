@@ -38,9 +38,6 @@ div {
 .status {
   padding-bottom: 0;
 }
-.follow {
-  font-size: 15px;
-}
 .word {
   text-align: center;
   font-size: 500%;
