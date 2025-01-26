@@ -204,6 +204,7 @@ a[class="home-link"] {
 .recents {
   border-style: dotted;
   padding: 9px;
+  margin-bottom: 4px;
 }
 .social-links {
  text-align: center;
@@ -216,8 +217,6 @@ a[class="home-link"] {
 }
 
 .leaderboard-link {
- margin: 10px;
- padding: 5px;
  text-align: center;
 }
 

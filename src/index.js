@@ -130,18 +130,19 @@ ${status.num_defined} out of ${status.total_num_words} (${percent}%)</div>
     }
   }
   response_string += `.</div>`
-  response_string += `<div class="leaderboard-link">
-                      <span>🏆 <a href="/Leaderboard">Leaderboard</a> 🏆</span></div>`;
-  response_string +=
-   `<div class="social-links">
-     Follow <a href="https://bsky.app/profile/acronymy.net">@acronymy.net</a> &amp; <a href="https://bsky.app/profile/daily.acronymy.net">@daily.acronymy.net</a>.
-   </div>`;
-  response_string += `</div>`;
-
   response_string += '<div class="feeling-lucky full-width">'
   response_string += `<a class="lucky-link" href="/random">random defined word</a>
                         <a class="lucky-link" href="/random-todo">random undefined word</a>`;
   response_string += "</div>"
+  response_string +=
+   `<div class="social-links">
+     Follow <a href="https://bsky.app/profile/acronymy.net">@acronymy.net</a> &amp; <a href="https://bsky.app/profile/daily.acronymy.net">@daily.acronymy.net</a>.
+   </div>`;
+
+  response_string += `<div class="leaderboard-link">
+                      <span>🏆 <a href="/leaderboard">Leaderboard</a> 🏆</span></div>`;
+  response_string += `</div>`;
+
   return response_string;
 }
 
