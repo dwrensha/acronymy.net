@@ -1119,7 +1119,10 @@ async function choose_new_word_of_the_day(env) {
 async function refresh_status(env) {
   const db = env.DB;
   let stmt1 = db.prepare(
-    "SELECT word_of_the_day, wotd_timestamp, num_defined, total_num_words FROM status;");
+    `SELECT word_of_the_day, def, wotd_timestamp, num_defined, total_num_words
+      FROM status JOIN defs ON defs.word = status.word_of_the_day
+      JOIN defs_log ON defs.def_id =defs_log.rowid;`
+  );
   let stmt2 = db.prepare(
     "SELECT DISTINCT(word) FROM defs_log ORDER BY timestamp DESC LIMIT 10;");
   const rows = await db.batch([stmt1, stmt2]);
@@ -1130,6 +1133,7 @@ async function refresh_status(env) {
   let status = {
     timestamp: status_row.wotd_timestamp,
     word_of_the_day: status_row.word_of_the_day,
+    word_of_the_day_def: status_row.def,
     num_defined: status_row.num_defined,
     total_num_words: status_row.total_num_words,
     recently_defined: recently_defined
