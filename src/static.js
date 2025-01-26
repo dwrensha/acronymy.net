@@ -36,7 +36,7 @@ div {
   padding-bottom: 10pt;
 }
 .catchphrase {
-  padding-bottom: 9px;
+  padding-bottom: 13px;
 }
 .progress-bar {
   box-sizing: content-box;
