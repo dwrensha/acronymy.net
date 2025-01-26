@@ -224,9 +224,7 @@ a[class="home-link"] {
 }
 
 .leaderboard-link span {
- border: 1px solid #aaa;
  padding: 4px;
- background-color: #fafafa;
 }
 
 
