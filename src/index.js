@@ -131,7 +131,7 @@ ${status.num_defined} out of ${status.total_num_words} (${percent}%)</div>
   }
   response_string += `.</div>`
   response_string += `<div class="leaderboard-link">
-                      <a href="/Leaderboard">🏆 Leaderboard 🏆</a></div>`;
+                      <span>🏆 <a href="/Leaderboard">Leaderboard</a> 🏆</span></div>`;
   response_string +=
    `<div class="social-links">
      Follow <a href="https://bsky.app/profile/acronymy.net">@acronymy.net</a> &amp; <a href="https://bsky.app/profile/daily.acronymy.net">@daily.acronymy.net</a>.

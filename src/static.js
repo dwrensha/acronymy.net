@@ -189,7 +189,7 @@ a[class="home-link"] {
 }
 
 .wotd {
-  font-size: 20px;
+  font-size: 18px;
   padding-left: 20px;
   padding-right: 20px;
 }
@@ -221,7 +221,7 @@ a[class="home-link"] {
  text-align: center;
 }
 
-.leaderboard-link a {
+.leaderboard-link span {
  border: 1px solid #aaa;
  padding: 4px;
  background-color: #fafafa;
