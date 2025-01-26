@@ -99,9 +99,9 @@ async function render_home_page(env) {
   let timestamp = new Date(status.timestamp);
   let percent = (100 * status.num_defined / status.total_num_words).toFixed(4);
 
-  let wotd = `Today's featured word is
+  let wotd = `Today's word is
               <b><a href="/define/${word_of_the_day}">${word_of_the_day}</a></b>:`;
-  wotd += `<div class="featured">"`;
+  wotd += `<div class="wotd-def">"`;
   let ii = 0;
   for (let def_word of word_of_the_day_def.split(" ")) {
     if (ii++ != 0) { wotd += " "; }
@@ -112,10 +112,16 @@ async function render_home_page(env) {
   let response_string = `<div class=\"title\">Acronymy</div>
 <div>Can we define every word as an acronym?</div>
 <div class="status full-width">
-<ul>
-<li>${wotd}</li>
-<li>${status.num_defined} out of ${status.total_num_words} words have been defined (${percent}%).</li>
-<li>Recently defined words include: `;
+<div class="progress-bar">
+ <div class="progress-bar-total">
+   <div class="progress-bar-done" style="width:${percent}%"> </div>
+ </div>
+</div>
+<div class="progress-bar-caption">
+${status.num_defined} out of ${status.total_num_words} (${percent}%)</div>
+<div class="wotd">${wotd}
+</div>
+<div class="recents">Recent edits: `
   for (let ii = 0; ii < status.recently_defined.length; ++ii) {
     let w = status.recently_defined[ii];
     response_string += `<a href="/define/${w}">${w}</a>`;
@@ -123,13 +129,13 @@ async function render_home_page(env) {
       response_string += ", ";
     }
   }
-  response_string += `.</li>`;
+  response_string += `.</div>`
+  response_string += `<div class="leaderboard-link">
+                      <a href="/Leaderboard">🏆 Leaderboard 🏆</a></div>`;
   response_string +=
-   `<li>
-     Activity is logged at <a href="https://bsky.app/profile/acronymy.net">@acronymy.net</a> and <a href="https://bsky.app/profile/daily.acronymy.net">@daily.acronymy.net</a>.
-   </li>
-  <li>Top contributors are listed on the <a href="/leaderboard">leaderboard</a>.</li>`
-  response_string += `</ul>`;
+   `<div class="social-links">
+     Follow <a href="https://bsky.app/profile/acronymy.net">@acronymy.net</a> &amp; <a href="https://bsky.app/profile/daily.acronymy.net">@daily.acronymy.net</a>.
+   </div>`;
   response_string += `</div>`;
 
   response_string += '<div class="feeling-lucky full-width">'

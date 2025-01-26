@@ -35,13 +35,30 @@ export const MAIN_CSS =
 div {
   padding-bottom: 10pt;
 }
+.progress-bar {
+  width: 100%;
+  height: 16px;
+  display: flex;
+  justify-content: center;
+}
+.progress-bar-total {
+  border: 1px solid #000;
+  width: 75%;
+  background-color: #e1e2e3;
+  height: 16px;
+}
+
+.progress-bar-done {
+  background-color: #009F67;
+  height: 16px;
+}
+
+.progress-bar-caption {
+  text-align: center;
+  font-size: 15px;
+}
 .status {
   padding-bottom: 0;
-}
-.featured {
-  padding-bottom: 3px;
-  padding-top: 3px;
-  font-style: italic;
 }
 .word {
   text-align: center;
@@ -72,6 +89,7 @@ div {
 .title {
   text-align: center;
   font-size: 500%;
+  padding-bottom: 5px;
 }
 .attribution {
    font-size: 11px;
@@ -170,12 +188,45 @@ a[class="home-link"] {
   border-width: 1px;
 }
 
-.status {
+.wotd {
+  font-size: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.wotd-def {
+  padding-bottom: 3px;
+  padding-top: 3px;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-style: italic;
+}
+
+.recents {
   border-style: dotted;
+  padding: 9px;
+}
+.social-links {
+ text-align: center;
+ font-size: 15px;
+}
+.status {
   text-align: left;
   margin: auto;
   font-size: 17px;
 }
+
+.leaderboard-link {
+ margin: 10px;
+ padding: 5px;
+ text-align: center;
+}
+
+.leaderboard-link a {
+ border: 1px solid #aaa;
+ padding: 4px;
+ background-color: #fafafa;
+}
+
 
 .about {
   text-align: left;
