@@ -209,8 +209,12 @@ function render_footer(options, home_or_about, login_redirect) {
   return result;
 }
 
-function render_home_footer(maybe_username) {
-  return render_footer({"username" : maybe_username, "autofocus_define": true},
+function render_home_footer(maybe_username, req) {
+  // HACK: if the user agent indicates that we're on mobile, then
+  // don't add the autofocus.
+  const user_agent = req.headers.get('user-agent') || '';
+  const is_mobile = /Mobile|Android|iP(hone|ad|od)|IEMobile|BlackBerry|Opera Mini/i.test(user_agent);
+  return render_footer({"username" : maybe_username, "autofocus_define": !is_mobile},
                        `<a class="about-link" href="/about">about</a>`,
                        "/");
 }
@@ -975,7 +979,7 @@ async function handle_get(req, env) {
     }
   } else if (url.pathname == "/") {
     response_string += await render_home_page(env);
-    response_string += render_home_footer(username);
+    response_string += render_home_footer(username, req);
   } else if (url.pathname == "/suggest-word") {
     response_string = header(` Acronymy - suggest word `);
     response_string += "<h3>suggest a new word</h3>"
