@@ -191,11 +191,6 @@ a[class="home-link"] {
   border-width: 1px;
 }
 
-.wotd {
-  font-size: 18px;
-  padding-left: 20px;
-  padding-right: 20px;
-}
 .wotd-def {
   padding-bottom: 3px;
   padding-top: 3px;
@@ -203,11 +198,12 @@ a[class="home-link"] {
   padding-right: 10px;
   font-style: italic;
 }
-
-.recents {
+.wotd-and-recents {
   border-style: dotted;
   padding: 9px;
+  padding-left: 24px;
   margin-bottom: 4px;
+  margin-top: 0px;
 }
 .social-links {
  text-align: center;
@@ -226,7 +222,6 @@ a[class="home-link"] {
 .leaderboard-link span {
  padding: 4px;
 }
-
 
 .about {
   text-align: left;

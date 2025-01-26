@@ -120,9 +120,10 @@ async function render_home_page(env) {
 </div>
 <div class="progress-bar-caption">
 ${status.num_defined} out of ${status.total_num_words} (${percent}%)</div>
-<div class="wotd">${wotd}
-</div>
-<div class="recents">Recent edits: `
+<ul class="wotd-and-recents">
+<li class="wotd">${wotd}
+</li>
+<li class="recents">Recent edits: `
   for (let ii = 0; ii < status.recently_defined.length; ++ii) {
     let w = status.recently_defined[ii];
     response_string += `<a href="/define/${w}">${w}</a>`;
@@ -130,7 +131,8 @@ ${status.num_defined} out of ${status.total_num_words} (${percent}%)</div>
       response_string += ", ";
     }
   }
-  response_string += `.</div>`
+  response_string += `.</li>`;
+  response_string += `</ul>`;
   response_string += '<div class="feeling-lucky full-width">'
   response_string += `<a class="lucky-link" href="/random">random defined word</a>
                         <a class="lucky-link" href="/random-todo">random undefined word</a>`;
