@@ -127,7 +127,7 @@ Activity is logged at <a href="https://bsky.app/profile/acronymy.net">@acronymy.
       response_string += ", ";
     }
   }
-  response_string += ".</li>";
+  response_string += ".</li></ul>";
   response_string += `</div>`;
 
   response_string += '<div class="feeling-lucky full-width">'
