@@ -74,7 +74,7 @@ div {
 }
 .word {
   text-align: center;
-  font-size: 500%;
+  font-size: 350%;
   font-weight: bold;
 }
 .extra-long {
