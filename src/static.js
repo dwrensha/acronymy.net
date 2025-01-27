@@ -24,13 +24,18 @@ export const MAIN_CSS =
 .word { font-family: Helvetica, Sans, Arial; }
 .definition {
    font-size: 28px;
+   width: 530px;
+   margin: auto;
 }
 .about-definition {
    font-size: 30px;
    text-align: center;
 }
 @media (max-width: 530px) {
-  .definition { font-size: 7vw; }
+  .definition {
+   font-size: 7vw;
+   width: 100%;
+  }
 }
 div {
   padding-bottom: 10pt;
