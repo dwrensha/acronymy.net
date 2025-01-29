@@ -66,7 +66,7 @@ async function render_leaderboard(env) {
        from (select * from defs left join defs_log
              where defs.def_id = defs_log.rowid)
        where not author is null
-       group by author order by count DESC LIMIT 30;`);
+       group by author order by count DESC LIMIT 40;`);
     const result = await stmt.all();
     let leaderboard_array = result.results;
     leaderboard_obj = {
@@ -78,7 +78,7 @@ async function render_leaderboard(env) {
   }
   let timestamp = (new Date(leaderboard_obj.timestamp)).toUTCString();
   let response = "<div class='leaderboard full-width'>";
-  response += "<h2>Leaderboard</h2>";
+  response += `<h2><a href="/">Acronymy</a> Leaderboard</h2>`;
   response += `<div class='timestamp'>(as of ${timestamp})</div>`;
   response += "<div class='leaderboard-holder'><table>";
   response += "<thead><tr><th></th><th>author</th><th>defs</th></tr></thead>";

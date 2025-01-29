@@ -257,9 +257,8 @@ font-size: 12px;
 }
 .leaderboard-holder table td {
   border: 1px solid #ccc;
-  padding: 5px;
+  padding: 1px 5px;
 }
-
 
 .status-title {
   margin-left: 20px;
