@@ -42,11 +42,7 @@ The source code of Acronymy is hosted
 Please report any bugs or feature requests there.
 </p>
 
-<p>— David Renshaw</p>
-<ul>
-<li><a href="https://twitter.com/dwrensha">@dwrensha</a> on Twitter</li>
-<li><a href="https://social.wub.site/@david">@david@social.wub.site</a> on Mastodon</li>
-</ul>
+<p>— <a href="https://dwrensha.ws">David Renshaw</a></p>
 </div>`;
 }
 
