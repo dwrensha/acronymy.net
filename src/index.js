@@ -17,25 +17,23 @@ function render_about_page() {
 <div class=\"about-definition\">${about}</div>
 <p>
 <a href="/">Acronymy</a> is a backronym dictionary that anyone can edit.
-I like to think of it as a massively multiplayer collaborative
-online word game.
+I like to think of it as a massively multiplayer online collaborative
+word game.
 </p>
+
+<p>Acronymy begin life in 2014 as one of the first <a href="https://sandstorm.org/">Sandstorm</a> apps.
+In 2022, I ported it to the
+<a href="https://workers.cloudflare.com/">Cloudflare Workers</a>
+platform
+and gave it a major overhaul.
+</p>
+
 <p>
-This <a href="http://youtu.be/LjOHnXRIp4Y">3-minute video from SIGBOVIK 2023</a>
-provides a good introduction.
-The video also describes a tool called Acronymy Assistant
+For SIGBOVIK 2023, I made a <a href="http://youtu.be/LjOHnXRIp4Y">3-minute video</a>
+about Acronymy and a tool called Acronymy Assistant
 that can compose definitions automatically.
 </p>
 
-<p>I created the initial basic version of Acronymy in 2014 as one of the first <a href="https://sandstorm.io/">Sandstorm</a> apps.</p>
-
-<p>In September 2022, I rewrote it
-using <a href="https://developers.cloudflare.com/workers/">Cloudflare Workers</a>
-and moved it to its current URL,
-<a href="https://acronymy.net">https://acronymy.net</a>.
-Over the subsequent months, I added mobile-friendly CSS, user logins, edit history,
-and lots of incremental improvements.
-</p>
 
 <p>
 The source code of Acronymy is hosted
