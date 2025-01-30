@@ -3,13 +3,13 @@ import { FAVICON, MAIN_CSS, ROBOTS_TXT } from "./static.js";
 
 
 function render_about_page() {
-  let about_defs = ["a bit of unembellished truth",
-                    "a bunch of unfamiliar terminology",
-                    "additional background outlining underlying themes",
-                    "amazing book offering unlikely thoughts",
-                    "amusing because of unforeseen twists",
-                    "acronyms bolster our understanding tremendously",
-                    "always be obsessively uploading things"];
+  let about_defs = [//"a bit of unembellished truth",
+                    //"a bunch of unfamiliar terminology",
+                    //"additional background outlining underlying themes",
+                    //"amazing book offering unlikely thoughts",
+                    //"amusing because of unforeseen twists",
+                    //"always be obsessively uploading things",
+                    "acronyms bolster our understanding tremendously"];
   let idx = Math.floor(Math.random() * about_defs.length);
   let about = about_defs[idx];
   return `<div class="about full-width">
