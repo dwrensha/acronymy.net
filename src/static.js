@@ -23,12 +23,12 @@ export const MAIN_CSS =
 }
 .word { font-family: Helvetica, Sans, Arial; }
 .definition {
-   font-size: 28px;
+   font-size: 27px;
    width: 530px;
    margin: auto;
 }
 .about-definition {
-   font-size: 30px;
+   font-size: 27px;
    text-align: center;
 }
 @media (max-width: 530px) {
