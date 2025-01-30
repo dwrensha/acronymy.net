@@ -16,8 +16,9 @@ function render_about_page() {
 <div class=\"word\">about</div>
 <div class=\"about-definition\">${about}</div>
 <p>
-I like to think of Acronymy as a massively multiplayer
-collaborative online word game.
+<a href="/">Acronymy</a> is a backronym dictionary that anyone can edit.
+I like to think of it as a massively multiplayer collaborative
+online word game.
 </p>
 <p>
 This <a href="http://youtu.be/LjOHnXRIp4Y">3-minute video from SIGBOVIK 2023</a>
