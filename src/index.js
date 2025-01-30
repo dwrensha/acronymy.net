@@ -25,15 +25,15 @@ word game.
 In 2022, I ported it to the
 <a href="https://workers.cloudflare.com/">Cloudflare Workers</a>
 platform
-and gave it a major overhaul.
+and added many new features such as definition history and user login.
 </p>
 
 <p>
 For SIGBOVIK 2023, I made a <a href="http://youtu.be/LjOHnXRIp4Y">3-minute video</a>
-about Acronymy and a tool called Acronymy Assistant
-that can compose definitions automatically.
+about Acronymy, including a discussion of
+<a href="https://github.com/dwrensha/acronymy-assistant">Acronymy Assistant</a>,
+which is a tool that can provide automatic help in backronym construction.
 </p>
-
 
 <p>
 The source code of Acronymy is hosted
