@@ -69,13 +69,13 @@ async function render_leaderboard(env) {
       timestamp: Date.now(),
       rows: leaderboard_array
     };
-    await env.META.put(LEADERBOARD_KEY, JSON.stringify(leaderboard_obj),
-                       {expirationTtl: 60 * 60 * 4})
+    await env.META.put(LEADERBOARD_KEY, JSON.stringify(leaderboard_obj));
+    //{expirationTtl: 60 * 60 * 4})
   }
   let timestamp = (new Date(leaderboard_obj.timestamp)).toUTCString();
   let response = "<div class='leaderboard full-width'>";
   response += `<h2><a href="/">Acronymy</a> Leaderboard</h2>`;
-  response += `<div class='timestamp'>(as of ${timestamp})</div>`;
+  //response += `<div class='timestamp'>(as of ${timestamp})</div>`;
   response += "<div class='leaderboard-holder'><table>";
   response += "<thead><tr><th></th><th>author</th><th>defs</th></tr></thead>";
   response += "<tbody>"
@@ -630,10 +630,12 @@ async function update_def(req, env, word, definition, username) {
     console.log("error on bloot attempt: ", e);
   });
 
+  let p5 = env.META.delete(LEADERBOARD_KEY);
+
   await Promise.all(
     [refresh_status(env),
      env.WORDS.put(word, definition, {metadata}),
-     p3, p4]);
+     p3, p4, p5]);
 }
 
 async function get_random_defined_word(env) {
