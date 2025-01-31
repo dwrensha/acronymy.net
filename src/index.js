@@ -25,7 +25,7 @@ word game.
 In 2022, I ported it to the
 <a href="https://workers.cloudflare.com/">Cloudflare Workers</a>
 platform
-and added many new features such as definition history and user login.
+and added many new features such as definition history and attribution.
 </p>
 
 <p>
