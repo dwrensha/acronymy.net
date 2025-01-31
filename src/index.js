@@ -484,10 +484,10 @@ async function render_definition(env, word, definition, metadata) {
       if (metadata.user) {
         response_string += ` by ${metadata.user}`;
       }
-      response_string += ` <a href="/history?word=${word}">[history]</a>`
     } else {
       response_string += `—defined before the beginning of history (October 2022)`;
     }
+    response_string += ` <a href="/history?word=${word}">[history]</a>`
     response_string += `</div>`;
   } else {
     response_string += "<div><i>this word has no definition yet</i></div>";
