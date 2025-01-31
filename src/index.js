@@ -908,7 +908,9 @@ async function handle_get(req, env) {
              </form>`;
         }
       }
-      response_string += `</td><td>`;
+      if (entries.length > 1) {
+        response_string += `</td><td>`;
+      }
       response_string += `${entry.def}`;
       response_string += `<p class="history-attribution">`;
       if (!timestamp) {
