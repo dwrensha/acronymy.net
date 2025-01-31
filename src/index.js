@@ -895,7 +895,7 @@ async function handle_get(req, env) {
       }
       response_string += `<tr><td class="restore-col">`;
       if (ii == 0) {
-        response_string += ``;
+        response_string += `<span title="this is the current definition">✓</span>`;
       } else {
         response_string +=
           `<form action="/define/${word}" method="post" class='restore-form'>

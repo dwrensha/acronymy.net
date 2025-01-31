@@ -222,6 +222,7 @@ a[class="home-link"] {
 }
 
 .restore-col {
+  text-align: center;
   width: 67px;
 }
 
