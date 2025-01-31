@@ -154,6 +154,7 @@ a[class="home-link"] {
   display: inline-block;
   margin: 1px;
   height: 25px;
+  line-height: 21px;
 }
 
 .footer-row {
