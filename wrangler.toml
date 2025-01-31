@@ -13,6 +13,9 @@ crons = ["1 0 * * *"] # every day at one minute past midnight
 [env.prod.vars]
 MASTODON_URL = "https://social.wub.site"
 
+[env.prod.observability]
+enabled = true
+
 [[env.prod.kv_namespaces]]
 # WORDS stores definitions, keyed by word
 # These get overwritten when new definitions are submitted.
