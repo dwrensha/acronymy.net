@@ -153,7 +153,7 @@ a[class="home-link"] {
 .logged-in span {
   display: inline-block;
   margin: 1px;
-  height: 26px;
+  height: 25px;
 }
 
 .footer-row {
@@ -163,12 +163,12 @@ a[class="home-link"] {
 
 .footer form input {
   width: 110px;
-  height: 26px;
+  height: 25px;
 }
 
 .footer form button {
   width: 64px;
-  height: 26px;
+  height: 25px;
 }
 
 @media (max-width: 475px) {
