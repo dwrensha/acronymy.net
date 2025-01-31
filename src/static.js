@@ -217,6 +217,10 @@ a[class="home-link"] {
   display: inline;
 }
 
+.expunge-button {
+  color: red;
+}
+
 .not-defined {
   border-style: dotted;
   border-width: 1px;

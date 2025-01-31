@@ -904,7 +904,7 @@ async function handle_get(req, env) {
         if (authorization_header_validates_as_admin(env.ADMIN_PASSWORD, req.headers.get("Authorization"))) {
           response_string +=
             `<form action="/expunge/${entry.rowid}" method="post" class='restore-form'>
-             <button>expunge</button>
+             <button class="expunge-button">expunge</button>
              </form>`;
         }
       }
