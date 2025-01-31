@@ -879,7 +879,10 @@ async function handle_get(req, env) {
 
     response_string += `<div>history of definitions for
                         <a href="/define/${word}">${word}</a>:</div>`;
-    response_string += `<div class="history full-width"><ul>`
+    response_string += `<div class="history full-width">`;
+    response_string += "<table>";
+    response_string += "<thead><tr></thead>";
+    response_string += "<tbody>"
     for (let ii = 0; ii < entries.length; ++ii) {
       let entry = entries[ii];
       let author = entry.author;
@@ -890,13 +893,13 @@ async function handle_get(req, env) {
         timestamp = entry.original_timestamp;
         author = entry.original_author;
       }
-      response_string += `<li>${entry.def}`
-
+      response_string += `<tr><td>`;
       if (ii != 0) {
         response_string +=
           `<form action="/define/${word}" method="post" class='restore-form'>
            <input name=\"definition\" type="hidden" value="${entry.def}"> </input>
-           <button>restore</button>
+           <button title="Restore this definition. The original author will be credited.">
+           restore</button>
            </form>`;
         if (authorization_header_validates_as_admin(env.ADMIN_PASSWORD, req.headers.get("Authorization"))) {
           response_string +=
@@ -905,7 +908,8 @@ async function handle_get(req, env) {
              </form>`;
         }
       }
-
+      response_string += `</td><td>`;
+      response_string += `${entry.def}`;
       response_string += `<p class="history-attribution">`;
       if (!timestamp) {
         response_string += ` — defined before the beginning of history (October 2022)`;
@@ -925,9 +929,10 @@ async function handle_get(req, env) {
         response_string += `</span>`;
       }
       response_string += `</p>`;
-      response_string += `</li>`
+      response_string += `</td>`;
+      response_string += `</tr>`
     }
-    response_string += `</ul></div>`
+    response_string += `</tbody></table></div>`;
     response_string += render_footer(
       {"username" : username},
       `<a class="home-link" href=\"/\">Acronymy</a>`,

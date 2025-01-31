@@ -188,16 +188,24 @@ a[class="home-link"] {
 .history {
    text-align: left;
    margin: auto;
-   font-size: 15px;
+   font-size: 18px;
+
+   display: flex;
+   justify-content: center;
 }
 
-.history li {
-   margin: 5px;
+.history table {
+  border-collapse: collapse;
+}
+.history table td {
+  border: 1px solid #ccc;
+  padding: 1px 5px;
 }
 
 .history-attribution {
+  font-size: 12px;
   font-style: italic;
-  color: #777;
+  color: #797979;
   margin: 0px;
 }
 
@@ -260,10 +268,9 @@ a[class="home-link"] {
 .leaderboard .timestamp {
 font-size: 12px;
 }
-
 .leaderboard-holder {
     display: flex;
-    justify-content: center; /* Centers horizontally */
+    justify-content: center;
 }
 .leaderboard-holder table {
   text-align: left;
