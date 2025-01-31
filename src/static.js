@@ -194,6 +194,7 @@ a[class="home-link"] {
 }
 
 .history table {
+  width: 95%;
   border-collapse: collapse;
 }
 .history table td {
@@ -218,6 +219,10 @@ a[class="home-link"] {
 
 .expunge-button {
   color: red;
+}
+
+.restore-col {
+  width: 67px;
 }
 
 .not-defined {

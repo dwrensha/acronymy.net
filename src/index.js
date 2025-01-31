@@ -893,8 +893,10 @@ async function handle_get(req, env) {
         timestamp = entry.original_timestamp;
         author = entry.original_author;
       }
-      response_string += `<tr><td>`;
-      if (ii != 0) {
+      response_string += `<tr><td class="restore-col">`;
+      if (ii == 0) {
+        response_string += ``;
+      } else {
         response_string +=
           `<form action="/define/${word}" method="post" class='restore-form'>
            <input name=\"definition\" type="hidden" value="${entry.def}"> </input>
@@ -908,9 +910,7 @@ async function handle_get(req, env) {
              </form>`;
         }
       }
-      if (entries.length > 1) {
-        response_string += `</td><td>`;
-      }
+      response_string += `</td><td>`;
       response_string += `${entry.def}`;
       response_string += `<p class="history-attribution">`;
       if (!timestamp) {
