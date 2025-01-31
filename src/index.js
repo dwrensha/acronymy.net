@@ -906,6 +906,7 @@ async function handle_get(req, env) {
         }
       }
 
+      response_string += `<p class="history-attribution">`;
       if (!timestamp) {
         response_string += ` — defined before the beginning of history (October 2022)`;
       } else {
@@ -923,6 +924,7 @@ async function handle_get(req, env) {
         }
         response_string += `</span>`;
       }
+      response_string += `</p>`;
       response_string += `</li>`
     }
     response_string += `</ul></div>`

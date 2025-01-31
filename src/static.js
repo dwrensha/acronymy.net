@@ -188,8 +188,17 @@ a[class="home-link"] {
 .history {
    text-align: left;
    margin: auto;
-   font-size: 14px;
-   font-style: italic;
+   font-size: 15px;
+}
+
+.history li {
+   margin: 5px;
+}
+
+.history-attribution {
+  font-style: italic;
+  color: #777;
+  margin: 0px;
 }
 
 .restored {
