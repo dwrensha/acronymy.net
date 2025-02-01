@@ -902,12 +902,16 @@ async function handle_get(req, env) {
       if (ii == 0) {
         response_string += `<span title="this is the current definition">✓</span>`;
       } else {
-        response_string +=
-          `<form action="/define/${word}" method="post" class='restore-form'>
+        if (entry.def == entries[0].def) {
+          response_string += `<span title="this is the current definition">✓</span>`;
+        } else {
+          response_string +=
+            `<form action="/define/${word}" method="post" class='restore-form'>
            <input name=\"definition\" type="hidden" value="${entry.def}"> </input>
            <button title="Restore this definition. The original author will be credited.">
            restore</button>
            </form>`;
+        }
         if (authorization_header_validates_as_admin(env.ADMIN_PASSWORD, req.headers.get("Authorization"))) {
           response_string +=
             `<form action="/expunge/${entry.rowid}" method="post" class='restore-form'>
