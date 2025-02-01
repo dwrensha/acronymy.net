@@ -56,12 +56,12 @@ async function render_leaderboard(env) {
          case
            when original_timestamp is null then author
            else original_author
-         end as author,
+         end as leaderboard_author,
          count(*) as count
        from (select * from defs left join defs_log
              where defs.def_id = defs_log.rowid)
-       where not author is null
-       group by author order by count DESC LIMIT 40;`);
+       where not leaderboard_author is null
+       group by leaderboard_author order by count DESC LIMIT 40;`);
     const result = await stmt.all();
     let leaderboard_array = result.results;
     leaderboard_obj = {
@@ -80,7 +80,7 @@ async function render_leaderboard(env) {
   response += "<tbody>"
   for (let ii = 0; ii < leaderboard_obj.rows.length; ++ii) {
     let row = leaderboard_obj.rows[ii];
-    response += `<tr><td>${ii + 1}</td><td>${row.author}</td><td>${row.count}</td></tr>`;
+    response += `<tr><td>${ii + 1}</td><td>${row.leaderboard_author}</td><td>${row.count}</td></tr>`;
   }
   response += "</tbody></table></div>"
   response += "<div>";
