@@ -903,7 +903,7 @@ async function handle_get(req, env) {
         response_string += `<span title="this is the current definition">✓</span>`;
       } else {
         if (entry.def == entries[0].def) {
-          response_string += `<span title="this is the current definition">✓</span>`;
+          response_string += `<span title="this is the current definition">-</span>`;
         } else {
           response_string +=
             `<form action="/define/${word}" method="post" class='restore-form'>
