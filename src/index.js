@@ -774,7 +774,8 @@ async function handle_get(req, env) {
     // Redirect to "/define/<word>".
     let word = url.searchParams.get('word');
     if (!word) {
-      return new Response("need to specify word", { status: 400 })
+      // Probably the user manually edited the URL. Send them to the homepage.
+      return new Response("", {status: 302, headers: {'Location': `/`}});
     }
     let encoded_word = encodeURI(word.toLowerCase().trim());
     return new Response("",
@@ -784,9 +785,7 @@ async function handle_get(req, env) {
     let word = url.pathname.slice("/define/".length);
     if (!word) {
       // Probably the user manually edited the URL. Send them to the homepage.
-      return new Response("",
-                          {status: 302,
-                           headers: {'Location': `/`}});
+      return new Response("", {status: 302, headers: {'Location': `/`}});
     }
     response_string = header(` Acronymy - ${word} `);
     let { value, metadata } = await get_word_definition(env, word, defined_just_now);
