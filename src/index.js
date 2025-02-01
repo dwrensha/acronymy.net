@@ -782,6 +782,12 @@ async function handle_get(req, env) {
                          headers: {'Location': `/define/${encoded_word}`, }});
   } else if (url.pathname.startsWith("/define/")) {
     let word = url.pathname.slice("/define/".length);
+    if (!word) {
+      // Probably the user manually edited the URL. Send them to the homepage.
+      return new Response("",
+                          {status: 302,
+                           headers: {'Location': `/`}});
+    }
     response_string = header(` Acronymy - ${word} `);
     let { value, metadata } = await get_word_definition(env, word, defined_just_now);
     let definition = value;
