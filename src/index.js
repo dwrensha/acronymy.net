@@ -415,7 +415,7 @@ async function send_daily_updates(env) {
     str => str.charAt(0).toUpperCase() + str.slice(1)).join(' ');
   let prefix = `The acronym of the day is ${word_of_the_day.toUpperCase()}:\n\n` +
       capitalized_def + "\n\n"+
-      "--------------------------------------------\n\n" +
+      "---\n\n" +
       `To submit a new definition for this word, visit `;
 
   const link_text = `acronymy.net/define/${word_of_the_day}`;
