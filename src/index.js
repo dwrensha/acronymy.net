@@ -94,8 +94,8 @@ async function render_home_page(env) {
   let timestamp = new Date(status.timestamp);
   let percent = (100 * status.num_defined / status.total_num_words).toFixed(4);
 
-  let wotd = `Today's word is
-              <b><a href="/define/${word_of_the_day}">${word_of_the_day}</a></b>:`;
+  let wotd =
+      `Today's word is <b><a href="/define/${word_of_the_day}">${word_of_the_day}</a></b>:`;
   wotd += `<div class="wotd-def">"`;
   let ii = 0;
   for (let def_word of word_of_the_day_def.split(" ")) {
@@ -185,8 +185,8 @@ function render_footer(options, home_or_about, login_redirect) {
 
   let result = `\n<div class="footer full-width"><hr><div class="footer-row">`;
   result += `<form action="/define" method="get">`;
-  result += `<input name="word" maxlength="100" size="15"`;
-  result +=        `placeholder="enter word" ${entered_word} ${autofocus_define} required/>`;
+  result += `<input name="word" maxlength="100" size="15" `;
+  result +=  `placeholder="enter word" ${entered_word} ${autofocus_define} required/>`;
   result += `<button>look up</button></form>`;
   result += home_or_about;
 
