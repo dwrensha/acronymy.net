@@ -572,11 +572,33 @@ async function update_def(req, env, word, definition, username) {
   const db = env.DB;
   let timestamp = Date.now();
 
+  let metadata = {};
+  let ratelimit_promise = Promise.resolve({"count(*)": 0});
+  let ip = null;
+  if (req && req.headers.has('cf-connecting-ip')) {
+    ip = req.headers.get('cf-connecting-ip');
+    metadata['ip'] = ip;
+
+    let stmt_ratelimit = db.prepare(
+      `SELECT count(*) from defs_log where timestamp > ?1 AND ip = ?2`
+    );
+    // get defs from the last 30 minutes that match the ip
+    stmt_ratelimit = stmt_ratelimit.bind(timestamp - 30 * 60 * 1000, ip);
+    ratelimit_promise = stmt_ratelimit.first();
+  }
+
   // First, check whether this is a restoration of an old definition.
   let stmt0 = db.prepare(
     "SELECT word, def, author, timestamp, original_author, original_timestamp FROM defs_log WHERE word = ?1 AND def = ?2 ORDER BY timestamp ASC LIMIT 1;");
   stmt0 = stmt0.bind(word, definition);
-  const result = await stmt0.first();
+
+  const results = await Promise.all([ratelimit_promise, stmt0.first()]);
+  let result_ratelimit = results[0];
+  if (result_ratelimit["count(*)"] > 100) {
+    // more than 100 defs from this IP in the last 30 minutes
+    return {error : {status : 429, message: "Rate limit exceeded."}};
+  }
+  let result = results[1];
   let credit = { author: username, timestamp: timestamp };
   let is_restoration = false;
   if (result) {
@@ -599,13 +621,8 @@ async function update_def(req, env, word, definition, username) {
 
   let stmt1 = db.prepare(
     "INSERT INTO defs_log (word, def, author, timestamp, ip, original_author, original_timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)");
-  let metadata = { time: credit.timestamp };
 
-  let ip = null;
-  if (req && req.headers.has('cf-connecting-ip')) {
-    ip = req.headers.get('cf-connecting-ip');
-    metadata['ip'] = ip;
-  }
+  metadata['time'] = credit.timestamp;
   if (credit.author) {
     metadata['user'] = credit.author;
   }
@@ -635,6 +652,8 @@ async function update_def(req, env, word, definition, username) {
     [refresh_status(env),
      env.WORDS.put(word, definition, {metadata}),
      p3, p4, p5]);
+
+  return { success : true };
 }
 
 async function get_random_defined_word(env) {
@@ -822,15 +841,21 @@ async function handle_get(req, env) {
           let new_def = def_words.join(" ");
           if (new_def != definition) {
             try {
-              await update_def(req, env, word, new_def, username);
-              return new Response("",
-                                  {status: 303,
-                                   headers:
-                                   {'Location': `/define/${word}`,
-                                    'Set-Cookie':
+              let result = await update_def(req, env, word, new_def, username);
+              if (result.success) {
+                return new Response("",
+                                    {status: 303,
+                                     headers:
+                                     {'Location': `/define/${word}`,
+                                      'Set-Cookie':
                                       `defined-just-now=${word}; Max-Age=60`}});
+              } else {
+                let err = result.error;
+                return new Response(err.message,
+                                    { status: err.status});
+              }
             } catch (e) {
-              console.log(e);
+              console.error(e);
               error_message = "<p>error occurred while attempting to write definition</p>";
             }
           }
