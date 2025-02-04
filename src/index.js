@@ -592,13 +592,12 @@ async function update_def(req, env, word, definition, username) {
     "SELECT word, def, author, timestamp, original_author, original_timestamp FROM defs_log WHERE word = ?1 AND def = ?2 ORDER BY timestamp ASC LIMIT 1;");
   stmt0 = stmt0.bind(word, definition);
 
-  const results = await Promise.all([ratelimit_promise, stmt0.first()]);
-  let result_ratelimit = results[0];
+  const [result_ratelimit, result] =
+        await Promise.all([ratelimit_promise, stmt0.first()]);
   if (result_ratelimit["count(*)"] > 100) {
     // more than 100 defs from this IP in the last 30 minutes
     return {error : {status : 429, message: "Rate limit exceeded."}};
   }
-  let result = results[1];
   let credit = { author: username, timestamp: timestamp };
   let is_restoration = false;
   if (result) {
