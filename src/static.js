@@ -165,11 +165,15 @@ a[class="home-link"] {
 .footer form input {
   width: 110px;
   height: 25px;
+  margin-right: 1px;
+  margin-left: 1px;
 }
 
 .footer form button {
   width: 64px;
   height: 25px;
+  padding-top: 2px;
+  padding-bottom: 2px;
 }
 
 @media (max-width: 475px) {
