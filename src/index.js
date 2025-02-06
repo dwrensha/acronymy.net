@@ -61,7 +61,8 @@ async function render_leaderboard(env) {
        from (select * from defs left join defs_log
              where defs.def_id = defs_log.rowid)
        where not leaderboard_author is null
-       group by leaderboard_author order by count DESC LIMIT 40;`);
+       group by leaderboard_author
+       order by count DESC, timestamp DESC LIMIT 40;`);
     const result = await stmt.all();
     let leaderboard_array = result.results;
     leaderboard_obj = {
