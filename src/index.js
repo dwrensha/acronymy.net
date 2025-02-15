@@ -10,7 +10,7 @@ function render_about_page() {
                     //"amusing because of unforeseen twists",
                     //"always be obsessively uploading things",
                     "acronyms bolster our understanding tremendously"];
-  let idx = Math.floor(Math.random() * about_defs.length);
+  let idx = 0; //Math.floor(Math.random() * about_defs.length);
   let about = about_defs[idx];
   return `<div class="about full-width">
 <div class=\"word\">about</div>
@@ -34,6 +34,11 @@ about Acronymy, including a discussion of
 <a href="https://github.com/dwrensha/acronymy-assistant">Acronymy Assistant</a>,
 which is a tool that can provide automatic help in backronym construction.
 </p>
+
+<p>
+After we surpassed 10,000 definitions in December 2024,
+I made a <a href="https://youtu.be/_0tNWWhPYYs">video</a>
+to illustrate some definitions from the top contributors.</p>
 
 <p>
 The source code of Acronymy is hosted
