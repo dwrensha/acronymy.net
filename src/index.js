@@ -321,7 +321,7 @@ async function send_toot(mastodon_url, token, status_text, visibility) {
           headers : {authorization: `Bearer ${token}`,
                     "Content-Type": "application/x-www-form-urlencoded"},
           body : data,
-          signal: AbortSignal.timeout(5000), // timeout after 5 seconds
+          signal: AbortSignal.timeout(3000), // timeout after 3 seconds
         });
 }
 
@@ -337,7 +337,7 @@ async function send_bloot(did, app_password, record) {
         { method : 'POST',
           headers : {"Content-Type": "application/json"},
           body : JSON.stringify(data),
-          signal: AbortSignal.timeout(3000), // timeout after 3 seconds
+          signal: AbortSignal.timeout(2000), // timeout after 2 seconds
         });
   const resp = await api_key_response.json();
   const jwt = resp.accessJwt;
@@ -351,7 +351,7 @@ async function send_bloot(did, app_password, record) {
           body : JSON.stringify({ "collection": "app.bsky.feed.post",
                                   "repo": did,
                                   record : record }),
-          signal: AbortSignal.timeout(3000) // timeout after 3 seconds
+          signal: AbortSignal.timeout(2000) // timeout after 2 seconds
         });
   if (post_response.status != 200) {
     console.error("failed to post to bluesky: ", post_response.status);
@@ -408,6 +408,29 @@ async function bloot_submission(env, word, new_def, credit) {
   };
   const DID = "did:plc:qlphhhwkaycflchuflwocd7b" // @acronymy.net
   await send_bloot(DID, env.BLUESKY_PASSWORD, record);
+}
+
+async function post_to_discord(env, word, new_def, credit) {
+  if (!env.DISCORD_TOKEN) {
+    console.error("No token. Not posting to Discord.");
+  }
+  const link_uri = `https://acronymy.net/define/${word}`;
+  const attribution = credit_to_attribution_string(credit);
+  const content = `[${word}](${link_uri}): ${new_def} \n${attribution}`;
+
+  const post_response = await fetch(
+    "https://discord.com/api/v10/channels/1341274691620306944/messages",
+        { method : 'POST',
+          headers : {
+            "Authorization": "Bot " + env.DISCORD_TOKEN,
+            'Content-Type': 'application/json'
+          },
+          body : JSON.stringify({ "content": content }),
+          signal: AbortSignal.timeout(2000) // timeout after 2 seconds
+        });
+  if (post_response.status != 200) {
+    console.error("failed to post to Discord: ", post_response.status);
+  }
 }
 
 async function send_daily_updates(env) {
@@ -653,10 +676,14 @@ async function update_def(req, env, word, definition, username) {
 
   let p5 = env.META.delete(LEADERBOARD_KEY);
 
+  let p6 = post_to_discord(env, word, definition, credit).catch((e) => {
+    console.log("error on posting to discord: ", e);
+  });
+
   await Promise.all(
     [refresh_status(env),
      env.WORDS.put(word, definition, {metadata}),
-     p3, p4, p5]);
+     p3, p4, p5, p6]);
 
   return { success : true };
 }
