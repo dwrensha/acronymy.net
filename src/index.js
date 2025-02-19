@@ -410,16 +410,13 @@ async function bloot_submission(env, word, new_def, credit) {
   await send_bloot(DID, env.BLUESKY_PASSWORD, record);
 }
 
-async function post_to_discord(env, word, new_def, credit) {
+async function post_to_discord(env, channel_id, content) {
   if (!env.DISCORD_TOKEN) {
     console.error("No token. Not posting to Discord.");
   }
-  const link_uri = `https://acronymy.net/define/${word}`;
-  const attribution = credit_to_attribution_string(credit);
-  const content = `[${word}](${link_uri}): ${new_def} \n${attribution}`;
 
   const post_response = await fetch(
-    "https://discord.com/api/v10/channels/1341274691620306944/messages",
+    `https://discord.com/api/v10/channels/${channel_id}/messages`,
         { method : 'POST',
           headers : {
             "Authorization": "Bot " + env.DISCORD_TOKEN,
@@ -431,6 +428,14 @@ async function post_to_discord(env, word, new_def, credit) {
   if (post_response.status != 200) {
     console.error("failed to post to Discord: ", post_response.status);
   }
+}
+
+async function post_def_to_discord(env, word, new_def, credit) {
+  const link_uri = `https://acronymy.net/define/${word}`;
+  const attribution = credit_to_attribution_string(credit);
+  const content = `[${word}](${link_uri}): ${new_def} \n${attribution}`;
+
+  await post_to_discord(env, "1341274691620306944", content);
 }
 
 async function send_daily_updates(env) {
@@ -676,7 +681,7 @@ async function update_def(req, env, word, definition, username) {
 
   let p5 = env.META.delete(LEADERBOARD_KEY);
 
-  let p6 = post_to_discord(env, word, definition, credit).catch((e) => {
+  let p6 = post_def_to_discord(env, word, definition, credit).catch((e) => {
     console.log("error on posting to discord: ", e);
   });
 
@@ -770,9 +775,18 @@ async function insert_suggestion(env, word, definition, username) {
   const id = get_random_id();
   stmt1 = stmt1.bind(id, word, definition, author, timestamp);
   await db.batch([stmt1]);
-  await toot_admin_notification(
+  const p1 = toot_admin_notification(
     env,
-    `new suggestion: ${word} = ${definition}. https://acronymy.net/suggest-word-admin/${id}`);
+    `new suggestion: ${word} = ${definition}. https://acronymy.net/suggest-word-admin/${id}`)
+        .catch((e) => { console.log("error tooting admin notification: " + e); });
+
+  const p2 = post_to_discord(
+    env,
+    "1341784714092216395", // "suggested-words"
+    `new suggestion: [${word}](https://acronymy.net/suggest-word-status/${id}) = ${definition}`)
+        .catch((e) => { console.log("error posting word suggestion to discord: " + e); });
+  await Promise.all([p1, p2]);
+
   return id;
 }
 
