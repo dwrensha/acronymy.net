@@ -413,6 +413,7 @@ async function bloot_submission(env, word, new_def, credit) {
 async function post_to_discord(env, channel_id, content) {
   if (!env.DISCORD_TOKEN) {
     console.error("No token. Not posting to Discord.");
+    return;
   }
 
   const post_response = await fetch(
@@ -430,10 +431,13 @@ async function post_to_discord(env, channel_id, content) {
   }
 }
 
-async function post_def_to_discord(env, word, new_def, credit) {
+async function post_def_to_discord(env, word, new_def, credit, old_def) {
   const link_uri = `https://acronymy.net/define/${word}`;
   const attribution = credit_to_attribution_string(credit);
-  const content = `[${word}](${link_uri}): ${new_def} \n${attribution}`;
+  let content = `[**${word}**](${link_uri}): ${new_def} \n${attribution}`;
+  if (old_def) {
+    content += `\n_previously: ${old_def}_`
+  }
 
   await post_to_discord(env, "1341274691620306944", content);
 }
@@ -602,7 +606,7 @@ function validate_username(username) {
   return {valid: true};
 }
 
-async function update_def(req, env, word, definition, username) {
+async function update_def(req, env, word, definition, username, old_def) {
   const db = env.DB;
   let timestamp = Date.now();
 
@@ -681,7 +685,7 @@ async function update_def(req, env, word, definition, username) {
 
   let p5 = env.META.delete(LEADERBOARD_KEY);
 
-  let p6 = post_def_to_discord(env, word, definition, credit).catch((e) => {
+  let p6 = post_def_to_discord(env, word, definition, credit, old_def).catch((e) => {
     console.log("error on posting to discord: ", e);
   });
 
@@ -887,7 +891,7 @@ async function handle_get(req, env) {
           let new_def = def_words.join(" ");
           if (new_def != definition) {
             try {
-              let result = await update_def(req, env, word, new_def, username);
+              let result = await update_def(req, env, word, new_def, username, definition);
               if (result.success) {
                 return new Response("",
                                     {status: 303,
