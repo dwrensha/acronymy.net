@@ -4,11 +4,18 @@ import subprocess
 import sys
 
 parser = argparse.ArgumentParser(description="remove a word")
-parser.add_argument("--db", type=str, required=True)
+parser.add_argument("--env", type=str, required=True)
 parser.add_argument("--word", type=str, required=True)
 args = parser.parse_args()
 
-DB= args.db
+ENV = args.env
+if ENV == 'prod':
+    DB = 'acronymy-prod'
+elif ENV == 'dev':
+    DB = 'acronymy-dev'
+else:
+    print("unknown env ", ENV)
+    sys.exit(1)
 WORD = args.word
 
 def run_sqlite_query(query):
@@ -18,9 +25,7 @@ def run_sqlite_query(query):
                             text=True, check=True)
     return json.loads(result.stdout)[0]
 
-
-
-query0 = "select * from words where word = '{word}'".format(word=WORD)
+query0 = "select rowid from words where word = '{word}'".format(word=WORD)
 query0_results = run_sqlite_query(query0)
 if len(query0_results['results']) == 0:
     print("Word is not in list. Aborting.")
@@ -33,12 +38,29 @@ if len(query1_results['results']) > 0:
     print("Word is already in use. Aborting.")
     sys.exit(1)
 
-query2 = "select * from defs where word = '{word}'".format(word=WORD)
-query2_results = run_sqlite_query(query2)
-if len(query2_results['results']) > 0:
-    print("Word is already defined. Aborting.")
+#query2 = "select * from defs where word = '{word}'".format(word=WORD)
+#query2_results = run_sqlite_query(query2)
+#if len(query2_results['results']) > 0:
+#    print("Word is already defined. Aborting.")
+#    sys.exit(1)
+
+query30 = "delete from defs_log where word = '{word}'".format(word=WORD)
+query30_results = run_sqlite_query(query30)
+if not query30_results["success"]:
+    print("Failed to delete word defs_log. Aborting.")
     sys.exit(1)
 
+query31 = "delete from defs where word = '{word}'".format(word=WORD)
+query31_results = run_sqlite_query(query31)
+if not query31_results["success"]:
+    print("Failed to delete word defs. Aborting.")
+    sys.exit(1)
+
+preview = "--preview false"
+if ENV == "dev":
+    preview = "--preview true"
+command = """npx wrangler -e {env} kv key delete {word} --binding WORDS {preview}""".format(env=ENV, word=WORD, preview=preview)
+subprocess.run(command, shell=True, text=True, check=True)
 
 query3 = "delete from words where word = '{word}'".format(word=WORD)
 query3_results = run_sqlite_query(query3)
