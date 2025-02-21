@@ -1043,6 +1043,13 @@ async function handle_get(req, env) {
     const row = await stmt1.first();
     return new Response("", {status: 302, headers: {'Location': `/history?word=${row.word}`}});
 */
+  } else if (url.pathname == "/refresh-status") {
+    const bounce = bounce_if_not_authed(env, req);
+    if (bounce) {
+      return bounce;
+    }
+    await refresh_status(env);
+    return new Response("refreshed", {status : 302, headers: {'Location': '/'}});
   } else if (url.pathname == "/about") {
     response_string += render_about_page();
     response_string += render_about_footer(username);
