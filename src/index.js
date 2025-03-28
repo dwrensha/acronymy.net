@@ -94,7 +94,16 @@ async function render_leaderboard(env) {
 }
 
 async function render_home_page(env) {
-  let status = JSON.parse(await env.META.get(STATUS_KEY));
+  let raw_status = await env.META.get(STATUS_KEY);
+  let status;
+  if (!raw_status) {
+    console.log("no status");
+    status = await refresh_status(env);
+    console.log("status = ", status);
+  } else {
+    status = JSON.parse(raw_status);
+  }
+
   let word_of_the_day = status.word_of_the_day;
   let word_of_the_day_def = status.word_of_the_day_def;
   let timestamp = new Date(status.timestamp);
