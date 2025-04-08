@@ -41,8 +41,8 @@ I made a <a href="https://youtu.be/_0tNWWhPYYs">video</a>
 to illustrate some definitions from the top contributors.</p>
 
 <p>
-There is a <a href="https://discord.gg/v5zD4E38KJ">Discord server</a>
-where you can meet other Acronymy participants.
+If you'd like to meet other Acronymy participants,
+please join our <a href="https://discord.gg/v5zD4E38KJ">Discord server</a>!
 </p>
 
 <p>
