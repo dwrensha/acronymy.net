@@ -41,6 +41,11 @@ I made a <a href="https://youtu.be/_0tNWWhPYYs">video</a>
 to illustrate some definitions from the top contributors.</p>
 
 <p>
+There is a <a href="https://discord.gg/v5zD4E38KJ">Discord server</a>
+where you can meet other Acronymy participants.
+</p>
+
+<p>
 The source code of Acronymy is hosted
 <a href="https://github.com/dwrensha/acronymy.net">on Github</a>.
 Please report any bugs or feature requests there.
