@@ -510,13 +510,15 @@ async function toot_admin_notification(env, toot_text) {
   return send_toot(env.MASTODON_URL, env.ADMIN_NOTIFICATIONS_MASTODON_TOKEN, toot_text, "private");
 }
 
-async function render_definition(env, word, definition, metadata) {
+async function render_definition(db, word, definition, metadata) {
   let response_string = "";
   if (definition) {
     let def_words = definition.split(" ");
     let def_promises = [];
     for (let def_word of def_words) {
-      def_promises.push(env.WORDS.get(def_word));
+      let stmt = db.prepare("SELECT word FROM defs WHERE word = ?1");
+      stmt = stmt.bind(def_word);
+      def_promises.push(stmt.first());
     }
     let defs = await Promise.all(def_promises);
 
@@ -924,7 +926,7 @@ async function handle_get(req, env) {
           input_starting_value = def_words.join(" ");
         }
       }
-      response_string += await render_definition(env, word, definition, metadata);
+      response_string += await render_definition(db, word, definition, metadata);
       response_string += define_form(word, input_starting_value);
       if (error_message) {
         response_string += `<div class="err"> ${error_message} </div>`;
