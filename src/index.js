@@ -57,10 +57,9 @@ Please report any bugs or feature requests there.
 
 const LEADERBOARD_KEY = "leaderboard";
 
-async function render_leaderboard(env) {
+async function render_leaderboard(env, db) {
   let leaderboard_obj = JSON.parse(await env.META.get(LEADERBOARD_KEY));
   if (leaderboard_obj == null) {
-    const db = env.DB.withSession();
     let stmt = db.prepare(
       `select
          case
@@ -1057,7 +1056,7 @@ async function handle_get(req, env) {
     response_string += render_about_page();
     response_string += render_about_footer(username);
   } else if (url.pathname == "/leaderboard") {
-    response_string += await render_leaderboard(env);
+    response_string += await render_leaderboard(env, db);
     response_string += render_leaderboard_footer(username);
   } else if (url.pathname == "/random") {
     const word = await get_random_defined_word(env);
