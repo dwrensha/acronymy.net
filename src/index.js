@@ -60,7 +60,7 @@ const LEADERBOARD_KEY = "leaderboard";
 async function render_leaderboard(env) {
   let leaderboard_obj = JSON.parse(await env.META.get(LEADERBOARD_KEY));
   if (leaderboard_obj == null) {
-    const db = env.DB;
+    const db = env.DB.withSession();
     let stmt = db.prepare(
       `select
          case
@@ -80,6 +80,7 @@ async function render_leaderboard(env) {
       rows: leaderboard_array
     };
     await env.META.put(LEADERBOARD_KEY, JSON.stringify(leaderboard_obj));
+
     //{expirationTtl: 60 * 60 * 4})
   }
   let timestamp = (new Date(leaderboard_obj.timestamp)).toUTCString();
@@ -95,6 +96,7 @@ async function render_leaderboard(env) {
   }
   response += "</tbody></table></div>"
   response += "<div>";
+
   return response;
 }
 
@@ -620,8 +622,7 @@ function validate_username(username) {
   return {valid: true};
 }
 
-async function update_def(req, env, word, definition, username, old_def) {
-  const db = env.DB;
+async function update_def(req, env, word, definition, username, old_def, db) {
   let timestamp = Date.now();
 
   let metadata = {};
@@ -744,33 +745,25 @@ async function get_random_undefined_word(env) {
   return null;
 }
 
-async function get_word_definition(env, word, defined_just_now) {
-  if (defined_just_now == word) {
-    // The user just defined the word, so we use D1, the primary datastore, to
-    // look up the latest value. If we used KV instead (the faster default path),
-    // then we would risk serving a stale cached value and confusing the user.
-    let stmt = env.DB.prepare(
-      `SELECT def, author, timestamp, original_author, original_timestamp from defs JOIN defs_log ON def_id = defs_log.rowid
+async function get_word_definition(env, word, db) {
+  let stmt = db.prepare(
+    `SELECT def, author, timestamp, original_author, original_timestamp from defs JOIN defs_log ON def_id = defs_log.rowid
        WHERE defs.word = ?1`).bind(word);
-    const row = await stmt.first();
-    if (!row) {
-      return { value : null, metadata: null };
-    }
-    let metadata = {};
-    if (row.original_timestamp != null) {
-      metadata.time = row.original_timestamp;
-      metadata.user = row.original_author;
-    } else {
-      metadata.time = row.timestamp;
-      metadata.user = row.author;
-    }
-    return {
-      value: row.def,
-      metadata
-    }
+  const row = await stmt.first();
+  if (!row) {
+    return { value : null, metadata: null };
+  }
+  let metadata = {};
+  if (row.original_timestamp != null) {
+    metadata.time = row.original_timestamp;
+    metadata.user = row.original_author;
   } else {
-    // The common case: use the faster KV cache.
-    return await env.WORDS.getWithMetadata(word);
+    metadata.time = row.timestamp;
+    metadata.user = row.author;
+  }
+  return {
+    value: row.def,
+    metadata
   }
 }
 
@@ -834,7 +827,7 @@ async function handle_get(req, env) {
   }
 
   let username = null;
-  let defined_just_now = null; // If non-null, the word the user just now submitted a definition for.
+  let bookmark = "first-unconstrained"; // D1 bookmark
   if (req.headers.has('Cookie')) {
     for (let cookie of req.headers.get('Cookie').split(";")) {
       let components = cookie.split('=');
@@ -844,11 +837,12 @@ async function handle_get(req, env) {
         if (!validate_username(username).valid) {
           return new Response("invalid username", {status: 400});
         }
-      } else if (name == 'defined-just-now') {
-        defined_just_now = components[1];
+      } else if (name == 'd1-bookmark') {
+        bookmark = components[1];
       }
     }
   }
+  let db = env.DB.withSession(bookmark);
 
   let response_string = header(" Acronymy ");
   let response_status = 200;
@@ -871,7 +865,7 @@ async function handle_get(req, env) {
       return new Response("", {status: 302, headers: {'Location': `/`}});
     }
     response_string = header(` Acronymy - ${word} `);
-    let { value, metadata } = await get_word_definition(env, word, defined_just_now);
+    let { value, metadata } = await get_word_definition(env, word, db);
     let definition = value;
     let input_starting_value = null;
     if (!definition && !(await is_word(word, env))) {
@@ -905,14 +899,15 @@ async function handle_get(req, env) {
           let new_def = def_words.join(" ");
           if (new_def != definition) {
             try {
-              let result = await update_def(req, env, word, new_def, username, definition);
+              let result = await update_def(req, env, word, new_def, username, definition, db);
               if (result.success) {
+                let bookmark = db.getBookmark();
                 return new Response("",
                                     {status: 303,
                                      headers:
                                      {'Location': `/define/${word}`,
                                       'Set-Cookie':
-                                      `defined-just-now=${word}; Max-Age=60`}});
+                                      `d1-bookmark=${bookmark}; Max-Age=600`}});
               } else {
                 let err = result.error;
                 return new Response(err.message,
@@ -964,7 +959,6 @@ async function handle_get(req, env) {
       return new Response("need to specify word", { status: 400 })
     }
 
-    const db = env.DB;
     let stmt1 = db.prepare(
       "SELECT rowid, def, author, timestamp, original_author, original_timestamp FROM defs_log WHERE word = ?1 ORDER BY timestamp DESC");
     stmt1 = stmt1.bind(word);
@@ -1136,7 +1130,7 @@ async function handle_get(req, env) {
   } else if (url.pathname.startsWith("/suggest-word-status/")) {
     response_string = header(` Acronymy - suggested word `);
     let id = url.pathname.slice("/suggest-word-status/".length);
-    let stmt = env.DB.prepare(
+    let stmt = db.prepare(
       "SELECT word, def, author, timestamp, status, moderator_note FROM suggestions WHERE id = ?1");
     stmt = stmt.bind(id);
     let db_result = await stmt.all();
@@ -1186,18 +1180,18 @@ async function handle_get(req, env) {
             note = entry[1];
           }
         }
-        let stmt = env.DB.prepare(
+        let stmt = db.prepare(
           "UPDATE suggestions SET status = ?1, moderator_note = ?2 WHERE id = ?3 AND status = 0");
         stmt = stmt.bind(status, note, id);
         let {results, success, meta} = await stmt.run();
         if (meta.changes == 1 && status == 1) {
           // The change happened and it added a word.
-          let stmt3 = env.DB.prepare(
+          let stmt3 = db.prepare(
             "INSERT INTO words (word) VALUES (?1)").bind(row.word);
-          let stmt4 = env.DB.prepare(
+          let stmt4 = db.prepare(
             "UPDATE status SET total_num_words = total_num_words + 1");
-          await env.DB.batch([stmt3, stmt4]);
-          await update_def(null, env, row.word, row.def, row.author);
+          await db.batch([stmt3, stmt4]);
+          await update_def(null, env, row.word, row.def, row.author, null, db);
         }
         return new Response("",
                             {status: 303,
