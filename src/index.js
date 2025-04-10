@@ -509,15 +509,13 @@ async function toot_admin_notification(env, toot_text) {
   return send_toot(env.MASTODON_URL, env.ADMIN_NOTIFICATIONS_MASTODON_TOKEN, toot_text, "private");
 }
 
-async function render_definition(db, word, definition, metadata) {
+async function render_definition(env, word, definition, metadata) {
   let response_string = "";
   if (definition) {
     let def_words = definition.split(" ");
     let def_promises = [];
     for (let def_word of def_words) {
-      let stmt = db.prepare("SELECT word FROM defs WHERE word = ?1");
-      stmt = stmt.bind(def_word);
-      def_promises.push(stmt.first());
+      def_promises.push(env.WORDS.get(def_word));
     }
     let defs = await Promise.all(def_promises);
 
@@ -746,25 +744,33 @@ async function get_random_undefined_word(env) {
   return null;
 }
 
-async function get_word_definition(env, word, db) {
-  let stmt = db.prepare(
-    `SELECT def, author, timestamp, original_author, original_timestamp from defs JOIN defs_log ON def_id = defs_log.rowid
+async function get_word_definition(env, word, db, defined_just_now) {
+  if (defined_just_now == word) {
+    // The user just defined the word, so we use D1, the primary datastore, to
+    // look up the latest value. If we used KV instead (the faster default path),
+    // then we would risk serving a stale cached value and confusing the user.
+    let stmt = env.DB.prepare(
+      `SELECT def, author, timestamp, original_author, original_timestamp from defs JOIN defs_log ON def_id = defs_log.rowid
        WHERE defs.word = ?1`).bind(word);
-  const row = await stmt.first();
-  if (!row) {
-    return { value : null, metadata: null };
-  }
-  let metadata = {};
-  if (row.original_timestamp != null) {
-    metadata.time = row.original_timestamp;
-    metadata.user = row.original_author;
+    const row = await stmt.first();
+    if (!row) {
+      return { value : null, metadata: null };
+    }
+    let metadata = {};
+    if (row.original_timestamp != null) {
+      metadata.time = row.original_timestamp;
+      metadata.user = row.original_author;
+    } else {
+      metadata.time = row.timestamp;
+      metadata.user = row.author;
+    }
+    return {
+      value: row.def,
+      metadata
+    }
   } else {
-    metadata.time = row.timestamp;
-    metadata.user = row.author;
-  }
-  return {
-    value: row.def,
-    metadata
+    // The common case: use the faster KV cache.
+    return await env.WORDS.getWithMetadata(word);
   }
 }
 
@@ -828,6 +834,7 @@ async function handle_get(req, env) {
   }
 
   let username = null;
+  let defined_just_now = null; // If non-null, the word the user just now submitted a definition for.
   let bookmark = "first-unconstrained"; // D1 bookmark
   if (req.headers.has('Cookie')) {
     for (let cookie of req.headers.get('Cookie').split(";")) {
@@ -840,6 +847,8 @@ async function handle_get(req, env) {
         }
       } else if (name == 'd1-bookmark') {
         bookmark = components[1];
+      } else if (name == 'defined-just-now') {
+        defined_just_now = components[1];
       }
     }
   }
@@ -866,7 +875,7 @@ async function handle_get(req, env) {
       return new Response("", {status: 302, headers: {'Location': `/`}});
     }
     response_string = header(` Acronymy - ${word} `);
-    let { value, metadata } = await get_word_definition(env, word, db);
+    let { value, metadata } = await get_word_definition(env, word, db, defined_just_now);
     let definition = value;
     let input_starting_value = null;
     if (!definition && !(await is_word(word, env))) {
@@ -903,12 +912,14 @@ async function handle_get(req, env) {
               let result = await update_def(req, env, word, new_def, username, definition, db);
               if (result.success) {
                 let bookmark = db.getBookmark();
+                const headers = new Headers();
+                headers.set('Location', `/define/${word}`);
+                headers.append('Set-Cookie', `defined-just-now=${word}; Max-Age=60`);
+                headers.append('Set-Cookie', `d1-bookmark=${bookmark}; Max-Age=600`);
+
                 return new Response("",
                                     {status: 303,
-                                     headers:
-                                     {'Location': `/define/${word}`,
-                                      'Set-Cookie':
-                                      `d1-bookmark=${bookmark}; Max-Age=600`}});
+                                     headers: headers});
               } else {
                 let err = result.error;
                 return new Response(err.message,
@@ -925,7 +936,7 @@ async function handle_get(req, env) {
           input_starting_value = def_words.join(" ");
         }
       }
-      response_string += await render_definition(db, word, definition, metadata);
+      response_string += await render_definition(env, word, definition, metadata);
       response_string += define_form(word, input_starting_value);
       if (error_message) {
         response_string += `<div class="err"> ${error_message} </div>`;
