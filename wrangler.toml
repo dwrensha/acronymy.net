@@ -7,8 +7,7 @@ compatibility_flags = [ "nodejs_compat" ]
 [[rules]]
 type = "Text"
 globs = ["*.css", "*.svg", "*.txt"]
-
-fallthrough = true
+fallthrough = false
 
 [env.prod]
 routes = [{pattern = "acronymy.net", custom_domain = true, zone_name = "acronymy.net"}]
