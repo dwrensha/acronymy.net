@@ -1,6 +1,7 @@
 import { bounce_if_not_authed, authorization_header_validates_as_admin } from "./auth.js";
-import { FAVICON, MAIN_CSS, ROBOTS_TXT } from "./static.js";
-
+import ROBOTS_TXT from "./robots.txt";
+import FAVICON from "./favicon.svg";
+import MAIN_CSS from "./main.css";
 
 function render_about_page() {
   let about_defs = [//"a bit of unembellished truth",
