@@ -1,60 +1,8 @@
 import { bounce_if_not_authed, authorization_header_validates_as_admin } from "./auth.js";
+import ABOUT_HTML from "./about.html";
 import ROBOTS_TXT from "./robots.txt";
 import FAVICON from "./favicon.svg";
 import MAIN_CSS from "./main.css";
-
-function render_about_page() {
-  let about_defs = [//"a bit of unembellished truth",
-                    //"a bunch of unfamiliar terminology",
-                    //"additional background outlining underlying themes",
-                    //"amazing book offering unlikely thoughts",
-                    //"amusing because of unforeseen twists",
-                    //"always be obsessively uploading things",
-                    "acronyms bolster our understanding tremendously"];
-  let idx = 0; //Math.floor(Math.random() * about_defs.length);
-  let about = about_defs[idx];
-  return `<div class="about full-width">
-<div class=\"word\">about</div>
-<div class=\"about-definition\">${about}</div>
-<p>
-<a href="/">Acronymy</a> is a backronym dictionary that anyone can edit.
-I like to think of it as a massively multiplayer online collaborative
-word game.
-</p>
-
-<p>Acronymy begin life in 2014 as one of the first <a href="https://sandstorm.org/">Sandstorm</a> apps.
-In 2022, I ported it to the
-<a href="https://workers.cloudflare.com/">Cloudflare Workers</a>
-platform
-and added many new features such as definition attribution and history.
-</p>
-
-<p>
-For SIGBOVIK 2023, I made a <a href="http://youtu.be/LjOHnXRIp4Y">3-minute video</a>
-about Acronymy, including a discussion of
-<a href="https://github.com/dwrensha/acronymy-assistant">Acronymy Assistant</a>,
-which is a tool that can provide automatic help in backronym construction.
-</p>
-
-<p>
-After we surpassed 10,000 definitions in December 2024,
-I made a <a href="https://youtu.be/_0tNWWhPYYs">video</a>
-to illustrate some definitions from the top contributors.</p>
-
-<p>
-If you'd like to meet other Acronymy participants,
-please join our <a href="https://discord.gg/v5zD4E38KJ">Discord server</a>!
-</p>
-
-<p>
-The source code of Acronymy is hosted
-<a href="https://github.com/dwrensha/acronymy.net">on Github</a>.
-Please report any bugs or feature requests there.
-</p>
-
-<p>— <a href="https://dwrensha.ws">David Renshaw</a></p>
-</div>`;
-}
 
 const LEADERBOARD_KEY = "leaderboard";
 
@@ -1065,7 +1013,7 @@ async function handle_get(req, env) {
     return new Response("", {status: 302, headers: {'Location': `/history?word=${row.word}`}});
 */
   } else if (url.pathname == "/about") {
-    response_string += render_about_page();
+    response_string += ABOUT_HTML;
     response_string += render_about_footer(username);
   } else if (url.pathname == "/leaderboard") {
     response_string += await render_leaderboard(env, db);
