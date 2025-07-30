@@ -1241,10 +1241,12 @@ async function tryFetch(req, env, remainingRetries) {
                           { status: 400 });
     }
   } catch (e) {
+    console.error("caught error: ", e);
     if (req.method == "GET" && remainingRetries > 0) {
+      console.error("retrying...");
       return await tryFetch(req, env, remainingRetries - 1)
     } else {
-      console.error("caught error: ", e);
+      console.error("giving up");
       let response_string = header(` Acronymy (error) `);
       response_string += render_error("Server Error", "something went wrong");
       response_string += "</body></html>";
