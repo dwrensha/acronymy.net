@@ -1228,12 +1228,8 @@ async function refresh_status(env) {
   return status;
 }
 
-export default {
-  async fetch(req, env) {
-    //if (req.headers.get('cf-connecting-ip') == "[BANNED_IP]") {
-    //  return new Response("You are being temporarily banned.",
-    //                      { status: 400 });
-    //}
+async function tryFetch(req, env, remainingRetries) {
+  try {
     if (req.method == "GET" || req.method == "POST") {
       return await handle_get(req, env);
     } else if (req.method == "HEAD") {
@@ -1244,6 +1240,27 @@ export default {
       return new Response("bad request",
                           { status: 400 });
     }
+  } catch (e) {
+    if (req.method == "GET" && remainingRetries > 0) {
+      return await tryFetch(req, env, remainingRetries - 1)
+    } else {
+      console.error("caught error: ", e);
+      let response_string = header(` Acronymy (error) `);
+      response_string += render_error("Server Error", "something went wrong");
+      response_string += "</body></html>";
+      return new Response(response_string, {headers : { 'content-type': 'text/html;charset=UTF-8'},
+                                            status: 500 });
+    }
+  }
+}
+
+export default {
+  async fetch(req, env) {
+    //if (req.headers.get('cf-connecting-ip') == "[BANNED_IP]") {
+    //  return new Response("You are being temporarily banned.",
+    //                      { status: 400 });
+    //}
+    return await tryFetch(req, env, 3);
   },
 
   async scheduled(event, env, ctx) {
