@@ -9,6 +9,9 @@ type = "Text"
 globs = ["*.css", "*.svg", "*.txt", "*.html"]
 fallthrough = false
 
+[assets]
+directory = "./assets"
+
 [env.prod]
 routes = [{pattern = "acronymy.net", custom_domain = true, zone_name = "acronymy.net"}]
 

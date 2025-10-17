@@ -1,8 +1,5 @@
 import { bounce_if_not_authed, authorization_header_validates_as_admin } from "./auth.js";
 import ABOUT_HTML from "./about.html";
-import ROBOTS_TXT from "./robots.txt";
-import FAVICON from "./favicon.svg";
-import MAIN_CSS from "./main.css";
 
 const LEADERBOARD_KEY = "leaderboard";
 
@@ -759,22 +756,6 @@ async function insert_suggestion(env, word, definition, username) {
 
 async function handle_get(req, env) {
   let url = new URL(req.url);
-
-  if (url.pathname == "/robots.txt") {
-    return new Response(ROBOTS_TXT);
-  }
-
-  if (url.pathname == "/main.css") {
-    return new Response(MAIN_CSS,
-                        {headers: {"Content-type": "text/css",
-                                   "Cache-Control": "max-age=600"}});
-  }
-
-  if (url.pathname == "/favicon.svg") {
-    return new Response(FAVICON,
-                        {headers: {"Content-type": "image/svg+xml",
-                                   "Cache-Control": "max-age=86400"}});
-  }
 
   if (url.pathname == "/apple-touch-icon.png") {
     let icon = await env.META.get("apple-touch-icon.png", {type: "arrayBuffer"});
