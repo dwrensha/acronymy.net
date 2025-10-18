@@ -756,13 +756,6 @@ async function insert_suggestion(env, word, definition, username) {
 
 async function handle_get(req, env) {
   let url = new URL(req.url);
-
-  if (url.pathname == "/apple-touch-icon.png") {
-    let icon = await env.META.get("apple-touch-icon.png", {type: "arrayBuffer"});
-    return new Response(icon, { headers: {"Content-type": "image/png",
-                                          "Cache-Control": "max-age=86400"}});
-  }
-
   let username = null;
   let defined_just_now = null; // If non-null, the word the user just now submitted a definition for.
   let bookmark = "first-unconstrained"; // D1 bookmark
