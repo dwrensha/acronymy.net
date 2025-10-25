@@ -37,6 +37,11 @@ binding = "DB"
 database_name = "acronymy-prod"
 database_id = "09491cb7-cd9f-4fea-9bd8-52a49da0d985"
 
+[[env.prod.ratelimits]]
+name = "SUBMISSION_RATE_LIMITER"
+namespace_id = "1"
+simple = { limit = 5, period = 60 }
+
 [env.dev.vars]
 MASTODON_URL = ""
 

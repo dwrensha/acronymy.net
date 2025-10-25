@@ -571,17 +571,11 @@ async function update_def(req, env, word, definition, username, old_def, db) {
   let timestamp = Date.now();
 
   let metadata = {};
-  let ratelimit_promise = Promise.resolve({"count(*)": 0});
-  let ip = null;
-  if (req && req.headers.has('cf-connecting-ip')) {
-    ip = req.headers.get('cf-connecting-ip');
 
-    let stmt_ratelimit = db.prepare(
-      `SELECT count(*) from defs_log where timestamp > ?1 AND ip = ?2`
-    );
-    // get defs from the last 30 minutes that match the ip
-    stmt_ratelimit = stmt_ratelimit.bind(timestamp - 30 * 60 * 1000, ip);
-    ratelimit_promise = stmt_ratelimit.first();
+  let ratelimit_promise = Promise.resolve({"success": true});
+  const ip = req.headers.get('cf-connecting-ip');
+  if (ip && env.SUBMISSION_RATE_LIMITER) {
+    ratelimit_promise = env.SUBMISSION_RATE_LIMITER.limit({ key: ip });
   }
 
   // First, check whether this is a restoration of an old definition.
@@ -591,8 +585,7 @@ async function update_def(req, env, word, definition, username, old_def, db) {
 
   const [result_ratelimit, result] =
         await Promise.all([ratelimit_promise, stmt0.first()]);
-  if (result_ratelimit["count(*)"] > 100) {
-    // more than 100 defs from this IP in the last 30 minutes
+  if (!result_ratelimit["success"]) {
     return {error : {status : 429, message: "Rate limit exceeded."}};
   }
   let credit = { author: username, timestamp: timestamp };
@@ -616,7 +609,7 @@ async function update_def(req, env, word, definition, username, old_def, db) {
   //    (this key is not present if this is not a restoration)
 
   let stmt1 = db.prepare(
-    "INSERT INTO defs_log (word, def, author, timestamp, ip, original_author, original_timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)");
+    "INSERT INTO defs_log (word, def, author, timestamp, original_author, original_timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)");
 
   metadata['time'] = credit.timestamp;
   if (credit.author) {
@@ -625,7 +618,7 @@ async function update_def(req, env, word, definition, username, old_def, db) {
 
   const original_author = is_restoration ? credit.author : null;
   const original_timestamp = is_restoration ? credit.timestamp : null;
-  stmt1 = stmt1.bind(word, definition, username, timestamp, ip,
+  stmt1 = stmt1.bind(word, definition, username, timestamp,
                      original_author, original_timestamp);
   let stmt2 = db.prepare(
     "INSERT INTO defs (word, def_id) VALUES (?1, last_insert_rowid()) " +
