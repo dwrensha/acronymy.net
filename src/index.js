@@ -575,7 +575,6 @@ async function update_def(req, env, word, definition, username, old_def, db) {
   let ip = null;
   if (req && req.headers.has('cf-connecting-ip')) {
     ip = req.headers.get('cf-connecting-ip');
-    metadata['ip'] = ip;
 
     let stmt_ratelimit = db.prepare(
       `SELECT count(*) from defs_log where timestamp > ?1 AND ip = ?2`
