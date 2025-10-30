@@ -573,7 +573,7 @@ async function update_def(req, env, word, definition, username, old_def, db) {
   let metadata = {};
 
   let ratelimit_promise = Promise.resolve({"success": true});
-  const ip = req.headers.get('cf-connecting-ip');
+  const ip = req && req.headers.get('cf-connecting-ip');
   if (ip && env.SUBMISSION_RATE_LIMITER) {
     ratelimit_promise = env.SUBMISSION_RATE_LIMITER.limit({ key: ip });
   }
