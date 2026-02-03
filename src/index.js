@@ -319,19 +319,28 @@ async function toot_admin_notification(env, toot_text) {
 async function render_definition(env, word, definition, metadata) {
   let response_string = "";
   if (definition) {
+    // Check which of the definition's words have definitions.
     let def_words = definition.split(" ");
-    let def_promises = [];
-    for (let def_word of def_words) {
-      def_promises.push(env.WORDS.get(def_word));
+    let stmt_str = "SELECT word FROM defs WHERE word IN (";
+    for (let ii = 0; ii < def_words.length; ++ii) {
+      if (ii > 0) {
+        stmt_str += ",";
+      }
+      stmt_str += "?";
     }
-    let defs = await Promise.all(def_promises);
+    stmt_str += ");"
+    let stmt = env.DB.prepare(stmt_str).bind(...def_words);
+    const result = await stmt.all();
+    const defined_words = new Set();
+    for (const row of result.results) {
+      defined_words.add(row.word);
+    }
 
     response_string += `<div class="definition">`
     for (let ii = 0; ii < def_words.length; ++ii){
       let def_word = def_words[ii];
-      let def_word_def = defs[ii];
       let not_defined_class="";
-      if (!def_word_def) {
+      if (!defined_words.has(def_word)) {
         not_defined_class = `class="not-defined"`;
       }
       response_string += ` <a href="/define/${def_word}" ${not_defined_class}>${def_word}</a> `;
