@@ -544,7 +544,7 @@ async function get_random_undefined_word(env) {
 }
 
 async function get_word_definition(env, word, db, defined_just_now) {
-  if (defined_just_now == word) {
+  if (true /*defined_just_now == word*/) {
     // The user just defined the word, so we use D1, the primary datastore, to
     // look up the latest value. If we used KV instead (the faster default path),
     // then we would risk serving a stale cached value and confusing the user.
