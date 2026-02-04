@@ -558,13 +558,14 @@ async function get_word_definition(env, word, db, defined_just_now) {
     // look up the latest value. If we used KV instead (the faster default path),
     // then we would risk serving a stale cached value and confusing the user.
     let stmt = env.DB.prepare(
-      `SELECT def, author, timestamp, original_author, original_timestamp from defs JOIN defs_log ON def_id = defs_log.rowid
+      `SELECT def, locked, author, timestamp, original_author, original_timestamp from defs JOIN defs_log ON def_id = defs_log.rowid
        WHERE defs.word = ?1`).bind(word);
     const row = await stmt.first();
     if (!row) {
       return { value : null, metadata: null };
     }
     let metadata = {};
+    metadata.locked = row.locked;
     if (row.original_timestamp != null) {
       metadata.time = row.original_timestamp;
       metadata.user = row.original_author;
@@ -722,7 +723,11 @@ async function handle_get(req, env) {
         }
       }
       response_string += await render_definition(env, word, definition, metadata);
-      response_string += define_form(word, input_starting_value);
+      if (metadata && metadata.locked) {
+        response_string += `<p class="locked">This word is locked.</p>`
+      } else {
+        response_string += define_form(word, input_starting_value);
+      }
       if (error_message) {
         response_string += `<div class="err"> ${error_message} </div>`;
       }

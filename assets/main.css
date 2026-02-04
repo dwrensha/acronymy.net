@@ -97,6 +97,10 @@ div {
    text-align: right;
    margin: auto;
 }
+.locked {
+    color: #9c8003;
+    margin-top: 16px;
+}
 .suggest-word-form {
    text-align: right;
    margin: auto;
