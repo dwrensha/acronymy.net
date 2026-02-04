@@ -1,5 +1,5 @@
 
-async function send_toot(mastodon_url, token, status_text, visibility) {
+export async function send_toot(mastodon_url, token, status_text, visibility) {
   if (!mastodon_url) {
     console.error("No mastodon url found. Not tooting.");
     return;
@@ -22,7 +22,7 @@ async function send_toot(mastodon_url, token, status_text, visibility) {
         });
 }
 
-async function send_bloot(did, app_password, record) {
+export async function send_bloot(did, app_password, record) {
   if (!app_password) {
     console.error("No token. Not posting to Bluesky.");
     return;

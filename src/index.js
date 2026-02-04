@@ -287,7 +287,7 @@ async function send_daily_updates(env) {
   let toot_text = prefix + link_uri + suffix;
 
   const p1 =
-        send_toot(env.MASTODON_URL, env.DAILY_UPDATE_MASTODON_TOKEN, toot_text, "public")
+        external.send_toot(env.MASTODON_URL, env.DAILY_UPDATE_MASTODON_TOKEN, toot_text, "public")
         .catch(e => console.error("error tooting daily update: ", e));
 
   // In Bluesky, we manually linkify via 'facets', so we drop the 'https://' in the text.
@@ -307,13 +307,13 @@ async function send_daily_updates(env) {
   };
 
   const DID = "did:plc:qazqvgjsbl7cucuu373w64nx" // @daily.acronymy.net
-  const p2 = send_bloot(DID, env.BLUESKY_DAILY_PASSWORD, record)
+  const p2 = external.send_bloot(DID, env.BLUESKY_DAILY_PASSWORD, record)
         .catch(e => console.error("error posting daily bluesky update: ", e));
   await Promise.all([p1, p2]);
 }
 
 async function toot_admin_notification(env, toot_text) {
-  return send_toot(env.MASTODON_URL, env.ADMIN_NOTIFICATIONS_MASTODON_TOKEN, toot_text, "private");
+  return external.send_toot(env.MASTODON_URL, env.ADMIN_NOTIFICATIONS_MASTODON_TOKEN, toot_text, "private");
 }
 
 async function render_definition(env, word, definition, metadata) {
@@ -597,7 +597,7 @@ async function insert_suggestion(env, word, definition, username) {
     `new suggestion: ${word} = ${definition}. https://acronymy.net/suggest-word-admin/${id}`)
         .catch((e) => { console.log("error tooting admin notification: " + e); });
 
-  const p2 = post_to_discord(
+  const p2 = external.post_to_discord(
     env,
     "1341784714092216395", // "suggested-words"
     `new suggestion: [${word}](https://acronymy.net/suggest-word-status/${id}) = ${definition}`)
