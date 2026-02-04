@@ -269,7 +269,8 @@ async function send_daily_updates(env) {
   const status = await refresh_status(env);
 
   // send @daily_acronymy toot
-  let word_of_the_day_def = await env.WORDS.get(word_of_the_day);
+  let { value, metadata } = await get_word_definition(env, word_of_the_day, env.DB);
+  let word_of_the_day_def = value;
   let percent = (100 * status.num_defined/status.total_num_words).toFixed(3);
   let capitalized_def = word_of_the_day_def.split(' ').map(
     str => str.charAt(0).toUpperCase() + str.slice(1)).join(' ');
