@@ -552,34 +552,25 @@ async function get_random_undefined_word(env) {
   return null;
 }
 
-async function get_word_definition(env, word, db, defined_just_now) {
-  if (true /*defined_just_now == word*/) {
-    // The user just defined the word, so we use D1, the primary datastore, to
-    // look up the latest value. If we used KV instead (the faster default path),
-    // then we would risk serving a stale cached value and confusing the user.
-    let stmt = env.DB.prepare(
-      `SELECT def, locked, author, timestamp, original_author, original_timestamp from defs JOIN defs_log ON def_id = defs_log.rowid
-       WHERE defs.word = ?1`).bind(word);
-    const row = await stmt.first();
-    if (!row) {
-      return { value : null, metadata: null };
-    }
-    let metadata = {};
-    metadata.locked = row.locked;
-    if (row.original_timestamp != null) {
-      metadata.time = row.original_timestamp;
-      metadata.user = row.original_author;
-    } else {
-      metadata.time = row.timestamp;
-      metadata.user = row.author;
-    }
-    return {
-      value: row.def,
-      metadata
-    }
+async function get_word_definition(env, word, db) {
+  let stmt = env.DB.prepare(
+    `SELECT def, locked, author, timestamp, original_author, original_timestamp from defs JOIN defs_log ON def_id = defs_log.rowid WHERE defs.word = ?1`).bind(word);
+  const row = await stmt.first();
+  if (!row) {
+    return { value : null, metadata: null };
+  }
+  let metadata = {};
+  metadata.locked = row.locked;
+  if (row.original_timestamp != null) {
+    metadata.time = row.original_timestamp;
+    metadata.user = row.original_author;
   } else {
-    // The common case: use the faster KV cache.
-    return await env.WORDS.getWithMetadata(word);
+    metadata.time = row.timestamp;
+    metadata.user = row.author;
+  }
+  return {
+    value: row.def,
+    metadata
   }
 }
 
@@ -620,7 +611,6 @@ async function insert_suggestion(env, word, definition, username) {
 async function handle_get(req, env) {
   let url = new URL(req.url);
   let username = null;
-  let defined_just_now = null; // If non-null, the word the user just now submitted a definition for.
   let bookmark = "first-unconstrained"; // D1 bookmark
   if (req.headers.has('Cookie')) {
     for (let cookie of req.headers.get('Cookie').split(";")) {
@@ -633,8 +623,6 @@ async function handle_get(req, env) {
         }
       } else if (name == 'd1-bookmark') {
         bookmark = components[1];
-      } else if (name == 'defined-just-now') {
-        defined_just_now = components[1];
       }
     }
   }
@@ -661,7 +649,7 @@ async function handle_get(req, env) {
       return new Response("", {status: 302, headers: {'Location': `/`}});
     }
     response_string = header(` Acronymy - ${word} `);
-    let { value, metadata } = await get_word_definition(env, word, db, defined_just_now);
+    let { value, metadata } = await get_word_definition(env, word, db);
     let definition = value;
     let input_starting_value = null;
     if (!definition && !(await is_word(word, env))) {
