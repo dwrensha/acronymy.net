@@ -60,13 +60,6 @@ if len(query2_results['results']) > 0:
         print("Failed to delete word defs. Aborting.")
         sys.exit(1)
 
-    preview = "--preview false"
-    if ENV == "dev":
-        preview = "--preview true"
-
-    command = """npx wrangler -e {env} kv key delete {word} --binding WORDS {preview} --remote""".format(env=ENV, word=WORD, preview=preview)
-    subprocess.run(command, shell=True, text=True, check=True)
-
 print("deleting the word...")
 query3 = "delete from words where word = '{word}'".format(word=WORD)
 query3_results = run_sqlite_query(query3)

@@ -441,8 +441,6 @@ function validate_username(username) {
 async function update_def(req, env, word, definition, username, old_def, db) {
   let timestamp = Date.now();
 
-  let metadata = {};
-
   let ratelimit_promise = Promise.resolve({"success": true});
   const ip = req && req.headers.get('cf-connecting-ip');
   if (ip && env.SUBMISSION_RATE_LIMITER) {
@@ -482,11 +480,6 @@ async function update_def(req, env, word, definition, username, old_def, db) {
   let stmt1 = db.prepare(
     "INSERT INTO defs_log (word, def, author, timestamp, original_author, original_timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)");
 
-  metadata['time'] = credit.timestamp;
-  if (credit.author) {
-    metadata['user'] = credit.author;
-  }
-
   const original_author = is_restoration ? credit.author : null;
   const original_timestamp = is_restoration ? credit.timestamp : null;
   stmt1 = stmt1.bind(word, definition, username, timestamp,
@@ -514,7 +507,6 @@ async function update_def(req, env, word, definition, username, old_def, db) {
 
   await Promise.all(
     [refresh_status(env),
-     env.WORDS.put(word, definition, {metadata}),
      p3, p4, p5, p6]);
 
   return { success : true };

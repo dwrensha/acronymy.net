@@ -20,14 +20,6 @@ MASTODON_URL = "https://social.wub.site"
 enabled = true
 
 [[env.prod.kv_namespaces]]
-# WORDS stores definitions, keyed by word
-# These get overwritten when new definitions are submitted.
-binding = "WORDS"
-id = "9e629eee35a74db189a3f2b5b6e7d22e"
-preview_id = "9e629eee35a74db189a3f2b5b6e7d22e"
-remote = true
-
-[[env.prod.kv_namespaces]]
 # META stores miscellaneous information, such as the word of the day
 binding = "META"
 id = "8c703fb07e54401084e6e7ce5dc7da2e"
@@ -47,12 +39,6 @@ simple = { limit = 5, period = 60 }
 
 [env.dev.vars]
 MASTODON_URL = ""
-
-[[env.dev.kv_namespaces]]
-binding = "WORDS"
-id = "a145bd25755d40a4a7254baf916f4122"
-preview_id = "a145bd25755d40a4a7254baf916f4122"
-remote = true
 
 [[env.dev.kv_namespaces]]
 binding = "META"
