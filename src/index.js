@@ -681,7 +681,6 @@ async function handle_get(req, env) {
                 let bookmark = db.getBookmark();
                 const headers = new Headers();
                 headers.set('Location', `/define/${word}`);
-                headers.append('Set-Cookie', `defined-just-now=${word}; Max-Age=60`);
                 headers.append('Set-Cookie', `d1-bookmark=${bookmark}; Max-Age=600`);
 
                 return new Response("",
