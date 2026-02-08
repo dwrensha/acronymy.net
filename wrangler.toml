@@ -8,13 +8,18 @@ compatibility_flags = [ "nodejs_compat" ]
 directory = "./assets"
 
 [env.prod]
-routes = [{pattern = "acronymy.net", custom_domain = true, zone_name = "acronymy.net"}]
+routes = [
+  {pattern = "acronymy.net", custom_domain = true, zone_name = "acronymy.net"},
+  {pattern = "admin.acronymy.net", custom_domain = true, zone_name = "acronymy.net"},
+  ]
 
 [env.prod.triggers]
 crons = ["1 0 * * *"] # every day at one minute past midnight
 
 [env.prod.vars]
 MASTODON_URL = "https://social.wub.site"
+POLICY_AUD = "f9c7e692a936cfe5653d31a44716b6bb816fb429966c0e956df412969aff8a80"
+TEAM_DOMAIN = "https://dwrensha.cloudflareaccess.com"
 
 [env.prod.observability]
 enabled = true
