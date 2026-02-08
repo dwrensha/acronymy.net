@@ -1,4 +1,3 @@
-import { bounce_if_not_authed, authorization_header_validates_as_admin } from "./auth.js";
 import { check_admin_auth } from "./admin-auth.js";
 import * as external from "./external.js";
 import ABOUT_HTML from "./about.html";
@@ -593,7 +592,7 @@ async function insert_suggestion(env, word, definition, username) {
   await db.batch([stmt1]);
   const p1 = toot_admin_notification(
     env,
-    `new suggestion: ${word} = ${definition}. https://acronymy.net/suggest-word-admin/${id}`)
+    `new suggestion: ${word} = ${definition}. https://admin.acronymy.net/suggest-word-status/${id}`)
         .catch((e) => { console.log("error tooting admin notification: " + e); });
 
   const p2 = external.post_to_discord(
@@ -782,7 +781,7 @@ async function handle_get(req, env) {
            restore</button>
            </form>`;
         }
-        if (authorization_header_validates_as_admin(env.ADMIN_PASSWORD, req.headers.get("Authorization"))) {
+        if (req.is_admin) {
           response_string +=
             `<form action="/expunge/${entry.rowid}" method="post" class='restore-form'>
              <button class="expunge-button">expunge</button>
@@ -818,12 +817,6 @@ async function handle_get(req, env) {
       {"username" : username},
       `<a class="home-link" href=\"/\">Acronymy</a>`,
       "/history?word=" + word);
-  } else if (url.pathname == "/admin-login") {
-    const bounce = bounce_if_not_authed(env, req);
-    if (bounce) {
-      return bounce;
-    }
-    return new Response("logged in", {status : 200});
 /*  } else if (url.pathname.startsWith("/expunge/")) {
     const bounce = bounce_if_not_authed(env, req);
     if (bounce) {
@@ -928,31 +921,8 @@ async function handle_get(req, env) {
                                       `suggestion "${id}" was not found`);
       response_string += render_not_found_footer(username);
     } else {
-      response_string += render_suggestion_status(entries[0]);
-      response_string += render_footer({"username" : username},
-                                       `<a class="home-link" href=\"/\">Acronymy</a>`,
-                                       `/suggest-word-status/${id}`);
-    }
-  } else if (url.pathname.startsWith("/suggest-word-admin/")) {
-    const bounce = bounce_if_not_authed(env, req);
-    if (bounce) {
-      return bounce;
-    }
-    let id = url.pathname.slice("/suggest-word-admin/".length);
-
-    let stmt = env.DB.prepare(
-      "SELECT word, def, author, timestamp, status, moderator_note FROM suggestions WHERE id = ?1");
-    stmt = stmt.bind(id);
-    let db_result = await stmt.all();
-    let entries = db_result.results;
-    if (entries.length < 1) {
-      response_status = 404;
-      response_string += render_error("Not Found",
-                                      `suggestion "${id}" was not found`);
-      response_string += render_not_found_footer(username);
-    } else {
       const row = entries[0];
-      if (req.method == "POST") {
+      if (req.is_admin && req.method == "POST") {
         const form_data = await req.formData();
         let status = 0;
         let note = null;
@@ -983,11 +953,12 @@ async function handle_get(req, env) {
         return new Response("",
                             {status: 303,
                              headers:
-                             {'Location': `/suggest-word-admin/${id}`}});
+                             {'Location': `/suggest-word-status/${id}`}});
       }
+
       response_string += render_suggestion_status(row);
-      if (row.status == 0) {
-        response_string += `<form action="/suggest-word-admin/${id}" method="post">
+      if (req.is_admin && row.status == 0) {
+        response_string += `<form action="/suggest-word-status/${id}" method="post">
         <input type="radio" id="accept" name="action" value="accept">
         <label for="accept">Accept</label><br>
         <input type="radio" id="reject" name="action" value="reject">
@@ -995,6 +966,9 @@ async function handle_get(req, env) {
         response_string += `<textarea name="note"></textarea>`
         response_string += `<button>submit</button></form>`
       }
+      response_string += render_footer({"username" : username},
+                                       `<a class="home-link" href=\"/\">Acronymy</a>`,
+                                       `/suggest-word-status/${id}`);
     }
   } else {
     response_status = 404;
