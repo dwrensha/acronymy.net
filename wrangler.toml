@@ -20,6 +20,7 @@ crons = ["1 0 * * *"] # every day at one minute past midnight
 MASTODON_URL = "https://social.wub.site"
 POLICY_AUD = "f9c7e692a936cfe5653d31a44716b6bb816fb429966c0e956df412969aff8a80"
 TEAM_DOMAIN = "https://dwrensha.cloudflareaccess.com"
+IS_PROD = "true"
 
 [env.prod.observability]
 enabled = true
