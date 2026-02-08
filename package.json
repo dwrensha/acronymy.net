@@ -8,5 +8,8 @@
   "scripts": {
     "start": "wrangler dev --remote -e dev",
     "deploy": "wrangler deploy -e prod"
+  },
+  "dependencies": {
+    "jose": "^6.1.3"
   }
 }

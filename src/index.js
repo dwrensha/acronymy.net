@@ -1,4 +1,5 @@
 import { bounce_if_not_authed, authorization_header_validates_as_admin } from "./auth.js";
+import { check_admin_auth } from "./admin-auth.js";
 import * as external from "./external.js";
 import ABOUT_HTML from "./about.html";
 
@@ -1083,6 +1084,10 @@ export default {
     //  return new Response("You are being temporarily banned.",
     //                      { status: 400 });
     //}
+    const admin_auth_result = await check_admin_auth(req, env);
+    if (!admin_auth_result.ok) {
+      return new Response(admin_auth_result.error, {status: 400});
+    }
     return await tryFetch(req, env, 3);
   },
 
