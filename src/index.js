@@ -113,11 +113,15 @@ ${status.num_defined} out of ${status.total_num_words} (${percent}%)</div>
   return response_string;
 }
 
-function header(title) {
+function header(req, title) {
+  let admin_class = "";
+  if (req.is_admin) {
+    admin_class = "class='admin-background'"
+  }
   return `<!DOCTYPE html><html><head> <meta name="viewport" content="width=device-width">
    <title>${title}</title><link rel="stylesheet" type="text/css" href="/main.css" >
    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-   </head><body>`;
+   </head><body ${admin_class}>`;
 }
 
 function define_form(word, initial_value) {
@@ -622,7 +626,7 @@ async function handle_get(req, env) {
   }
   let db = env.DB.withSession(bookmark);
 
-  let response_string = header(" Acronymy ");
+  let response_string = header(req, " Acronymy ");
   let response_status = 200;
   if (url.pathname == "/define") {
     // Result of submitting the "look up" form.
@@ -642,7 +646,7 @@ async function handle_get(req, env) {
       // Probably the user manually edited the URL. Send them to the homepage.
       return new Response("", {status: 302, headers: {'Location': `/`}});
     }
-    response_string = header(` Acronymy - ${word} `);
+    response_string = header(req, ` Acronymy - ${word} `);
     let { value, metadata } = await get_word_definition(env, word, db);
     let definition = value;
     let input_starting_value = null;
@@ -862,7 +866,7 @@ async function handle_get(req, env) {
     response_string += await render_home_page(env);
     response_string += render_home_footer(username, req);
   } else if (url.pathname == "/suggest-word") {
-    response_string = header(` Acronymy - suggest word `);
+    response_string = header(req, ` Acronymy - suggest word `);
     response_string += "<h3>suggest a new word</h3>"
     let error_message = null;
     let proposed_word = null;
@@ -911,7 +915,7 @@ async function handle_get(req, env) {
                        `<a class="home-link" href=\"/\">Acronymy</a>`,
                        url.pathname + url.search);
   } else if (url.pathname.startsWith("/suggest-word-status/")) {
-    response_string = header(` Acronymy - suggested word `);
+    response_string = header(req, ` Acronymy - suggested word `);
     let id = url.pathname.slice("/suggest-word-status/".length);
     let stmt = db.prepare(
       "SELECT word, def, author, timestamp, status, moderator_note FROM suggestions WHERE id = ?1");
@@ -1069,7 +1073,7 @@ async function tryFetch(req, env, remainingRetries) {
       return await tryFetch(req, env, remainingRetries - 1)
     } else {
       console.error("giving up");
-      let response_string = header(` Acronymy (error) `);
+      let response_string = header(req, ` Acronymy (error) `);
       response_string += render_error("Server Error", "something went wrong");
       response_string += "</body></html>";
       return new Response(response_string, {headers : { 'content-type': 'text/html;charset=UTF-8'},
