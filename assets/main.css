@@ -348,3 +348,7 @@ button:hover {
 .admin-background {
   background-color: #fcdfca;
 }
+form.set-locked {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}

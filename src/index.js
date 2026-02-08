@@ -715,8 +715,44 @@ async function handle_get(req, env) {
       if (error_message) {
         response_string += `<div class="err"> ${error_message} </div>`;
       }
+      if (req.is_admin && definition) {
+        const locked = metadata && metadata.locked;
+        const button_text = locked ? "unlock" : "lock";
+        const value = locked ? "0" : "1";
+        response_string +=
+          `<form action='/set-locked' method='post' class='set-locked'>
+             <input name="word" value="${word}" type="hidden"></input>
+             <input name="value" value="${value}" type="hidden"></input>
+             <button>${button_text}</button></form>`;
+      }
       response_string += render_def_footer(word, username);
     }
+  } else if (req.is_admin && url.pathname == "/set-locked" && req.method == "POST") {
+    const form_data = await req.formData();
+    let word = null;
+    let value = 0;
+    for (const entry of form_data.entries()) {
+      if (entry[0] == "word") {
+        word = entry[1];
+      } else if (entry[0] == "value") {
+        if (entry[1] == "0") {
+          value = 0;
+        } else if (entry[1] == "1") {
+          value = 1;
+        }
+      }
+    }
+
+    let stmt = db.prepare("UPDATE defs SET locked = ?1 WHERE word = ?2");
+    stmt = stmt.bind(value, word);
+    let db_result = await stmt.all();
+    if (!db_result.success) {
+      return new Response("error", {status: 500});
+    }
+    return new Response("",
+                        {status: 302,
+                         headers: { 'Location': "/define/" + word}});
+
   } else if (url.pathname == "/login") {
     let location = url.searchParams.get('redirect') || "/";
     let username = url.searchParams.get('username') || "";
