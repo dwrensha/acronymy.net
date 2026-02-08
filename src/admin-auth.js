@@ -2,8 +2,10 @@ import { jwtVerify, createRemoteJWKSet } from "jose";
 
 export async function check_admin_auth(req, env) {
   if (req.headers.get("host") != "admin.acronymy.net") {
-    if (env.DEV_IS_ADMIN) {
+    if (env.DEV_IS_ADMIN == "true" && req.headers.get("host").startsWith("localhost:")) {
       req.is_admin = true;
+    } else {
+      req.is_admin = false;
     }
     return {"ok" : true};
   }
