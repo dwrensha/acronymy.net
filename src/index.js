@@ -817,11 +817,7 @@ async function handle_get(req, env) {
       {"username" : username},
       `<a class="home-link" href=\"/\">Acronymy</a>`,
       "/history?word=" + word);
-/*  } else if (url.pathname.startsWith("/expunge/")) {
-    const bounce = bounce_if_not_authed(env, req);
-    if (bounce) {
-      return bounce;
-    }
+  } else if (url.pathname.startsWith("/expunge/") && req.is_admin) {
     let rowid_string = url.pathname.slice("/expunge/".length);
     const rowid = parseInt(rowid_string, 10);
     console.log("rowid =", rowid);
@@ -830,7 +826,6 @@ async function handle_get(req, env) {
     stmt1 = stmt1.bind(rowid);
     const row = await stmt1.first();
     return new Response("", {status: 302, headers: {'Location': `/history?word=${row.word}`}});
-*/
   } else if (url.pathname == "/about") {
     response_string += ABOUT_HTML;
     response_string += render_about_footer(username);
