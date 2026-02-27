@@ -30,7 +30,6 @@ enabled = true
 binding = "META"
 id = "8c703fb07e54401084e6e7ce5dc7da2e"
 preview_id = "8c703fb07e54401084e6e7ce5dc7da2e"
-remote = true
 
 [[env.prod.d1_databases]]
 binding = "DB"
@@ -50,7 +49,6 @@ MASTODON_URL = ""
 binding = "META"
 id = "75d13e911a294abcb3f71ac23a908acc"
 preview_id = "75d13e911a294abcb3f71ac23a908acc"
-remote = true
 
 [[env.dev.d1_databases]]
 binding = "DB"
