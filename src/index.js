@@ -898,6 +898,15 @@ async function handle_get(req, env) {
     let input_starting_word = url.searchParams.get('word');
     let input_starting_definition = null;
     if (req.method == "POST") {
+      let ratelimit_promise = Promise.resolve({"success": true});
+      const ip = req && req.headers.get('cf-connecting-ip');
+      if (ip && env.SUBMISSION_RATE_LIMITER) {
+        ratelimit_promise = env.SUBMISSION_RATE_LIMITER.limit({ key: ip });
+      }
+      let ratelimit_result = await ratelimit_promise;
+      if (!ratelimit_result["success"]) {
+        return {error : {status : 429, message: "Rate limit exceeded."}};
+      }
       const form_data = await req.formData();
       for (const entry of form_data.entries()) {
         if (entry[0] == "new-word") {
