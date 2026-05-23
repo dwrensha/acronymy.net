@@ -286,6 +286,11 @@ font-size: 12px;
   padding: 1px 5px;
 }
 
+.author {
+  text-align: center;
+  margin: auto;
+}
+
 .status-title {
   margin-left: 20px;
   margin-top: 15px;
