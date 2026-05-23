@@ -4,20 +4,28 @@ import ABOUT_HTML from "./about.html";
 
 const LEADERBOARD_KEY = "leaderboard";
 
+function active_definition_authors_query() {
+  return `
+    select
+      case
+        when original_timestamp is null then author
+        else original_author
+      end as active_author,
+      timestamp
+    from defs join defs_log
+      on defs.def_id = defs_log.rowid`;
+}
+
 async function render_leaderboard(env, db) {
   let leaderboard_obj = JSON.parse(await env.META.get(LEADERBOARD_KEY));
   if (leaderboard_obj == null) {
     let stmt = db.prepare(
       `select
-         case
-           when original_timestamp is null then author
-           else original_author
-         end as leaderboard_author,
+         active_author as leaderboard_author,
          count(*) as count
-       from (select * from defs left join defs_log
-             where defs.def_id = defs_log.rowid)
-       where not leaderboard_author is null
-       group by leaderboard_author
+       from (${active_definition_authors_query()})
+       where not active_author is null
+       group by active_author
        order by count DESC, timestamp DESC LIMIT 40;`);
     const result = await stmt.all();
     let leaderboard_array = result.results;
@@ -43,6 +51,25 @@ async function render_leaderboard(env, db) {
   response += "</tbody></table></div>"
   response += "<div>";
 
+  return response;
+}
+
+async function get_active_definition_count_for_author(db, author) {
+  let stmt = db.prepare(
+    `select count(*) as count
+     from (${active_definition_authors_query()})
+     where active_author = ?1;`);
+  stmt = stmt.bind(author);
+  return await stmt.first('count');
+}
+
+async function render_author_page(db, author) {
+  let count = await get_active_definition_count_for_author(db, author);
+  let plural = count == 1 ? "definition" : "definitions";
+  let response = `<div class="author full-width">`;
+  response += `<h2><a href="/">Acronymy</a> author ${author}</h2>`;
+  response += `<p>${author} has ${count} active ${plural}.</p>`;
+  response += `</div>`;
   return response;
 }
 
@@ -868,6 +895,20 @@ async function handle_get(req, env) {
   } else if (url.pathname == "/leaderboard") {
     response_string += await render_leaderboard(env, db);
     response_string += render_leaderboard_footer(username);
+  } else if (url.pathname.startsWith("/author/")) {
+    let author = url.pathname.slice("/author/".length);
+    let author_validation = validate_username(author);
+    if (!author_validation.valid) {
+      response_status = 400;
+      response_string += render_error("Invalid Author", author_validation.reason);
+      response_string += render_not_found_footer(username);
+    } else {
+      response_string = header(req, ` Acronymy - author ${author} `);
+      response_string += await render_author_page(db, author);
+      response_string += render_footer({"username" : username},
+                                       `<a class="home-link" href="/">Acronymy</a>`,
+                                       "/author/" + author);
+    }
   } else if (url.pathname == "/random") {
     const word = await get_random_defined_word(env);
     if (word) {
